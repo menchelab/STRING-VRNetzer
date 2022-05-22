@@ -154,7 +154,7 @@ class StringDiseaseQuery(StringCmd):
 
 @dataclass
 class StringProteinQuery(StringCmd):
-    query: List[str] = None  # type: ignore
+    query: Union[List[str], None] = None
 
     def __post_init__(self):
         StringCmd.__post_init__(self)
