@@ -22,7 +22,7 @@ import py4cytoscape as p4c
 
 class NetworkType(Enum):
     fullNetwork = auto
-    pyhsicalSubnetwork = auto
+    physicalSubnetwork = auto
 
 
 class CytoscapeParser:
@@ -85,11 +85,11 @@ class CytoscapeParser:
 
 @dataclass
 class StringCmd(ABC):
-    network_type: str = None  # type: ignore
-    cutoff: float = None  # type: ignore
-    limit: int = None  # type: ignore
-    species: str = None  # type: ignore
-    taxonID: str = None  # type: ignore
+    network_type: NetworkType = NetworkType.fullNetwork
+    cutoff: Union[float, None] = None
+    limit: Union[int, None] = None
+    species: Union[str, None] = None
+    taxonID: Union[str, None] = None
 
     def __post_init__(self):
         self.verifications = {
@@ -132,7 +132,7 @@ class StringCmd(ABC):
 
 
 @dataclass
-class StringDieseaseQuery(StringCmd):
+class StringDiseaseQuery(StringCmd):
     disease: str = None  # type: ignore
 
     def __post_init__(self):
@@ -178,4 +178,6 @@ if __name__ == "__main__":
     parser = CytoscapeParser()
     pass
     # p4c.export_network("./HIV-human PPI.sif")
-    # cmd = StringDieseaseQuery(disease="cancer", network_type=NetworkType.pyhsicalSubnetwork)  # type: ignore
+    cmd = StringDiseaseQuery(
+        disease="cancer", network_type=NetworkType.physicalSubnetwork
+    )
