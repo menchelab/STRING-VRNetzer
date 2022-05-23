@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from commands import NetworkType, StringDiseaseQuery, StringProteinQuery
@@ -18,6 +19,10 @@ def call_disease_query(parser: CytoscapeParser, disease: str, **kwargs):
     parser.exec_cmd(query.cmd_list)
 
 
+def export_network(parser: CytoscapeParser, **kwargs):
+    parser.export_network(**kwargs)
+
+
 def main():
     # pd.options.mode.chained_assignment = None
     # string_cmd_list = ["string disease query", 'disease="sadcer"', "cutoff=0.1"]
@@ -35,7 +40,7 @@ def main():
     parser = CytoscapeParser()
     # call_protein_query(parser, query=["ABC"], limit=2)
     call_disease_query(parser, disease="breast cancer", limit=2)
-    print(parser.__dict__.keys())
+    export_network(parser, filename="test.sif", overwrite_file=True)
     if "cytoscape_proc" in list(parser.__dict__.keys()):
         parser.cytoscape_proc.wait()
 

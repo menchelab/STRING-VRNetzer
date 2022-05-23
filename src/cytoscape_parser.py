@@ -87,14 +87,14 @@ class CytoscapeParser:
             # TODO How to start cytoscape with subprocess on windows if it is not running.
         return None
 
-    def export_network(self, filename):
+    def export_network(self, filename, **kwargs):
         """Export the current network."""
-        p4c.export_network(filename)
+        p4c.export_network(filename=filename, **kwargs)
 
     def exec_cmd(self, cmd_list) -> bool:
         """Executes a given command command."""
         cmd = " ".join(cmd_list)  # type: ignore
-        wait_until_ready()
+        wait_until_ready()  # Waits until the REST API is ready to be used.
         try:
             p4c.commands.commands_run(cmd)
             logging.info(f"Executed command {cmd}.")
@@ -102,3 +102,8 @@ class CytoscapeParser:
         except p4c.exceptions.CyError:  # type: ignore
             logging.warning(f"Error running command: {cmd}.")
         return False
+
+    def close_cytoscape(self):
+        # wait = input("Want to close Cytoscape?\n")
+        # if wait == "y":
+        os.kill(self.pid)
