@@ -11,6 +11,8 @@ class NetworkType(Enum):
 
 @dataclass
 class StringCmd(ABC):
+    """Abstract Class to build a string command which can be executed using the CyREST API. CyRest API is accessed using the py4cytoscape package."""
+
     network_type: NetworkType = NetworkType.fullNetwork
     cutoff: Union[float, None] = None
     limit: Union[int, None] = None
@@ -54,6 +56,8 @@ class StringCmd(ABC):
 
 @dataclass
 class StringProteinQuery(StringCmd):
+    """Class to build a string protein query command which can be executed using the CyREST API. CyRest API is accessed using the py4cytoscape package."""
+
     query: Union[List[str], None] = None
 
     def __post_init__(self):
@@ -67,6 +71,8 @@ class StringProteinQuery(StringCmd):
 
 @dataclass
 class StringDiseaseQuery(StringCmd):
+    """Class to build a string disease query command which can be executed using the CyREST API. CyRest API is accessed using the py4cytoscape package."""
+
     disease: str = None  # type: ignore
 
     def __post_init__(self):
@@ -75,4 +81,34 @@ class StringDiseaseQuery(StringCmd):
         if self.disease is None:
             raise ValueError("Please define a disease for the query!")
         self.arguments.append(self.disease)
+        self.add_arguments()
+
+
+@dataclass
+class StringCompoundQuery(StringCmd):
+    """Class to build a string compound query command which can be executed using the CyREST API. CyRest API is accessed using the py4cytoscape package."""
+
+    query: str = None  # type: ignore
+
+    def __post_init__(self):
+        StringCmd.__post_init__(self)
+        self.query_type = "compound query"
+        if self.query is None:
+            raise ValueError("Please define a compounds/proteins for the query!")
+        self.arguments.append(self.query)
+        self.add_arguments()
+
+
+@dataclass
+class StringPubMedQuery(StringCmd):
+    """Class to build a string compound query command which can be executed using the CyREST API. CyRest API is accessed using the py4cytoscape package."""
+
+    pubmed: str = None  # type: ignore
+
+    def __post_init__(self):
+        StringCmd.__post_init__(self)
+        self.query_type = "compound query"
+        if self.pubmed is None:
+            raise ValueError("Please define a compounds/proteins for the query!")
+        self.arguments.append(self.query)
         self.add_arguments()

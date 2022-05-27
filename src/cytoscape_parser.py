@@ -34,10 +34,10 @@ def wait_until_ready(time_limit=30):
 class CytoscapeParser:
     """Class that serves as a parser for Cytoscapes cyREST API."""
 
-    def __init__(self, cytoscape=None):
-        self.cytoscape = cytoscape
-        # Start cytoscape, if it is not already running
-        if self.cytoscape is None:
+    def __init__(self, CYTOSCAPE=None):
+        self.CYTOSCAPE = CYTOSCAPE
+        # Start Cytoscape, if it is not already running
+        if self.CYTOSCAPE is None:
             pid = self.check_for_cytoscape()
             logging.debug(f"pid of Cytoscape is:{pid}")
         # self.networks_names = p4c.get_network_list()
@@ -62,9 +62,9 @@ class CytoscapeParser:
                 raise Exception(f"Not yet implemented to work with {system}.")
 
             self.cytoscape = paths[system]
-            if not os.access(self.cytoscape, os.X_OK):
+            if not os.access(self.CYTOSCAPE, os.X_OK):
                 raise Exception(
-                    f"cytoscape.sh can not be found at given path:{self.cytoscape}"
+                    f"cytoscape.sh can not be found at given path:{self.CYTOSCAPE}"
                 )
             pid = self.start_cytoscape()
         return pid
@@ -74,7 +74,7 @@ class CytoscapeParser:
         # Uses Java Version 11
         try:
             self.cytoscape_proc = subprocess.Popen(
-                f"{self.cytoscape}", stdout=subprocess.PIPE
+                f"{self.CYTOSCAPE}", stdout=subprocess.PIPE
             )
             print("Cytoscape is booting!")
             print(self.cytoscape_proc.pid)

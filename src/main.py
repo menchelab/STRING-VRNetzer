@@ -1,7 +1,13 @@
 import os
 from typing import List
 
-from commands import NetworkType, StringDiseaseQuery, StringProteinQuery
+from commands import (
+    NetworkType,
+    StringCompoundQuery,
+    StringDiseaseQuery,
+    StringProteinQuery,
+    StringPubMedQuery,
+)
 from cytoscape_parser import CytoscapeParser
 
 
@@ -19,8 +25,27 @@ def call_disease_query(parser: CytoscapeParser, disease: str, **kwargs):
     parser.exec_cmd(query.cmd_list)
 
 
+def call_compound_query(parser: CytoscapeParser, query: List[str], **kwargs):
+    """Fetches a network for given compound query."""
+    query = StringCompoundQuery(query=query, **kwargs)
+    print(query.cmd_list)
+    parser.exec_cmd(query.cmd_list)
+
+
+def call_pubmed_query(parser: CytoscapeParser, pubmed: List[str], **kwargs):
+    """Fetches a network for given pubmed query."""
+    query = StringPubMedQuery(pubmed=pubmed, **kwargs)
+    print(query.cmd_list)
+    parser.exec_cmd(query.cmd_list)
+
+
 def export_network(parser: CytoscapeParser, **kwargs):
     parser.export_network(**kwargs)
+
+
+def export_style():
+    # TODO implement exporting of network style
+    pass
 
 
 def main():
