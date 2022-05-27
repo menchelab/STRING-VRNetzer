@@ -1,3 +1,3 @@
-import commands
-import cytoscape_parser
-import main
+from .commands import *
+from .cytoscape_parser import *
+from .main import *

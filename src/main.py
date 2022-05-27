@@ -1,8 +1,7 @@
-import os
+import logging
 from typing import List
 
 from commands import (
-    NetworkType,
     StringCompoundQuery,
     StringDiseaseQuery,
     StringProteinQuery,
@@ -10,36 +9,41 @@ from commands import (
 )
 from cytoscape_parser import CytoscapeParser
 
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+
 
 def call_protein_query(parser: CytoscapeParser, p_query: List[str], **kwargs):
     """Fetches a network for given protein query."""
     query = StringProteinQuery(query=p_query, **kwargs)
-    print(query.cmd_list)
+    logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
 def call_disease_query(parser: CytoscapeParser, disease: str, **kwargs):
     """Fetches a network for given disease query."""
     query = StringDiseaseQuery(disease=disease, **kwargs)
-    print(query.cmd_list)
+    logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
 def call_compound_query(parser: CytoscapeParser, query: List[str], **kwargs):
     """Fetches a network for given compound query."""
     query = StringCompoundQuery(query=query, **kwargs)
-    print(query.cmd_list)
+    logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
 def call_pubmed_query(parser: CytoscapeParser, pubmed: List[str], **kwargs):
     """Fetches a network for given pubmed query."""
     query = StringPubMedQuery(pubmed=pubmed, **kwargs)
-    print(query.cmd_list)
+    logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
 def export_network(parser: CytoscapeParser, **kwargs):
+    network = parser.get_network_list()[0]
+    logger.info(f"Network exported:{network}")
     parser.export_network(**kwargs)
 
 
@@ -63,9 +67,10 @@ def main():
     #     disease="cancer", network_type=NetworkType.physicalSubnetwork
     # )
     parser = CytoscapeParser()
-    # call_protein_query(parser, query=["ABC"], limit=2)
-    call_disease_query(parser, disease="breast cancer", limit=2)
-    export_network(parser, filename="test.sif", overwrite_file=True)
+    parser.check_for_string_app()
+    # call_protein_query(parser, p_query=["ABC"], limit=2)
+    # call_disease_query(parser, disease="breast cancer", limit=2)
+    export_network(parser, filename="test.gml", overwrite_file=True, type="graphML")
     if "cytoscape_proc" in list(parser.__dict__.keys()):
         parser.cytoscape_proc.wait()
 

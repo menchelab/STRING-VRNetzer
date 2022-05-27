@@ -8,7 +8,6 @@ import logging
 import os
 import platform
 import subprocess
-import timeit
 from time import sleep, time
 from typing import Union
 
@@ -17,8 +16,12 @@ import py4cytoscape as p4c
 import requests
 from requests.exceptions import ConnectionError
 
+logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
+logging.getLogger("py4...").setLevel(logging.INFO)
+
 
 def wait_until_ready(time_limit=30):
+
     response = requests.Response()
     start = time()
     while response.status_code != 200:
@@ -40,6 +43,7 @@ class CytoscapeParser:
         if self.CYTOSCAPE is None:
             pid = self.check_for_cytoscape()
             logging.debug(f"pid of Cytoscape is:{pid}")
+        self.check_for_string_app()
         # self.networks_names = p4c.get_network_list()
 
     def check_for_cytoscape(self) -> Union[int, None]:
@@ -89,6 +93,7 @@ class CytoscapeParser:
 
     def export_network(self, filename, **kwargs):
         """Export the current network."""
+        p4c.delete_table_column(column="stringdb::STRING style")
         p4c.export_network(filename=filename, **kwargs)
 
     def exec_cmd(self, cmd_list) -> bool:
@@ -107,3 +112,11 @@ class CytoscapeParser:
         # wait = input("Want to close Cytoscape?\n")
         # if wait == "y":
         os.kill(self.pid)
+
+    def get_network_list(self):
+        return p4c.get_network_list()
+
+    def check_for_string_app(self):
+        if p4c.get_app_status("stringApp")["status"] != "Installed":
+            print()
+            raise Exception("StringApp is not installed!")
