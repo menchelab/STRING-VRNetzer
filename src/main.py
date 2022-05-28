@@ -1,13 +1,17 @@
+import json
 import logging
+import os
 from typing import List
 
-from commands import (
-    StringCompoundQuery,
-    StringDiseaseQuery,
-    StringProteinQuery,
-    StringPubMedQuery,
-)
+import networkx as nx
+from black import out
+from matplotlib import pyplot as plt
+
+from commands import (StringCompoundQuery, StringDiseaseQuery,
+                      StringProteinQuery, StringPubMedQuery)
+from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
+from graphml_parser import parse_graphml
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -41,10 +45,36 @@ def call_pubmed_query(parser: CytoscapeParser, pubmed: List[str], **kwargs):
     parser.exec_cmd(query.cmd_list)
 
 
-def export_network(parser: CytoscapeParser, **kwargs):
-    network = parser.get_network_list()[0]
+def export_network(parser: CytoscapeParser, filename, keep_output=True, **kwargs):
+    networks = parser.get_network_list()
+    network = list(networks.keys())[0]
     logger.info(f"Network exported:{network}")
-    parser.export_network(**kwargs)
+    parser.export_network(filename=filename, network=network, **kwargs)
+    nodes, edges = parse_graphml(f"{filename}.graphml")
+    layouter = Layouter(nodes, edges)
+    layouter.apply_layout()
+    if not keep_output:
+        os.remove(f"{filename}.graphml")
+
+    with open("sample.json", "w") as outfile:
+        outfile.write("from numpy import array\n")
+        outfile.write(f"nodes_data={layouter.nodes_data}\n")
+        outfile.write(f"edge_data={layouter.edges_data}\n")
+
+
+# TODO: Networkx export with separate table export. Does not work do fails in matching node/edge names to SUIDs
+# def parse_network(parser: CytoscapeParser, network_index=None, **kwargs):
+#     if network_index is None:
+#         network_index = 0
+#     networks = parser.get_network_list()
+#     network = list(networks.keys())[network_index]
+#     graph = parser.get_networkx_network(network)
+#     # node_columns, edge_columns = parser.export_table(network)
+#     nx.draw(graph)
+#     plt.show()
+
+
+# TODO directly create a networkx network
 
 
 def export_style():
@@ -69,10 +99,13 @@ def main():
     parser = CytoscapeParser()
     parser.check_for_string_app()
     # call_protein_query(parser, p_query=["ABC"], limit=2)
-    # call_disease_query(parser, disease="breast cancer", limit=2)
-    export_network(parser, filename="test.gml", overwrite_file=True, type="graphML")
-    if "cytoscape_proc" in list(parser.__dict__.keys()):
-        parser.cytoscape_proc.wait()
+    # call_disease_query(parser, disease="breast cancer", limit=1000)
+    export_network(
+        parser,
+        filename="test",
+        overwrite_file=True,
+        type="graphML",
+    )
 
 
 if __name__ == "__main__":

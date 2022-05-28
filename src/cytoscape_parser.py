@@ -11,10 +11,11 @@ import subprocess
 from time import sleep, time
 from typing import Union
 
-import psutil
 import py4cytoscape as p4c
 import requests
 from requests.exceptions import ConnectionError
+
+from util import get_pid_of_process
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
 logging.getLogger("py4...").setLevel(logging.INFO)
@@ -39,33 +40,33 @@ class CytoscapeParser:
 
     def __init__(self, CYTOSCAPE=None):
         self.CYTOSCAPE = CYTOSCAPE
+        self.POSSIBLE_PROC_NAMES = {
+            "Darwin": "javaapplicationstub",
+            "Linux": "NA",
+            "Windows": "NA",
+        }
+        self.CYTOSCAPE_INSTALLATION_PATHS = {
+            "Darwin": "/Applications/Cytoscape_v3.9.1/cytoscape.sh",
+            "Linux": "NA",  # TODO implement path to cytoscape.sh on Linux.
+            "Windows": "NA",  # TODO implement path to cytoscape.bat on Windows.
+        }
+        self.SYSTEM = platform.system()
+        self.PROC_NAME = self.POSSIBLE_PROC_NAMES[self.SYSTEM]
+
         # Start Cytoscape, if it is not already running
         if self.CYTOSCAPE is None:
-            pid = self.check_for_cytoscape()
-            logging.debug(f"pid of Cytoscape is:{pid}")
+            # TODO Other versions of Cytoscape?
+            if self.CYTOSCAPE_INSTALLATION_PATHS[self.SYSTEM] == "NA":
+                raise Exception(f"Not yet implemented to work with {self.SYSTEM}.")
+            self.CYTOSCAPE_INSTALLATION_PATHS[self.SYSTEM]
+        self.pid = self.check_for_cytoscape()
+        logging.debug(f"pid of Cytoscape is:{self.pid}")
         self.check_for_string_app()
-        # self.networks_names = p4c.get_network_list()
 
     def check_for_cytoscape(self) -> Union[int, None]:
         """Will check whether cytoscape is already running, if not, it will setup path to cytoscape.sh/cytoscape.bat and execute it. Will return the process id of"""
-        processes = [proc for proc in psutil.process_iter()]
-        procs = {"Darwin": "javaapplicationstub", "Linux": "NA", "Windows": "NA"}
-        system = platform.system()
-        pid = None
-        for p in processes:
-            if p.name().lower() == procs[system]:
-                pid = p.pid
+        pid = get_pid_of_process(self.PROC_NAME)
         if pid is None:
-            paths = {
-                "Darwin": "/Applications/Cytoscape_v3.9.1/cytoscape.sh",
-                "Linux": "NA",  # TODO implement path to cytoscape.sh on Linux.
-                "Windows": "NA",  # TODO implement path to cytoscape.bat on Windows.
-            }
-            # TODO Other versions of Cytoscape?
-            if paths[system] == "NA":
-                raise Exception(f"Not yet implemented to work with {system}.")
-
-            self.cytoscape = paths[system]
             if not os.access(self.CYTOSCAPE, os.X_OK):
                 raise Exception(
                     f"cytoscape.sh can not be found at given path:{self.CYTOSCAPE}"
@@ -77,12 +78,15 @@ class CytoscapeParser:
         """Will start cytoscape as a subprocess and return the corresponding process id."""
         # Uses Java Version 11
         try:
-            self.cytoscape_proc = subprocess.Popen(
-                f"{self.CYTOSCAPE}", stdout=subprocess.PIPE
+            devnull = open(os.devnull, "wb")
+            process = subprocess.Popen(
+                self.CYTOSCAPE, stdout=devnull, stderr=devnull, start_new_session=True
             )
+            pid = process.pid
             print("Cytoscape is booting!")
-            print(self.cytoscape_proc.pid)
-            return self.cytoscape_proc.pid
+            wait_until_ready()
+            print(f"Cytoscape is booted! Pid is:{pid}")
+            return pid
         except Exception as e:
             print(e)
 
@@ -91,10 +95,41 @@ class CytoscapeParser:
             # TODO How to start cytoscape with subprocess on windows if it is not running.
         return None
 
-    def export_network(self, filename, **kwargs):
+    def export_network(self, filename, network, **kwargs):
         """Export the current network."""
-        p4c.delete_table_column(column="stringdb::STRING style")
-        p4c.export_network(filename=filename, **kwargs)
+        column_names = p4c.get_table_column_names(network=network)
+        if "stringdb::STRING style" in column_names:
+            p4c.delete_table_column(column="stringdb::STRING style")
+        if "stringdb::canonical name" in column_names:
+            p4c.rename_table_column(
+                column="stringdb::canonical name", new_name="uniprotid"
+            )
+        p4c.export_network(filename=filename, network=network, **kwargs)
+
+    def get_networkx_network(self, network, **kwargs):
+        return p4c.create_networkx_from_network(network)
+
+    # FIXME: Does not work, they destroying it by using name_identifier to get SUIDs
+    def export_table(self, network, **kwargs):
+        all_node_names = p4c.get_all_nodes(network=network)
+        all_edge_names = p4c.get_all_edges(network=network)
+
+        node_table = {i: None for i, _ in enumerate(all_node_names)}
+        edge_table = {i: None for i, _ in enumerate(all_edge_names)}
+
+        node_columns = p4c.get_table_column_names(table="node", network=network)
+        edge_columns = p4c.get_table_column_names(table="edge", network=network)
+        for i, node in enumerate(node_table.keys()):
+            row = {}
+            for column in node_columns:
+                row[column] = p4c.get_table_value("node", all_edge_names[i], column)
+            node_table[i] = row
+        for i, edge in enumerate(edge_table.keys()):
+            row = {}
+            for column in node_columns:
+                row[column] = p4c.get_table_value("edge", all_edge_names[i], column)
+            edge_table[i] = row
+        return node_columns, edge_columns
 
     def exec_cmd(self, cmd_list) -> bool:
         """Executes a given command command."""
@@ -114,9 +149,14 @@ class CytoscapeParser:
         os.kill(self.pid)
 
     def get_network_list(self):
-        return p4c.get_network_list()
+        names = p4c.get_network_list()
+        networks = {}
+        for i, name in enumerate(names):
+            networks[name] = p4c.get_network_suid(name)
+        return networks
 
     def check_for_string_app(self):
+        wait_until_ready()
         if p4c.get_app_status("stringApp")["status"] != "Installed":
             print()
             raise Exception("StringApp is not installed!")
