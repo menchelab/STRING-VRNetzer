@@ -15,24 +15,10 @@ import py4cytoscape as p4c
 import requests
 from requests.exceptions import ConnectionError
 
-from util import get_pid_of_process
+from util import get_pid_of_process, wait_until_ready
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
 logging.getLogger("py4...").setLevel(logging.INFO)
-
-
-def wait_until_ready(time_limit=30):
-
-    response = requests.Response()
-    start = time()
-    while response.status_code != 200:
-        try:
-            response = requests.get("http://127.0.0.1:1234")
-        except ConnectionError:
-            pass
-        if time() - start > time_limit:
-            raise TimeoutError
-        sleep(1)
 
 
 class CytoscapeParser:
@@ -52,6 +38,7 @@ class CytoscapeParser:
         }
         self.SYSTEM = platform.system()
         self.PROC_NAME = self.POSSIBLE_PROC_NAMES[self.SYSTEM]
+        self.URL = "http://127.0.0.1:1234"
 
         # Start Cytoscape, if it is not already running
         if self.CYTOSCAPE is None:
@@ -84,7 +71,7 @@ class CytoscapeParser:
             )
             pid = process.pid
             print("Cytoscape is booting!")
-            wait_until_ready()
+            wait_until_ready(url=self.URL)
             print(f"Cytoscape is booted! Pid is:{pid}")
             return pid
         except Exception as e:
@@ -134,7 +121,7 @@ class CytoscapeParser:
     def exec_cmd(self, cmd_list) -> bool:
         """Executes a given command command."""
         cmd = " ".join(cmd_list)  # type: ignore
-        wait_until_ready()  # Waits until the REST API is ready to be used.
+        wait_until_ready(url=self.URL)  # Waits until the REST API is ready to be used.
         try:
             p4c.commands.commands_run(cmd)
             logging.info(f"Executed command {cmd}.")
@@ -156,7 +143,7 @@ class CytoscapeParser:
         return networks
 
     def check_for_string_app(self):
-        wait_until_ready()
+        wait_until_ready(url=self.URL)
         if p4c.get_app_status("stringApp")["status"] != "Installed":
             print()
             raise Exception("StringApp is not installed!")
