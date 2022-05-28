@@ -1,5 +1,7 @@
-**/logs
-*.graphml
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+# logs
+**/logs
+#Output files
+*.graphml
