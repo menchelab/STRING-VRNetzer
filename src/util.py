@@ -1,3 +1,6 @@
+import os
+import subprocess as sp
+import sys
 import time
 
 import networkx as nx
@@ -5,6 +8,7 @@ import numpy as np
 import psutil
 import requests
 from matplotlib import pyplot as plt
+from requests.exceptions import ConnectionError
 
 
 def get_pid_of_process(process: str):
@@ -17,18 +21,19 @@ def get_pid_of_process(process: str):
     return None
 
 
-def wait_until_ready(url, time_limit=30):
+def wait_until_ready(url, time_limit=30) -> bool:
     """Waits until an response is successful. Waits repeats until a certain time limit has passed."""
     response = requests.Response()
     start = time.time()
     while response.status_code != 200:
         try:
             response = requests.get(url)
-        except ConnectionError:
+        except ConnectionError as e:
             pass
         if time.time() - start > time_limit:
             raise TimeoutError
         time.sleep(1)
+    return True
 
 
 def prepare_networkx_network(G: nx.Graph, positions: dict = None):

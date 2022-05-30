@@ -7,13 +7,13 @@
 import logging
 import os
 import platform
-import subprocess
+import subprocess as sp
 from typing import Union
 
 import py4cytoscape as p4c
 from requests.exceptions import ConnectionError
 
-from util import get_pid_of_process, wait_until_ready
+from util import get_pid_of_process, spawnDaemon, wait_until_ready
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
 logging.getLogger("py4...").setLevel(logging.INFO)
@@ -43,7 +43,7 @@ class CytoscapeParser:
             # TODO Other versions of Cytoscape?
             if self.CYTOSCAPE_INSTALLATION_PATHS[self.SYSTEM] == "NA":
                 raise Exception(f"Not yet implemented to work with {self.SYSTEM}.")
-            self.CYTOSCAPE_INSTALLATION_PATHS[self.SYSTEM]
+            self.CYTOSCAPE = self.CYTOSCAPE_INSTALLATION_PATHS[self.SYSTEM]
         self.pid = self.check_for_cytoscape()
         logging.debug(f"pid of Cytoscape is:{self.pid}")
         self.check_for_string_app()
@@ -63,22 +63,22 @@ class CytoscapeParser:
         """Will start cytoscape as a subprocess and return the corresponding process id."""
         # Uses Java Version 11
         try:
-            devnull = open(os.devnull, "wb")
-            process = subprocess.Popen(
-                self.CYTOSCAPE, stdout=devnull, stderr=devnull, start_new_session=True
+            p = sp.Popen(
+                self.CYTOSCAPE,
+                stdout=sp.DEVNULL,
+                stderr=sp.DEVNULL,
+                start_new_session=True,
             )
-            pid = process.pid
             print("Cytoscape is booting!")
+
             wait_until_ready(url=self.URL)
+            print("Connected to CyREST API!")
+            # pid = get_pid_of_process(self.PROC_NAME)
+            pid = p.pid
             print(f"Cytoscape is booted! Pid is:{pid}")
             return pid
         except Exception as e:
             print(e)
-
-        if platform.system() == "Windows":
-            raise Exception("Not yes implemented to work with Windows.")
-            # TODO How to start cytoscape with subprocess on windows if it is not running.
-        return None
 
     def export_network(self, filename, network, **kwargs):
         """Export the current network."""
@@ -145,3 +145,7 @@ class CytoscapeParser:
         if p4c.get_app_status("stringApp")["status"] != "Installed":
             print()
             raise Exception("StringApp is not installed!")
+
+
+if __name__ == "__main__":
+    parer = CytoscapeParser()
