@@ -31,13 +31,15 @@ def wait_until_ready(url, time_limit=30):
         time.sleep(1)
 
 
-def prepare_networkx_network(G: nx.Graph):
-    """Transforms a basic networkx graph into a correct data structure to be uploaded by the Cytoscape uploader."""
+def prepare_networkx_network(G: nx.Graph, positions: dict = None):
+    """Transforms a basic networkx graph into a correct data structure to be uploaded by the Cytoscape uploader. If the positions are not given, the positions are calculated using the spring layout algorithm of networkx."""
+    if positions is None:
+        positions = nx.spring_layout(G, dim=3)
     nodes_data = {}
     edges_data = {}
     for node in G.nodes():
         nodes_data[node] = {
-            "pos": (0, 0, 0),
+            "pos": positions[node],
             "uniprotid": node,
             "display name": "Gene Name of the Protein",
         }
