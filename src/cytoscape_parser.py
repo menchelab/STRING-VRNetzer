@@ -8,11 +8,9 @@ import logging
 import os
 import platform
 import subprocess
-from time import sleep, time
 from typing import Union
 
 import py4cytoscape as p4c
-import requests
 from requests.exceptions import ConnectionError
 
 from util import get_pid_of_process, wait_until_ready

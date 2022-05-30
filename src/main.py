@@ -7,11 +7,15 @@ import networkx as nx
 from black import out
 from matplotlib import pyplot as plt
 
-from commands import (StringCompoundQuery, StringDiseaseQuery,
-                      StringProteinQuery, StringPubMedQuery)
 from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
 from graphml_parser import parse_graphml
+from string_commands import (
+    StringCompoundQuery,
+    StringDiseaseQuery,
+    StringProteinQuery,
+    StringPubMedQuery,
+)
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)

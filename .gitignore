@@ -5,3 +5,4 @@ __pycache__/
 **/logs
 #Output files
 *.graphml
+sample.json
