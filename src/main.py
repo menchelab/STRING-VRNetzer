@@ -1,92 +1,81 @@
-import json
-import logging
-import os
-from typing import List
+import sys
 
-import networkx as nx
-from black import out
-from matplotlib import pyplot as plt
-
-from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
-from graphml_parser import parse_graphml
-from string_commands import (
-    StringCompoundQuery,
-    StringDiseaseQuery,
-    StringProteinQuery,
-    StringPubMedQuery,
-)
-
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+from src.workflows import (call_compound_query, call_disease_query,
+                           call_protein_query, call_pubmed_query)
+from workflows import export_network
 
 
-def call_protein_query(parser: CytoscapeParser, p_query: List[str], **kwargs):
-    """Fetches a network for given protein query."""
-    query = StringProteinQuery(query=p_query, **kwargs)
-    logger.info(f"Command as list:{query.cmd_list}")
-    parser.exec_cmd(query.cmd_list)
+def call_query(parser:CytoscapeParser):
+    arguments = [
+        None,  # Query Type
+        None,  # Query (Protein, Disease, Compound, PubMed)
+        None,  # Cutoff
+        None,  # Limit
+        None,  # Species
+        None,  # TaxonID
+    ]
+    for i, arg in enumerate(sys.argv[2:]):
+        if "," in arg:
+            arg = arg.split(",")
+        arguments[i] = arg
+    queries = {
+        "protein": call_protein_query,
+        "disease": call_disease_query,
+        "compound": call_compound_query,
+        "pubmed": call_pubmed_query,
+    }
+    queries[parser,arguments[0]](
+        arguments[1],
+        cutoff=arguments[2],
+        limit=arguments[3],
+        species=arguments[4],
+        taxonID=arguments[5],
+    )
+    choice = input("Want to export this network?\n")
+    if choice is "y":
+        return prepare_export()
+    return None
+
+def prepare_export():
+    new_argv = input(
+            "Please enter <filename> <network> <keep tmp> **kwargs"
+        ).split(" ")
+    arguments = [
+        None,  # Network
+        None,  # Filename
+        None,  # Keep temp Graph XML file
+        None,  # Base url
+        None,  # *
+        None,  # overwrite_file
+    ]
+    for i, arg in enumerate(new_argv):
+        arguments[i] = arg
+    sys.argv = sys.argv[:2]+arguments
+    return sys.argv
+
+def call_export(parser,argv=sys.argv[2:]):
+    
 
 
-def call_disease_query(parser: CytoscapeParser, disease: str, **kwargs):
-    """Fetches a network for given disease query."""
-    query = StringDiseaseQuery(disease=disease, **kwargs)
-    logger.info(f"Command as list:{query.cmd_list}")
-    parser.exec_cmd(query.cmd_list)
-
-
-def call_compound_query(parser: CytoscapeParser, query: List[str], **kwargs):
-    """Fetches a network for given compound query."""
-    query = StringCompoundQuery(query=query, **kwargs)
-    logger.info(f"Command as list:{query.cmd_list}")
-    parser.exec_cmd(query.cmd_list)
-
-
-def call_pubmed_query(parser: CytoscapeParser, pubmed: List[str], **kwargs):
-    """Fetches a network for given pubmed query."""
-    query = StringPubMedQuery(pubmed=pubmed, **kwargs)
-    logger.info(f"Command as list:{query.cmd_list}")
-    parser.exec_cmd(query.cmd_list)
-
-
-def export_network(parser: CytoscapeParser, filename, keep_output=True, **kwargs):
-    networks = parser.get_network_list()
-    network = list(networks.keys())[0]
-    logger.info(f"Network exported:{network}")
-    parser.export_network(filename=filename, network=network, **kwargs)
-    nodes, edges = parse_graphml(f"{filename}.graphml")
-    layouter = Layouter(nodes, edges)
-    layouter.apply_layout()
-    if not keep_output:
-        os.remove(f"{filename}.graphml")
-
-    with open("sample.json", "w") as outfile:
-        outfile.write("from numpy import array\n")
-        outfile.write(f"nodes_data={layouter.nodes_data}\n")
-        outfile.write(f"edge_data={layouter.edges_data}\n")
-
-
-# TODO: Networkx export with separate table export. Does not work do fails in matching node/edge names to SUIDs
-# def parse_network(parser: CytoscapeParser, network_index=None, **kwargs):
-#     if network_index is None:
-#         network_index = 0
-#     networks = parser.get_network_list()
-#     network = list(networks.keys())[network_index]
-#     graph = parser.get_networkx_network(network)
-#     # node_columns, edge_columns = parser.export_table(network)
-#     nx.draw(graph)
-#     plt.show()
-
-
-# TODO directly create a networkx network
-
-
-def export_style():
-    # TODO implement exporting of network style
-    pass
-
-
-def main():
+def main(filename):
+    if len(sys.argv) == 1:
+        print(
+            "Usage:\n"
+            + "main.py query <query type=[protein/disease/compound/pubmed]> <query> <opt:cutoff> <opt:limit> <opt:species> <opt:taxonID>"
+            + "\n"
+            "or\n"
+            + "main.py export <network> <filename> <opt:KeepTmp> <opt:baseUrl> <opt:*> <opt:overwrite_file>"
+        )
+        return
+    keyword = sys.argv[1]
+    parser = CytoscapeParser()
+    if keyword is "query":
+        sys.argv = call_query(parser)
+        if sys.argv is None:
+            return
+    elif keyword is "export":
+        call_export(parser)
     # pd.options.mode.chained_assignment = None
     # string_cmd_list = ["string disease query", 'disease="sadcer"', "cutoff=0.1"]
     # string_cmd = " ".join(string_cmd_list)
@@ -101,15 +90,19 @@ def main():
     #     disease="cancer", network_type=NetworkType.physicalSubnetwork
     # )
     parser = CytoscapeParser()
-    parser.check_for_string_app()
+    # print(timeit.timeit(parser.check_for_string_app), number=10)
+    print(parser.get_network_list())
     # call_protein_query(parser, p_query=["ABC"], limit=2)
-    # call_disease_query(parser, disease="breast cancer", limit=1000)
-    export_network(
+    # call_disease_query(parser, disease="breast cancer", limit=100)
+    layouter = export_network(
         parser,
-        filename="test",
+        filename=filename,
         overwrite_file=True,
         type="graphML",
     )
+    with open(f"{filename}.json", "w") as outfile:
+        outfile.write(f"{layouter.nodes_data}\n")
+        outfile.write(f"{layouter.edges_data}")
 
 
 if __name__ == "__main__":

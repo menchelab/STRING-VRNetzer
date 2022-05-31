@@ -8,12 +8,12 @@ import logging
 import os
 import platform
 import subprocess as sp
+import time
 from typing import Union
 
 import py4cytoscape as p4c
-from requests.exceptions import ConnectionError
 
-from util import get_pid_of_process, spawnDaemon, wait_until_ready
+from util import get_pid_of_process, wait_until_ready
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
 logging.getLogger("py4...").setLevel(logging.INFO)
@@ -25,9 +25,9 @@ class CytoscapeParser:
     def __init__(self, CYTOSCAPE=None):
         self.CYTOSCAPE = CYTOSCAPE
         self.POSSIBLE_PROC_NAMES = {
-            "Darwin": "javaapplicationstub",
-            "Linux": "NA",
-            "Windows": "NA",
+            "Darwin": ["javaapplicationstub"],
+            "Linux": ["NA"],
+            "Windows": ["NA"],
         }
         self.CYTOSCAPE_INSTALLATION_PATHS = {
             "Darwin": "/Applications/Cytoscape_v3.9.1/cytoscape.sh",
@@ -62,23 +62,25 @@ class CytoscapeParser:
     def start_cytoscape(self) -> Union[int, None]:
         """Will start cytoscape as a subprocess and return the corresponding process id."""
         # Uses Java Version 11
-        try:
-            p = sp.Popen(
-                self.CYTOSCAPE,
-                stdout=sp.DEVNULL,
-                stderr=sp.DEVNULL,
-                start_new_session=True,
-            )
-            print("Cytoscape is booting!")
+        # TODO does not work, Terminal crashes
+        # try:
+        #     p = sp.Popen(
+        #         self.CYTOSCAPE,
+        #         stdout=sp.DEVNULL,
+        #         stderr=sp.DEVNULL,
+        #         start_new_session=True,
+        #     )
+        #     print("Cytoscape is booting!")
 
-            wait_until_ready(url=self.URL)
-            print("Connected to CyREST API!")
-            # pid = get_pid_of_process(self.PROC_NAME)
-            pid = p.pid
-            print(f"Cytoscape is booted! Pid is:{pid}")
-            return pid
-        except Exception as e:
-            print(e)
+        #     wait_until_ready(url=self.URL)
+        #     print("Connected to CyREST API!")
+        #     # pid = get_pid_of_process(self.PROC_NAME)
+        #     pid = p.pid
+        #     print(f"Cytoscape is booted! Pid is:{pid}")
+        #     return pid
+        # except Exception as e:
+        #     print(e)
+        raise Exception("Cytoscape is not started, please start it manually.")
 
     def export_network(self, filename, network, **kwargs):
         """Export the current network."""
@@ -90,6 +92,9 @@ class CytoscapeParser:
                 column="stringdb::canonical name", new_name="uniprotid"
             )
         p4c.export_network(filename=filename, network=network, **kwargs)
+
+    def export_style(self, filename, style, **kwargs):
+        p4c.export_style(filename=filename, style=style, **kwargs)
 
     def get_networkx_network(self, network, **kwargs):
         return p4c.create_networkx_from_network(network)
@@ -129,8 +134,6 @@ class CytoscapeParser:
         return False
 
     def close_cytoscape(self):
-        # wait = input("Want to close Cytoscape?\n")
-        # if wait == "y":
         os.kill(self.pid)
 
     def get_network_list(self):
@@ -148,4 +151,7 @@ class CytoscapeParser:
 
 
 if __name__ == "__main__":
-    parer = CytoscapeParser()
+    start = time.time()
+    parser = CytoscapeParser()
+    parser.check_for_string_app()
+    print(time.time() - start)

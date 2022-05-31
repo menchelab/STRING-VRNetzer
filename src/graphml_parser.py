@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 _GRAPHML_URL = "{http://graphml.graphdrawing.org/xmlns}"
 
 
-def parse_graphml(file: str):
+def parse_graphml_network(file: str):
     """Parses a Cytoscape network in a"""
     tree = ET.parse(file)
     root = tree.getroot()
@@ -32,8 +32,10 @@ def parse_graphml(file: str):
     return nodes_data, edges_data
 
 
-# makeNodeTex
-# makeEdgeTex
+def parse_xml_style(file: str):
+    """Parses a Cytoscape style file"""
+    pass
+
 
 if __name__ == "__main__":
-    parse_graphml("test.graphml")
+    parse_graphml_network("test.graphml")

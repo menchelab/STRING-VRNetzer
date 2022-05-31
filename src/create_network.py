@@ -28,10 +28,22 @@ class Layouter:
         layouts = {"spring": self.create_spring_layout}
         layout = layouts[layout_algo]()
         points = np.array(list(layout.values()))
-        min_values = [min(points[:, 0]), min(points[:, 0]), min(points[:, 1])]
+        min_values = [min(points[:, i]) for i in range(3)]
+        max_values = [max(points[:, i]) for i in range(3)]
+        # Move everything into positive space
         for i, point in enumerate(points):
             for d, dim in enumerate(point):
                 points[i, d] += abs(min_values[d])
+
+        # Normalize Values between 0 and 1
+        min_values = [min(points[:, i]) for i in range(3)]
+        max_values = [max(points[:, i]) for i in range(3)]
+        norms = [max_values[i] - min_values[i] for i in range(3)]
+        for i, point in enumerate(points):
+            for d, dim in enumerate(point):
+                points[i, d] /= norms[d]
+
+        # write points to node and add position to node data.
         for i, key in enumerate(layout):
             layout[key] = points[i]
         for node, position in layout.items():

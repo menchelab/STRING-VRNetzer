@@ -11,13 +11,14 @@ from matplotlib import pyplot as plt
 from requests.exceptions import ConnectionError
 
 
-def get_pid_of_process(process: str):
+def get_pid_of_process(process_names: list):
     """Get the PID of a running process addressed by name."""
     processes = [proc for proc in psutil.process_iter()]
     for p in processes:
-        if p.name().lower() == process:
-            pid = p.pid
-            return pid
+        for name in process_names:
+            if p.name().lower() == name:
+                pid = p.pid
+                return pid
     return None
 
 
@@ -32,7 +33,7 @@ def wait_until_ready(url, time_limit=30) -> bool:
             pass
         if time.time() - start > time_limit:
             raise TimeoutError
-        time.sleep(1)
+        # time.sleep(1)
     return True
 
 
