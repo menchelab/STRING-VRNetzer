@@ -46,11 +46,12 @@ def call_pubmed_query(parser: CytoscapeParser, pubmed: list[str], **kwargs):
 def export_network(
     parser: CytoscapeParser, filename, network=None, keep_output=True, **kwargs
 ) -> Layouter:
+    filename = f"../{filename}"
     networks = parser.get_network_list()
     if network is None:
         network = list(networks.keys())[0]
-    logger.info(f"Network exported:{network}")
-    parser.export_network(filename=filename, network=network, **kwargs)
+    logger.info(f"Network exported: {network}")
+    parser.export_network(filename=filename, network=network, type="graphML", **kwargs)
     nodes, edges = parse_graphml_network(f"{filename}.graphml")
     layouter = Layouter(nodes, edges)
     layouter.apply_layout()
