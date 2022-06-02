@@ -1,12 +1,21 @@
+import os
 import sys
 from ast import literal_eval
 
+from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
-from workflows import (call_compound_query, call_disease_query,
-                       call_protein_query, call_pubmed_query, export_network)
+from workflows import (
+    call_compound_query,
+    call_disease_query,
+    call_protein_query,
+    call_pubmed_query,
+    create_project,
+    export_network,
+)
 
 
-def extract_arguments(argv, source):
+def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
+    """Extract argument literals from list of strings."""
     for i, arg in enumerate(source):
         try:
             arg = literal_eval(arg)
@@ -19,6 +28,7 @@ def extract_arguments(argv, source):
 
 
 def call_query(parser: CytoscapeParser):
+    """Calls either a protein query, disease query, compound query or a PubMed query."""
     argv = [
         None,  # Query Type
         None,  # Query (Protein, Disease, Compound, PubMed)
@@ -50,9 +60,10 @@ def call_query(parser: CytoscapeParser):
 
 
 def prepare_export():
+    """Prepares the arguments for the export function."""
     while True:
         new_argv = input(
-            "Please enter <network> <filename> <opt:keep tmp> <opt:**kwargs>"
+            "Please enter <network> <filename> <opt:keep tmp> <opt:**kwargs>\n"
         ).split(" ")
         if len(new_argv) > 1:
             break
@@ -69,23 +80,25 @@ def prepare_export():
 
 
 def call_export(parser, argv=None):
+    """Export the targeted network to a GraphML file."""
     if argv is None:
         argv = [
-            None,  # Network
-            None,  # Filename
-            None,  # Keep temp Graph XML file
-            "http://127.0.0.1:1234/v1",  # Base url
-            None,  # *
-            True,  # overwrite_file
+            None,  # 0: Network
+            None,  # 1: Filename
+            False,  # 2: Keep temp GraphML file
+            "http://127.0.0.1:1234/v1",  # 3: Base url
+            None,  # 4: *
+            True,  # 5: overwrite_file
         ]
         argv = extract_arguments(argv, sys.argv[2:])
-    layouter = export_network(parser, argv[1], argv[0], argv[3], overwrite_file=argv[5])
-    with open(f"{argv[0]}.json", "w") as outfile:
-        outfile.write(f"{layouter.nodes_data}\n")
-        outfile.write(f"{layouter.edges_data}")
+    layouter, filename = export_network(
+        parser, argv[1], argv[0], argv[3], overwrite_file=argv[5]
+    )
+    create_project(layouter.graph, filename, skip_exists=argv[5])
 
 
 def main():
+    """Guides the user through the workflow."""
     if len(sys.argv) == 1:
         print(
             "Usage:\n"
@@ -105,30 +118,6 @@ def main():
         print("Network\t\t\t SUID")
         for k, v in parser.get_network_list().items():
             print(f"{k}\t\t\t {v}")
-    # pd.options.mode.chained_assignment = None
-    # string_cmd_list = ["string disease query", 'disease="sadcer"', "cutoff=0.1"]
-    # string_cmd = " ".join(string_cmd_list)
-    # try:
-    #     p4c.commands.commands_run(string_cmd)
-    # except p4c.exceptions.CyError:
-    #     print(f"Error running command")
-    # parser = CytoscapeParser()
-
-    # p4c.export_network("./HIV-human PPI.sif")
-    # cmd = StringDiseaseQuery(
-    #     disease="cancer", network_type=NetworkType.physicalSubnetwork
-    # )
-    # parser = CytoscapeParser()
-    # print(timeit.timeit(parser.check_for_string_app), number=10)
-    # print(parser.get_network_list())
-    # call_protein_query(parser, p_query=["ABC"], limit=2)
-    # call_disease_query(parser, disease="breast cancer", limit=100)
-    # layouter = export_network(
-    #     parser,
-    #     filename=filename,
-    #     overwrite_file=True,
-    #     type="graphML",
-    # )
 
 
 if __name__ == "__main__":

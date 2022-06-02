@@ -2,9 +2,8 @@ import os
 import sys
 from ast import literal_eval
 
+from settings import _PROJECTS_PATH
 from uploader_cytoscape_network import upload_files
-
-_PROJECTS_PATH = os.path.abspath("../static/projects")
 
 
 def upload_network_from_file(filename: str, project_name: str, **kwargs):

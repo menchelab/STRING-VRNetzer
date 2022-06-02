@@ -145,8 +145,10 @@ class CytoscapeParser:
 
     def check_for_string_app(self):
         wait_until_ready(url=self.URL)
-        if p4c.get_app_status("stringApp")["status"] != "Installed":
-            print()
+        status = p4c.get_app_status("stringApp")
+        if not "status" in status.keys():
+            raise Exception("StringApp is not installed!")
+        if not p4c.get_app_status("stringApp")["status"] == "Installed":
             raise Exception("StringApp is not installed!")
 
 

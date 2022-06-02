@@ -180,8 +180,8 @@ def makeLinkTex(
         node_ids[node] = i
 
     for i, edge in enumerate(edges):
-        source = int(node_ids[edge["source"]])
-        target = int(node_ids[edge["target"]])
+        source = int(node_ids[edge[0]])
+        target = int(node_ids[edge[1]])
         sx = source % 128
         syl = source // 128 % 128
         syh = source // 16384
@@ -284,7 +284,7 @@ def upload_files(
     # GET EDGES
     pfile["links"].append(filename + "XYZ")
     pfile["linksRGB"].append(filename + "RGB")
-    state = f"{state}<br>{makeLinkTex(project,filename,edge_data.values(),node_data.keys(),projects_path,skip_exists)}"
+    state = f"{state}<br>{makeLinkTex(project,filename,edge_data,node_data.keys(),projects_path,skip_exists)}"
 
     # update the projects file
     with open(folder + "pfile.json", "w") as json_file:
@@ -300,17 +300,16 @@ def prepare_networkx_network(G: nx.Graph, positions: dict = None) -> tuple[dict,
     """Transforms a basic networkx graph into a correct data structure to be uploaded by the Cytoscape uploader. If the positions are not given, the positions are calculated using the spring layout algorithm of networkx."""
     if positions is None:
         positions = nx.spring_layout(G, dim=3)
-    nodes_data = {}
-    edges_data = {}
     for node in G.nodes():
-        nodes_data[node] = {
-            "pos": positions[node],
-            "uniprotid": node,
-            "display name": "Gene Name of the Protein",
-        }
-    for edge in G.edges():
-        edges_data[edge] = {"source": edge[0], "target": edge[1]}
-    return nodes_data, edges_data
+        nx.set_node_attributes(
+            G,
+            {
+                "pos": positions[node],
+                "uniprotide": node,
+                "display_name": "Gene Name of the Protein",
+            },
+        )
+    return G
 
 
 if __name__ == "__main__":

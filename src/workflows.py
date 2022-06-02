@@ -1,17 +1,21 @@
 import logging
 import os
 
+import networkx as nx
+
 from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
 from graphml_parser import parse_graphml_network
+from settings import _NETWORKS_PATH, _PROJECTS_PATH
 from string_commands import (
     StringCompoundQuery,
     StringDiseaseQuery,
     StringProteinQuery,
     StringPubMedQuery,
 )
+from uploader_cytoscape_network import upload_files
 
-logger = logging.getLogger()
+logger = logging.getLogger("cytoscape_workflows")
 logger.setLevel(logging.DEBUG)
 
 
@@ -44,21 +48,58 @@ def call_pubmed_query(parser: CytoscapeParser, pubmed: list[str], **kwargs):
 
 
 def export_network(
-    parser: CytoscapeParser, filename, network=None, keep_output=True, **kwargs
+    parser: CytoscapeParser,
+    filename: str = None,
+    network: str = None,
+    keep_output: bool = True,
+    layout_algo: str = None,
+    **kwargs,
 ) -> Layouter:
-    filename = f"../{filename}"
+    """Exports a network as GraphML file, generates a 3D layout ."""
     networks = parser.get_network_list()
     if network is None:
         network = list(networks.keys())[0]
+    if filename is None:
+        filename = network
+    save_loc = f"{_NETWORKS_PATH}/{filename}"
+    parser.export_network(filename=save_loc, network=network, type="graphML", **kwargs)
     logger.info(f"Network exported: {network}")
-    parser.export_network(filename=filename, network=network, type="graphML", **kwargs)
-    nodes, edges = parse_graphml_network(f"{filename}.graphml")
-    layouter = Layouter(nodes, edges)
-    layouter.apply_layout()
+
+    layouter = Layouter(f"{save_loc}.graphml")
+    logger.info(f"Network extracted from: {save_loc}.graphml")
+    layouter.apply_layout(layout_algo)
+    logger.info(f"Layout algorithm {layout_algo} applied!")
     if not keep_output:
         os.remove(f"{filename}.graphml")
+        logger.info(f"Removed tmp file: {filename}.graphml.")
 
-    return layouter
+    return layouter, filename
+
+
+def create_project(
+    graph: nx.Graph,
+    project_name: str,
+    projects_path=_PROJECTS_PATH,
+    skip_exists=True,
+    keep_tmp=False,
+):
+    """Uses a layout to generate a new VRNetzer Project."""
+    state = upload_files(
+        project_name,
+        project_name,
+        dict(graph.nodes(data=True)),
+        list(graph.edges(data=True)),
+        projects_path=projects_path,
+        skip_exists=skip_exists,
+    )
+    # if keep temp, we save the network as a file
+    if keep_tmp:
+        outfile = f"{_NETWORKS_PATH}/{project_name}.network"
+        with open(outfile, "w") as f:
+            f.write(f"{graph.nodes(data=True)}\n")
+            f.write(f"{graph.edges(data=True)}")
+        logging.info(f"Saved network as {outfile}")
+    logging.info(f"Project created: {project_name}")
 
 
 # TODO: Networkx export with separate table export. Does not work do fails in matching node/edge names to SUIDs
