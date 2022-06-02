@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 
 
 class Layouter:
+    """Simple class to apply a 3D layout algorithm to a Graph extracted from a GraphML file."""
+
     def __init__(self, file: str):
         self.graph = nx.read_graphml(file)
 
@@ -52,4 +54,3 @@ if __name__ == "__main__":
         )
     )
     layouter.apply_layout()
-    print(list(layouter.graph.edges(data=True))[0])

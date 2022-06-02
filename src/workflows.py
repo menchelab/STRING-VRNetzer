@@ -5,7 +5,6 @@ import networkx as nx
 
 from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
-from graphml_parser import parse_graphml_network
 from settings import _NETWORKS_PATH, _PROJECTS_PATH
 from string_commands import (
     StringCompoundQuery,
