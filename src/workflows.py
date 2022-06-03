@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -7,12 +8,8 @@ from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
 from extract_colors_from_style import get_node_mapping
 from settings import _NETWORKS_PATH, _PROJECTS_PATH, _STYLES_PATH
-from string_commands import (
-    StringCompoundQuery,
-    StringDiseaseQuery,
-    StringProteinQuery,
-    StringPubMedQuery,
-)
+from string_commands import (StringCompoundQuery, StringDiseaseQuery,
+                             StringProteinQuery, StringPubMedQuery)
 from uploader_cytoscape_network import upload_files
 from util import colorize_nodes
 
@@ -119,12 +116,13 @@ def create_project(
     skip_exists=False,
     keep_tmp=False,
 ):
+    nodes = dict(graph.nodes(data=True))
     edges = {tuple((edge[0], edge[1])): edge[2] for edge in graph.edges(data=True)}
     """Uses a layout to generate a new VRNetzer Project."""
     state = upload_files(
         project_name,
         project_name,
-        dict(graph.nodes(data=True)),
+        nodes,
         edges,
         projects_path=projects_path,
         skip_exists=skip_exists,
@@ -132,9 +130,10 @@ def create_project(
     # if keep temp, we save the network as a file
     if keep_tmp:
         outfile = f"{_NETWORKS_PATH}/{project_name}.json"
+        print(f"OUTFILE:{outfile}")
         with open(outfile, "w") as f:
-            f.write(f"{graph.nodes(data=True)}\n")
-            f.write(f"{graph.edges(data=True)}")
+            f.write(f"{nodes}\n")
+            f.write(f"{edges}")
         logging.info(f"Saved network as {outfile}")
 
     logging.info(f"Project created: {project_name}")

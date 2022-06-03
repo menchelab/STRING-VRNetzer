@@ -100,7 +100,9 @@ def call_export(parser, argv=None):
 
     # Create VRNetzer Project
     skip_exists = not argv["overwrite_files"]
-    state = create_project(layouter.graph, filename, skip_exists=skip_exists)
+    state = create_project(
+        layouter.graph, filename, skip_exists=skip_exists, keep_tmp=argv["keep_tmp"]
+    )
     return state
 
 
