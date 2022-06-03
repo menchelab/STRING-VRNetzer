@@ -8,8 +8,12 @@ from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
 from extract_colors_from_style import get_node_mapping
 from settings import _NETWORKS_PATH, _PROJECTS_PATH, _STYLES_PATH
-from string_commands import (StringCompoundQuery, StringDiseaseQuery,
-                             StringProteinQuery, StringPubMedQuery)
+from string_commands import (
+    StringCompoundQuery,
+    StringDiseaseQuery,
+    StringProteinQuery,
+    StringPubMedQuery,
+)
 from uploader_cytoscape_network import upload_files
 from util import colorize_nodes
 
@@ -43,6 +47,7 @@ def call_pubmed_query(parser: CytoscapeParser, pubmed: list[str], **kwargs):
     query = StringPubMedQuery(pubmed=pubmed, **kwargs)
     logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
+    print(query.cmd_list)
 
 
 def export_network(

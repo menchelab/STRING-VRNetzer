@@ -86,10 +86,10 @@ class CytoscapeParser:
         """Export the current network."""
         column_names = p4c.get_table_column_names(network=network)
         if "stringdb::STRING style" in column_names:
-            p4c.delete_table_column(column="stringdb::STRING style")
+            p4c.delete_table_column(column="stringdb::STRING style", network=network)
         if "stringdb::canonical name" in column_names:
             p4c.rename_table_column(
-                column="stringdb::canonical name", new_name="uniprotid"
+                column="stringdb::canonical name", new_name="uniprotid", network=network
             )
         p4c.export_network(filename=filename, network=network, **kwargs)
 

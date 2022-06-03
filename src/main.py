@@ -51,6 +51,7 @@ def call_query(parser: CytoscapeParser):
         taxonID=argv["taxonID"],
     )
     choice = input("Want to export this network?\n")
+
     if choice == "y":
         argv = prepare_export()
         call_export(parser, argv)
@@ -92,12 +93,12 @@ def call_export(parser, argv=None):
     # Export Network as GraphML
     layouter, filename = export_network(
         parser,
-        argv["network"],
         argv["filename"],
+        argv["network"],
         keep_output=argv["keep_tmp"],
         overwrite_file=argv["overwrite_files"],
     )
-
+    print(isinstance(argv["network"], int))
     # Create VRNetzer Project
     skip_exists = not argv["overwrite_files"]
     state = create_project(
@@ -129,6 +130,12 @@ def call_create_project():
     return state
 
 
+def print_networks(parser: CytoscapeParser):
+    print("Network\t\t\t SUID")
+    for k, v in parser.get_network_list().items():
+        print(f"{k}\t\t\t {v}")
+
+
 def main():
     """Guides the user through the workflow."""
     if len(sys.argv) == 1:
@@ -157,9 +164,7 @@ def main():
         state = call_create_project()
         print(state)
     elif keyword == "names":
-        print("Network\t\t\t SUID")
-        for k, v in parser.get_network_list().items():
-            print(f"{k}\t\t\t {v}")
+        print_networks(parser)
 
 
 if __name__ == "__main__":

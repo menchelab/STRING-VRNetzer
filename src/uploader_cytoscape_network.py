@@ -196,15 +196,14 @@ def makeLinkTex(
         ex = target % 128
         eyl = target // 128 % 128
         eyh = target // 16384
-        # TODO Add Color if wished
-        r = 0
-        g = 100
-        b = 255
-        a = 90
 
+        color = [0, 100, 255, 255]
+        if "color" in edges[edge].keys():
+            if isinstance(edges[edge]["color"], tuple):
+                color = edges[edge]["color"]
         pixell1 = (sx, syl, syh)
         pixell2 = (ex, eyl, eyh)
-        pixelc = (r, g, b, a)
+        pixelc = tuple(color)
 
         if i >= 262144:
             break
@@ -253,16 +252,21 @@ def upload_files(
     edge_data: dict,
     projects_path: str = "static/projects",
     skip_exists: bool = True,
-    layouts=[
-        "stringdb::experiments",
-        "stringdb::coexpression",
-        "stringdb::databases",
-        "stringdb::neighborhood",
-        "stringdb::cooccurence",
-        "stringdb::fusion",
-    ],
+    layouts: dict = None,
 ):
     """Generates textures and upload the needed network files."""
+    if layouts is None:
+        layouts = {
+            "any": (200, 200, 200, 255),
+            "stringdb::interspecies": (125, 225, 240, 255),
+            "stringdb::experiments": (255, 100, 160, 255),
+            "stringdb::coexpression": (50, 50, 50, 255),
+            "stringdb::databases": (90, 255, 255, 255),
+            "stringdb::neighborhood": (0, 255, 0, 255),
+            "stringdb::cooccurence": (0, 0, 255, 255),
+            "stringdb::fusion": (255, 0, 0, 255),
+            "stringdb::similarity": (255, 255, 255, 255),
+        }
     prolist = listProjects(projects_path)
     # GET LAYOUT
     if not skip_exists:
@@ -295,12 +299,18 @@ def upload_files(
 
     # Upload.upload_layouts(namespace, layout_files)
     for layout in layouts:
+        edges = edge_data
+        if not layout == "any":
+            edges = {
+                edge: data for edge, data in edge_data.items() if layout in data.keys()
+            }
+        for edge in edges:
+            edges[edge]["color"] = layouts[layout]
+        if len(edges) == 0:
+            continue
         # GET EDGES
         pfile["links"].append(f"{layout}XYZ")
         pfile["linksRGB"].append(f"{layout}RGB")
-        edges = {
-            edge: data for edge, data in edge_data.items() if layout in data.keys()
-        }
         state += f"{state}<br>{makeLinkTex(project,layout,edges,node_data.keys(),projects_path,skip_exists)}"
 
     # update the projects file

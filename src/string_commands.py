@@ -107,8 +107,8 @@ class StringPubMedQuery(StringCmd):
 
     def __post_init__(self):
         StringCmd.__post_init__(self)
-        self.query_type = "compound query"
+        self.query_type = "pubmed query"
         if self.pubmed is None:
             raise ValueError("Please define a compounds/proteins for the query!")
-        self.arguments.append(self.query)
+        self.arguments.append(self.pubmed)
         self.add_arguments()
