@@ -1,14 +1,10 @@
 #! python3
 import os
 import sys
-from ast import arg, literal_eval
+from ast import literal_eval
 from re import S
 
-from scipy.fft import skip_backend
-
-from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
-from util import colorize_nodes
 from workflows import *
 
 
@@ -71,10 +67,10 @@ def prepare_export():
     argv = {
         "network": None,
         "filename": None,
-        "keep_tmp": None,
+        "keep_tmp": True,
         "base_url": "http://127.0.0.1:1234/v1",
         "*": None,
-        "overwrite_file": None,
+        "overwrite_files": True,
     }
     argv = extract_arguments(argv, new_argv)
     return argv
@@ -86,10 +82,10 @@ def call_export(parser, argv=None):
         argv = {
             "network": None,
             "filename": None,
-            "keep_tmp": None,
+            "keep_tmp": True,
             "base_url": "http://127.0.0.1:1234/v1",
             "*": None,
-            "overwrite_file": None,
+            "overwrite_files": True,
         }
         argv = extract_arguments(argv, sys.argv[2:])
 
@@ -99,11 +95,11 @@ def call_export(parser, argv=None):
         argv["network"],
         argv["filename"],
         keep_output=argv["keep_tmp"],
-        overwrite_file=argv["overwrite_file"],
+        overwrite_file=argv["overwrite_files"],
     )
 
     # Create VRNetzer Project
-    skip_exists = not argv[5]
+    skip_exists = not argv["overwrite_files"]
     state = create_project(layouter.graph, filename, skip_exists=skip_exists)
     return state
 
@@ -113,8 +109,8 @@ def call_create_project():
         "network": None,
         "style": None,
         "layout_algo": None,
-        "keep_tmp": None,
-        "skip_exists": None,
+        "keep_tmp": True,
+        "skip_exists": False,
         "project_name": None,
     }
     argv = extract_arguments(argv, sys.argv[2:])
@@ -140,6 +136,12 @@ def main():
             + "\n"
             "or\n"
             + "main.py export <network> <filename> <opt:KeepTmp> <opt:*> <opt:overwrite_file>"
+            + "\n"
+            + "or\n"
+            + "main.py project <network> <style> <opt:layout_algo> <opt:KeepTmp> <opt:skip_exists> <opt:project_name>"
+            + "\n"
+            + "or\n"
+            + "main.py names"
         )
         return
     keyword = sys.argv[1]

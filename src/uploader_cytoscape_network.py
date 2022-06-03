@@ -115,7 +115,8 @@ def makeNodeTex(
         coords = [0, 0, 0]  # x,y,z
         color = [255, 0, 255, 255]  # r,g,b,a
         if "color" in elem.keys():
-            color = elem["color"]
+            if isinstance(elem["color"], tuple):
+                color = elem["color"]
         for d, _ in enumerate(position):
             coords[d] = int(float(position[d]) * 65280)
         high = [value // 255 for value in coords]
@@ -252,6 +253,14 @@ def upload_files(
     edge_data: dict,
     projects_path: str = "static/projects",
     skip_exists: bool = True,
+    layouts=[
+        "stringdb::experiments",
+        "stringdb::coexpression",
+        "stringdb::databases",
+        "stringdb::neighborhood",
+        "stringdb::cooccurence",
+        "stringdb::fusion",
+    ],
 ):
     """Generates textures and upload the needed network files."""
     prolist = listProjects(projects_path)
@@ -275,10 +284,9 @@ def upload_files(
 
     state = ""
     # layout_files = request.files.getlist("layouts")  # If a network has multiple layouts
-
-    state = f"{state}<br>{makeNodeTex(project, filename, node_data.values(), projects_path, skip_exists)}"
-    pfile["layouts"].append(filename + "XYZ")
-    pfile["layoutsRGB"].append(filename + "RGB")
+    state += f"{state}<br>{makeNodeTex(project, filename, node_data.values(), projects_path, skip_exists)}"
+    pfile["layouts"].append(f"{filename}XYZ")
+    pfile["layoutsRGB"].append(f"{filename}RGB")
 
     # print(contents)
     # x = validate_layout(contents.split("\n"))
@@ -286,11 +294,14 @@ def upload_files(
     # if x[1] == 0:
 
     # Upload.upload_layouts(namespace, layout_files)
-
-    # GET EDGES
-    pfile["links"].append(filename + "XYZ")
-    pfile["linksRGB"].append(filename + "RGB")
-    state = f"{state}<br>{makeLinkTex(project,filename,edge_data,node_data.keys(),projects_path,skip_exists)}"
+    for layout in layouts:
+        # GET EDGES
+        pfile["links"].append(f"{layout}XYZ")
+        pfile["linksRGB"].append(f"{layout}RGB")
+        edges = {
+            edge: data for edge, data in edge_data.items() if layout in data.keys()
+        }
+        state += f"{state}<br>{makeLinkTex(project,layout,edges,node_data.keys(),projects_path,skip_exists)}"
 
     # update the projects file
     with open(folder + "pfile.json", "w") as json_file:

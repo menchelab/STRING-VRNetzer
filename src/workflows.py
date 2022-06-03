@@ -63,7 +63,10 @@ def export_network(
     if filename is None:
         filename = network
     network_loc = f"{_NETWORKS_PATH}/{filename}"
+    network_file = f"{network_loc}.graphml"
     style_loc = f"{_STYLES_PATH}/{filename}"
+    style_file = f"{style_loc}.xml"
+
     parser.export_network(
         filename=network_loc, network=network, type="graphML", **kwargs
     )
@@ -72,33 +75,34 @@ def export_network(
     # generate a 3D layout
     layouter = apply_layout(f"{network_loc}.graphml", layout_algo)
 
-    # Extract colors from discrete mapping
-    for style in list(parser.get_visual_style_names()):
-        if style.startswith("STRING"):
-            break
+    # Export current style
     parser.export_style(filename=style_loc, **kwargs)
-    logger.info(f"Style exported: {style}.xml")
-    layouter.graph = apply_style(layouter.graph, style_loc, layout_algo)
-    color_mapping = get_node_mapping(f"{style_loc}.xml")
-    layouter.graph = colorize_nodes(layouter.graph, color_mapping)
+
+    logger.info(f"Style exported: {style_file}")
+    layouter.graph = apply_style(layouter.graph, style_file)
     # if keep_output is False, we remove the tmp GraphML file
     if not keep_output:
-        os.remove(f"{network_loc}.graphml")
-        logger.info(f"Removed tmp file: {network_loc}.graphml.")
-
+        os.remove(network_file)
+        logger.info(f"Removed tmp file: {network_file}")
+        os.remove(style_file)
+        logger.info(f"Removed tmp file: {style_file}")
     return layouter, filename
 
 
-def apply_layout(network, layout_algo=None):
+def apply_layout(network: str, layout_algo=None):
     layouter = Layouter(f"{network}")
     logger.info(f"Network extracted from: {network}")
     layouter.apply_layout(layout_algo)
+    if layout_algo is None:
+        layout_algo = "spring"
     logger.info(f"Layout algorithm {layout_algo} applied!")
     return layouter
 
 
-def apply_style(graph: nx.Graph, style):
+def apply_style(graph: nx.Graph, style: str):
     color_mapping = get_node_mapping(style)
+    if color_mapping is None:
+        return graph
     mapping_type = color_mapping["type"]
     logger.info(
         f"Color mapping extracted from: {style}.xml. Mapping Type: {mapping_type}"
@@ -115,18 +119,19 @@ def create_project(
     skip_exists=False,
     keep_tmp=False,
 ):
+    edges = {tuple((edge[0], edge[1])): edge[2] for edge in graph.edges(data=True)}
     """Uses a layout to generate a new VRNetzer Project."""
     state = upload_files(
         project_name,
         project_name,
         dict(graph.nodes(data=True)),
-        list(graph.edges(data=True)),
+        edges,
         projects_path=projects_path,
         skip_exists=skip_exists,
     )
     # if keep temp, we save the network as a file
     if keep_tmp:
-        outfile = f"{_NETWORKS_PATH}/{project_name}.network"
+        outfile = f"{_NETWORKS_PATH}/{project_name}.json"
         with open(outfile, "w") as f:
             f.write(f"{graph.nodes(data=True)}\n")
             f.write(f"{graph.edges(data=True)}")
