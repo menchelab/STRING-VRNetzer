@@ -82,7 +82,7 @@ class CytoscapeParser:
         #     print(e)
         raise Exception("Cytoscape is not started, please start it manually.")
 
-    def export_network(self, filename, network, **kwargs):
+    def export_network(self, filename, network=None, **kwargs):
         """Export the current network."""
         column_names = p4c.get_table_column_names(network=network)
         if "stringdb::STRING style" in column_names:
@@ -93,8 +93,11 @@ class CytoscapeParser:
             )
         p4c.export_network(filename=filename, network=network, **kwargs)
 
-    def export_style(self, filename, style, **kwargs):
-        p4c.export_style(filename=filename, style=style, **kwargs)
+    def export_style(self, filename, styles=None, **kwargs):
+        p4c.export_visual_styles(filename=filename, styles=styles, **kwargs)
+
+    def get_visual_style_names(self):
+        return p4c.get_visual_style_names()
 
     def get_networkx_network(self, network, **kwargs):
         return p4c.create_networkx_from_network(network)

@@ -1,42 +1,43 @@
+#! python3
 import os
 import sys
-from ast import literal_eval
+from ast import arg, literal_eval
+from re import S
+
+from scipy.fft import skip_backend
 
 from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
-from workflows import (
-    call_compound_query,
-    call_disease_query,
-    call_protein_query,
-    call_pubmed_query,
-    create_project,
-    export_network,
-)
+from util import colorize_nodes
+from workflows import *
 
 
 def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
     """Extract argument literals from list of strings."""
+    keys = list(argv.keys())
     for i, arg in enumerate(source):
+        if arg == "":
+            continue
         try:
             arg = literal_eval(arg)
         except (ValueError, SyntaxError):
             arg = str(arg)
             if "," in arg:
                 arg = arg.split(",")
-        argv[i] = arg
+        argv[keys[i]] = arg
     return argv
 
 
 def call_query(parser: CytoscapeParser):
     """Calls either a protein query, disease query, compound query or a PubMed query."""
-    argv = [
-        None,  # Query Type
-        None,  # Query (Protein, Disease, Compound, PubMed)
-        None,  # Cutoff
-        None,  # Limit
-        None,  # Species
-        None,  # TaxonID
-    ]
+    argv = {
+        "query_type": None,
+        "query": None,
+        "cutoff": None,
+        "limit": None,
+        "species": None,
+        "taxonID": None,
+    }
     argv = extract_arguments(argv, sys.argv[2:])
     queries = {
         "protein": call_protein_query,
@@ -45,13 +46,13 @@ def call_query(parser: CytoscapeParser):
         "pubmed": call_pubmed_query,
     }
     # Call the desired Query
-    queries[argv[0]](
+    queries[argv["query_type"]](
         parser,
-        argv[1],
-        cutoff=argv[2],
-        limit=argv[3],
-        species=argv[4],
-        taxonID=argv[5],
+        argv["query"],
+        cutoff=argv["cutoff"],
+        limit=argv["limit"],
+        species=argv["species"],
+        taxonID=argv["taxonID"],
     )
     choice = input("Want to export this network?\n")
     if choice == "y":
@@ -67,14 +68,14 @@ def prepare_export():
         ).split(" ")
         if len(new_argv) > 1:
             break
-    argv = [
-        None,  # Network
-        None,  # Filename
-        None,  # Keep temp Graph XML file
-        None,  # Base url
-        None,  # *
-        None,  # overwrite_file
-    ]
+    argv = {
+        "network": None,
+        "filename": None,
+        "keep_tmp": None,
+        "base_url": "http://127.0.0.1:1234/v1",
+        "*": None,
+        "overwrite_file": None,
+    }
     argv = extract_arguments(argv, new_argv)
     return argv
 
@@ -82,19 +83,52 @@ def prepare_export():
 def call_export(parser, argv=None):
     """Export the targeted network to a GraphML file."""
     if argv is None:
-        argv = [
-            None,  # 0: Network
-            None,  # 1: Filename
-            False,  # 2: Keep temp GraphML file
-            "http://127.0.0.1:1234/v1",  # 3: Base url
-            None,  # 4: *
-            True,  # 5: overwrite_file
-        ]
+        argv = {
+            "network": None,
+            "filename": None,
+            "keep_tmp": None,
+            "base_url": "http://127.0.0.1:1234/v1",
+            "*": None,
+            "overwrite_file": None,
+        }
         argv = extract_arguments(argv, sys.argv[2:])
+
+    # Export Network as GraphML
     layouter, filename = export_network(
-        parser, argv[1], argv[0], argv[3], overwrite_file=argv[5]
+        parser,
+        argv["network"],
+        argv["filename"],
+        keep_output=argv["keep_tmp"],
+        overwrite_file=argv["overwrite_file"],
     )
-    create_project(layouter.graph, filename, skip_exists=argv[5])
+
+    # Create VRNetzer Project
+    skip_exists = not argv[5]
+    state = create_project(layouter.graph, filename, skip_exists=skip_exists)
+    return state
+
+
+def call_create_project():
+    argv = {
+        "network": None,
+        "style": None,
+        "layout_algo": None,
+        "keep_tmp": None,
+        "skip_exists": None,
+        "project_name": None,
+    }
+    argv = extract_arguments(argv, sys.argv[2:])
+    if argv["project_name"] is None:
+        argv["project_name"] = str(argv["network"].split("/")[-1]).strip(".graphml")
+    layouter = apply_layout(argv["network"], argv["layout_algo"])
+    graph = apply_style(layouter.graph, argv["style"])
+    state = create_project(
+        graph,
+        project_name=argv["project_name"],
+        keep_tmp=argv["keep_tmp"],
+        skip_exists=argv["skip_exists"],
+    )
+    return state
 
 
 def main():
@@ -113,7 +147,11 @@ def main():
     if keyword == "query":
         call_query(parser)
     elif keyword == "export":
-        call_export(parser)
+        state = call_export(parser)
+        print(state)
+    elif keyword == "project":
+        state = call_create_project()
+        print(state)
     elif keyword == "names":
         print("Network\t\t\t SUID")
         for k, v in parser.get_network_list().items():

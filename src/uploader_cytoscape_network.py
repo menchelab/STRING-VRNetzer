@@ -80,9 +80,9 @@ def makeNodeTex(
     nodes: dict,
     projects_path: str = "static/projects",
     skip_exists=True,
+    skip_attr=["pos", "color", "selected"],
 ) -> str:
     """Generates Node textures from a dictionary of nodes."""
-
     elem = len(nodes)
     hight = 128 * (int(elem / 16384) + 1)
 
@@ -102,16 +102,22 @@ def makeNodeTex(
         position = elem["pos"]
         name = ["NA"]
         if "uniprotid" in elem.keys():
-            name = [elem["uniprotid"]]
+            name = elem["uniprotid"]
         elif "display name" in elem.keys():
             gene_name = elem["display name"]
-            name = [f"GENENAME={gene_name}"]
-        attrlist["names"].append(name)
+            name = f"GENENAME={gene_name}"
+        attrlist["names"].append([name])
+        attributes = [k for k in elem.keys() if k not in skip_attr]
+        for attr in attributes:
+            if not attr in attrlist:
+                attrlist[attr] = []
+            attrlist[attr].append([elem[attr]])
         coords = [0, 0, 0]  # x,y,z
-        color = [255, 0, 255, 255]  # r,g,b
+        color = [255, 0, 255, 255]  # r,g,b,a
+        if "color" in elem.keys():
+            color = elem["color"]
         for d, _ in enumerate(position):
             coords[d] = int(float(position[d]) * 65280)
-            # channels[i] = int(float()) # TODO decide on color
         high = [value // 255 for value in coords]
         low = [value % 255 for value in coords]
 
