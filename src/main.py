@@ -2,7 +2,6 @@
 import os
 import sys
 from ast import literal_eval
-from re import S
 
 from cytoscape_parser import CytoscapeParser
 from workflows import *
@@ -138,6 +137,7 @@ def print_networks(parser: CytoscapeParser):
 
 def main():
     """Guides the user through the workflow."""
+
     if len(sys.argv) == 1:
         print(
             "Usage:\n"
