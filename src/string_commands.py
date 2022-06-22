@@ -1,7 +1,8 @@
-from abc import ABC
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import List, Union
+from typing import Union
+
+from cytoscape_commands import AbstractCommand
 
 
 class NetworkType(Enum):
@@ -10,7 +11,7 @@ class NetworkType(Enum):
 
 
 @dataclass
-class StringCmd(ABC):
+class StringCmd(AbstractCommand):
     """Abstract Class to build a string command which can be executed using the CyREST API. CyRest API is accessed using the py4cytoscape package."""
 
     network_type: NetworkType = NetworkType.fullNetwork
@@ -31,34 +32,12 @@ class StringCmd(ABC):
         self.query_type = "NA"
         self.arguments = [self.cutoff, self.limit, self.species, self.taxonID]
 
-    def verify(self) -> bool:
-        # TODO Verify values
-        for i, (value, boundaries) in enumerate(self.verifications.items()):
-            if value is not None:
-                if value not in boundaries:
-                    variable = ""
-                    for k, v in self.__dict__.items():
-                        if value == v:
-                            variable = k
-                    raise ValueError(f"{variable} = {value} is not a valid!")
-        return True
-
-    def add_arguments(self) -> None:
-        """Adds additional attributes needed for the corresponding query."""
-        self.cmd_list.append(self.query_type)
-        for arg in self.arguments:
-            if arg is not None:
-                arg_name = [i for i, a in self.__dict__.items() if a == arg][
-                    0
-                ]  # get the name of the variable as string.
-                self.cmd_list.append(f"{arg_name}={arg}")
-
 
 @dataclass
 class StringProteinQuery(StringCmd):
     """Class to build a string protein query command which can be executed using the CyREST API. CyRest API is accessed using the py4cytoscape package."""
 
-    query: Union[List[str], None] = None
+    query: Union[list[str], None] = None
 
     def __post_init__(self):
         StringCmd.__post_init__(self)
@@ -66,7 +45,7 @@ class StringProteinQuery(StringCmd):
         if self.query is None:
             raise ValueError("Please define proteins to query with!")
         self.arguments.append(self.query)
-        self.add_arguments()
+        self.add_arguments(self.query_type)
 
 
 @dataclass
@@ -81,7 +60,7 @@ class StringDiseaseQuery(StringCmd):
         if self.disease is None:
             raise ValueError("Please define a disease for the query!")
         self.arguments.append(self.disease)
-        self.add_arguments()
+        self.add_arguments(self.query_type)
 
 
 @dataclass
@@ -96,7 +75,7 @@ class StringCompoundQuery(StringCmd):
         if self.query is None:
             raise ValueError("Please define a compounds/proteins for the query!")
         self.arguments.append(self.query)
-        self.add_arguments()
+        self.add_arguments(self.query_type)
 
 
 @dataclass
@@ -111,4 +90,4 @@ class StringPubMedQuery(StringCmd):
         if self.pubmed is None:
             raise ValueError("Please define a compounds/proteins for the query!")
         self.arguments.append(self.pubmed)
-        self.add_arguments()
+        self.add_arguments(self.query_type)

@@ -41,7 +41,7 @@ def call_query(parser: CytoscapeParser):
         "pubmed": call_pubmed_query,
     }
     # Call the desired Query
-    queries[argv["query_type"]](
+    success = queries[argv["query_type"]](
         parser,
         argv["query"],
         cutoff=argv["cutoff"],
@@ -49,11 +49,13 @@ def call_query(parser: CytoscapeParser):
         species=argv["species"],
         taxonID=argv["taxonID"],
     )
-    choice = input("Want to export this network?\n")
-
-    if choice == "y":
-        argv = prepare_export()
-        call_export(parser, argv)
+    if success:
+        choice = input("Want to export this network?\n")
+        if choice == "y":
+            argv = prepare_export()
+            call_export(parser, argv)
+    else:
+        exit()
 
 
 def prepare_export():
