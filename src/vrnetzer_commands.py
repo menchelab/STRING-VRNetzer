@@ -17,12 +17,12 @@ class VRNetzerAppCmd(AbstractCommand):
 
 @dataclass
 class VRNetzerAppExport(VRNetzerAppCmd):
-    """Class to build a string compound query command which can be executed using the CyREST API. CyRest API is accessed using the py4cytoscape package."""
+    """Class to build a vrnetzer export command which can be executed using the CyREST API. CyRest API is accessed using the py4cytoscape package."""
 
-    arguments: str = None  # type: ignore
+    filename: str = None
 
     def __post_init__(self):
         VRNetzerAppCmd.__post_init__(self)
-        self.cmd_list += ["export"]
-        self.arguments
-        self.add_arguments()
+        self.command = "export"
+        self.arguments = [self.filename]
+        self.add_arguments(self.command)

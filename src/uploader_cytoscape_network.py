@@ -99,7 +99,7 @@ def makeNodeTex(
     attrlist = {}
     attrlist["names"] = []
     for i, elem in enumerate(nodes):
-        position = elem["pos"]
+        position = elem["VRNetzer_pos"]
         name = ["NA"]
         if "uniprotid" in elem.keys():
             name = elem["uniprotid"]
@@ -174,8 +174,7 @@ def makeLinkTex(
 ) -> str:
     """Generate a Link texture from a dictionary of edges."""
 
-    # elem = len(edges)
-    hight = 512  # int(elem / 512)+1
+    hight = 512
     path = f"{projects_path}/{project}"
 
     texl = [(0, 0, 0)] * 1024 * hight
@@ -187,20 +186,22 @@ def makeLinkTex(
         node_ids[node] = i
 
     for i, edge in enumerate(edges):
-        source = int(node_ids[edge[0]])
-        target = int(node_ids[edge[1]])
+        edge = edges[edge]
+        source = int(edge["source"])
+        sink = int(edge["sink"])
+
         sx = source % 128
         syl = source // 128 % 128
         syh = source // 16384
 
-        ex = target % 128
-        eyl = target // 128 % 128
-        eyh = target // 16384
+        ex = sink % 128
+        eyl = sink // 128 % 128
+        eyh = sink // 16384
 
         color = [0, 100, 255, 255]
-        if "color" in edges[edge].keys():
-            if isinstance(edges[edge]["color"], tuple):
-                color = edges[edge]["color"]
+        if "color" in edge.keys():
+            if isinstance(edge["color"], tuple):
+                color = edge["color"]
         pixell1 = (sx, syl, syh)
         pixell2 = (ex, eyl, eyh)
         pixelc = tuple(color)
@@ -248,24 +249,34 @@ def makeLinkTex(
 def upload_files(
     project: str,
     filename: str,
-    node_data: dict,
-    edge_data: dict,
+    network: dict,
     projects_path: str = "static/projects",
     skip_exists: bool = True,
     layouts: dict = None,
 ):
+    ingored_elements = ["data_type", "amount"]
+    nodes_data = {
+        node: data
+        for node, data in network["nodes"].items()
+        if node not in ingored_elements
+    }
+    edges_data = {
+        edge: data
+        for edge, data in network["edges"].items()
+        if edge not in ingored_elements
+    }
     """Generates textures and upload the needed network files."""
     if layouts is None:
         layouts = {
             "any": (200, 200, 200, 255),
-            "stringdb::interspecies": (125, 225, 240, 255),
-            "stringdb::experiments": (255, 100, 160, 255),
-            "stringdb::coexpression": (50, 50, 50, 255),
-            "stringdb::databases": (90, 255, 255, 255),
-            "stringdb::neighborhood": (0, 255, 0, 255),
-            "stringdb::cooccurence": (0, 0, 255, 255),
-            "stringdb::fusion": (255, 0, 0, 255),
-            "stringdb::similarity": (255, 255, 255, 255),
+            "stringdb_interspecies": (125, 225, 240, 255),
+            "stringdb_experiments": (255, 100, 160, 255),
+            "stringdb_coexpression": (50, 50, 50, 255),
+            "stringdb_databases": (90, 255, 255, 255),
+            "stringdb_neighborhood": (0, 255, 0, 255),
+            "stringdb_cooccurence": (0, 0, 255, 255),
+            "stringdb_fusion": (255, 0, 0, 255),
+            "stringdb_similarity": (255, 255, 255, 255),
         }
     prolist = listProjects(projects_path)
     # GET LAYOUT
@@ -288,7 +299,7 @@ def upload_files(
 
     state = ""
     # layout_files = request.files.getlist("layouts")  # If a network has multiple layouts
-    state += f"{state}<br>{makeNodeTex(project, filename, node_data.values(), projects_path, skip_exists)}"
+    state += f"{state}<br>{makeNodeTex(project, filename, nodes_data.values(), projects_path, skip_exists)}"
     pfile["layouts"].append(f"{filename}XYZ")
     pfile["layoutsRGB"].append(f"{filename}RGB")
 
@@ -299,10 +310,10 @@ def upload_files(
 
     # Upload.upload_layouts(namespace, layout_files)
     for layout in layouts:
-        edges = edge_data
+        edges = edges_data.copy()
         if not layout == "any":
             edges = {
-                edge: data for edge, data in edge_data.items() if layout in data.keys()
+                edge: data for edge, data in edges.items() if layout in data.keys()
             }
         for edge in edges:
             edges[edge]["color"] = layouts[layout]
@@ -311,7 +322,7 @@ def upload_files(
         # GET EDGES
         pfile["links"].append(f"{layout}XYZ")
         pfile["linksRGB"].append(f"{layout}RGB")
-        state += f"{state}<br>{makeLinkTex(project,layout,edges,node_data.keys(),projects_path,skip_exists)}"
+        state += f"{state}<br>{makeLinkTex(project,layout,edges,nodes_data.keys(),projects_path,skip_exists)}"
 
     # update the projects file
     with open(folder + "pfile.json", "w") as json_file:

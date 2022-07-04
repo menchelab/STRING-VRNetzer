@@ -64,36 +64,35 @@ def export_network(
         network = list(networks.keys())[0]
     if filename is None:
         filename = network
+    filename = filename.replace(" ", "_")
     network_loc = f"{_NETWORKS_PATH}/{filename}"
-    network_file = f"{network_loc}.graphml"
+    network_file = f"{network_loc}.VRNetz"
     style_loc = f"{_STYLES_PATH}/{filename}"
-    style_file = f"{style_loc}.xml"
+    # style_file = f"{style_loc}.xml"
 
-    parser.export_network(
-        filename=network_loc, network=network, type="graphML", **kwargs
-    )
+    parser.export_network(filename=network_loc)
     logger.info(f"Network exported: {network}")
 
     # generate a 3D layout
-    layouter = apply_layout(f"{network_loc}.graphml", layout_algo)
-
+    layouter = apply_layout(f"{network_loc}.VRNetz", layout_algo)
     # Export current style
-    parser.export_style(filename=style_loc, **kwargs)
+    # parser.export_style(filename=style_loc, **kwargs)
 
-    logger.info(f"Style exported: {style_file}")
-    layouter.graph = apply_style(layouter.graph, style_file)
+    # logger.info(f"Style exported: {style_file}")
+    # layouter.graph = apply_style(layouter.graph, style_file)
     # if keep_output is False, we remove the tmp GraphML file
     if not keep_output:
         os.remove(network_file)
         logger.info(f"Removed tmp file: {network_file}")
-        os.remove(style_file)
-        logger.info(f"Removed tmp file: {style_file}")
+        # os.remove(style_file)
+        # logger.info(f"Removed tmp file: {style_file}")
     return layouter, filename
 
 
-def apply_layout(network: str, layout_algo=None):
-    layouter = Layouter(f"{network}")
-    logger.info(f"Network extracted from: {network}")
+def apply_layout(file_name: str, layout_algo=None):
+    layouter = Layouter()
+    layouter.read_from_json(file_name)
+    logger.info(f"Network extracted from: {file_name}")
     layouter.apply_layout(layout_algo)
     if layout_algo is None:
         layout_algo = "spring"
@@ -122,24 +121,33 @@ def create_project(
     keep_tmp=False,
 ):
     nodes = dict(graph.nodes(data=True))
+    print(nodes)
     edges = {tuple((edge[0], edge[1])): edge[2] for edge in graph.edges(data=True)}
     """Uses a layout to generate a new VRNetzer Project."""
+    # if keep temp, we save the network as a file
+    network = {"nodes": {}, "edges": {}}
+    for node in nodes:
+        network["nodes"][node] = nodes[node]
+    network["nodes"]["data_type"] = "nodes"
+    network["nodes"]["amount"] = len(nodes)
+    for edge in edges:
+        suid = edges[edge]["data"]["SUID"]
+        network["edges"][suid] = edges[edge]["data"]
+    network["edges"]["data_type"] = "edges"
+    network["edges"]["amount"] = len(edges)
     state = upload_files(
         project_name,
         project_name,
-        nodes,
-        edges,
+        network,
         projects_path=projects_path,
         skip_exists=skip_exists,
     )
-    # if keep temp, we save the network as a file
     if keep_tmp:
-        outfile = f"{_NETWORKS_PATH}/{project_name}.json"
+        outfile = f"{_NETWORKS_PATH}/{project_name}.VRNetz"
         print(f"OUTFILE:{outfile}")
         with open(outfile, "w") as f:
-            f.write(f"{nodes}\n")
-            f.write(f"{edges}")
-        logging.info(f"Saved network as {outfile}")
+            json.dump(network, f)
+        logging.info(f"Saved network as {outfile}.VRNetz")
 
     logging.info(f"Project created: {project_name}")
     return state

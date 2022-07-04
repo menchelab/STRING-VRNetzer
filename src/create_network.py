@@ -1,13 +1,37 @@
+import json
+from ast import literal_eval
+
+import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-from matplotlib import pyplot as plt
 
 
 class Layouter:
     """Simple class to apply a 3D layout algorithm to a Graph extracted from a GraphML file."""
 
-    def __init__(self, file: str):
+    graph: nx.Graph = nx.Graph()
+
+    def read_from_json(self, file: str):
+        network = literal_eval(open(file).read().strip("\n"))
+        nodes = network["nodes"]
+        edges = network["edges"]
+        nodes.pop("data_type")
+        nodes.pop("amount")
+        edges.pop("data_type")
+        edges.pop("amount")
+        self.graph = nx.Graph()
+        self.graph.add_nodes_from(
+            [(node, {k: v for k, v in data.items()}) for (node, data) in nodes.items()]
+        )
+        for edge in edges:
+            self.graph.add_edge(
+                (str(edges[edge]["source"])), str(edges[edge]["sink"]), data=edges[edge]
+            )
+        return self.graph
+
+    def read_from_grahpml(self, file: str):
         self.graph = nx.read_graphml(file)
+        return self.graph
 
     def create_spring_layout(self) -> dict:
         return nx.spring_layout(self.graph, dim=3)
@@ -41,16 +65,18 @@ class Layouter:
         for i, key in enumerate(layout):
             layout[key] = points[i]
         for node, position in layout.items():
-            self.graph.nodes[node]["pos"] = tuple(position)
+            self.graph.nodes[node]["VRNetzer_pos"] = tuple(position)
         return layout
 
 
 if __name__ == "__main__":
     import os
 
-    layouter = Layouter(
+    layouter = Layouter()
+    layouter.read_from_json(
         os.path.abspath(
-            f"{__file__}/../../static/networks/STRING network - Alzheimer's disease.graphml"
+            f"{__file__}/../../static/networks/STRING_network_-_Alzheimer's_disease.VRNetz"
         )
     )
     layouter.apply_layout()
+    print(layouter.graph)

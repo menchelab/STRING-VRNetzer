@@ -82,7 +82,7 @@ class CytoscapeParser:
         #     print(e)
         raise Exception("Cytoscape is not started, please start it manually.")
 
-    def export_network(self, filename, network=None, **kwargs):
+    def export_network_graphML(self, filename, network=None, **kwargs):
         """Export the current network."""
         column_names = p4c.get_table_column_names(network=network)
         if "stringdb::STRING style" in column_names:
@@ -92,6 +92,10 @@ class CytoscapeParser:
                 column="stringdb::canonical name", new_name="uniprotid", network=network
             )
         p4c.export_network(filename=filename, network=network, **kwargs)
+
+    def export_network(self, filename, network=None, **kwargs):
+        cmd = ["vrnetzer", "export", f"fileName={filename}"]
+        self.exec_cmd(cmd)
 
     def export_style(self, filename, styles=None, **kwargs):
         p4c.export_visual_styles(filename=filename, styles=styles, **kwargs)
@@ -127,6 +131,7 @@ class CytoscapeParser:
     def exec_cmd(self, cmd_list) -> bool:
         """Executes a given command command."""
         cmd = " ".join(cmd_list)  # type: ignore
+        print(cmd)
         wait_until_ready(url=self.URL)  # Waits until the REST API is ready to be used.
         try:
             p4c.commands.commands_run(cmd)
