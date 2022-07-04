@@ -17,9 +17,19 @@ public class ConstructJson {
 	}
 	public JSONObject generateObject(String header,Map<String,Object> data) {
 		JSONObject objectToWrite = new JSONObject();
-		objectToWrite.putAll(data);
 	    objectToWrite.put("data_type", header);
-	    objectToWrite.put("amount", data.size());
+	    objectToWrite.put("ammount", data.size());
+	    
+	    JSONObject dataJson = new JSONObject();
+	    
+	    for (Map.Entry<String, Object> entry : data.entrySet()) {
+		    String thisEntry = entry.getKey();
+		    JSONObject entryObject = new JSONObject();
+		    Map<String,Object> entryData = (Map<String,Object>) entry.getValue();
+		    entryObject.putAll(entryData);
+		    dataJson.put(thisEntry,entryObject);
+		}
+	    objectToWrite.put("data", dataJson);
 	    return objectToWrite;
 	}
 	public void writeObject(JSONObject myObject) throws IOException {
