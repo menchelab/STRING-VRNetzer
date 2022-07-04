@@ -3,10 +3,8 @@ package edu.ucsf.rbvi.VRNetzerApp.internal.util;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.Map;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 
@@ -18,7 +16,7 @@ public class ConstructJson {
 	public JSONObject generateObject(String header,Map<String,Object> data) {
 		JSONObject objectToWrite = new JSONObject();
 	    objectToWrite.put("data_type", header);
-	    objectToWrite.put("ammount", data.size());
+	    objectToWrite.put("amount", data.size());
 	    
 	    JSONObject dataJson = new JSONObject();
 	    
