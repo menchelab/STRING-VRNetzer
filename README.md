@@ -33,7 +33,7 @@ Apps -> App Manger -> Install from File... -> select the "VRNetzerApp-x.x.x.jar"
 
 You network is now exported as an VRNetz which can be used in the [VRNetzer](https://github.com/menchelab/VRNetzer) to present your network as a 3D network.
 ## **Dependencies**
-python==3.
+python==3.9
 networkx==
 [Cytoscape - StringApp](https://apps.cytoscape.org/apps/stringapp)
 ## **Software**
