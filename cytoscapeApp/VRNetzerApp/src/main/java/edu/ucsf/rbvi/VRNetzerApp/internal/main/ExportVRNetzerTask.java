@@ -2,13 +2,11 @@ package edu.ucsf.rbvi.VRNetzerApp.internal.main;
 
 import java.awt.Color;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.Long;
 
 import org.cytoscape.io.write.CyWriter;
 import org.cytoscape.model.CyColumn;
@@ -19,7 +17,6 @@ import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.task.AbstractNetworkTask;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.View;
@@ -48,7 +45,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 	public File fileName = null;
 	
 	private CyNetworkView netView;
-	final private List<String> skip_columns = Arrays.asList("stringdb::STRING style","selected");
+	final private List<String> skip_columns = Arrays.asList("stringdb::STRING style","selected","stringdb_namespace","stringdb_enhancedLabel Passthrough");
 
 	public ExportVRNetzerTask(CyServiceRegistrar registrar, CyNetwork network) {
 		this.registrar = registrar;
