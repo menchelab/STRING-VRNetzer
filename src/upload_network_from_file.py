@@ -6,14 +6,15 @@ from uploader_cytoscape_network import upload_files
 
 def upload_network_from_file(filename: str, project_name: str, **kwargs):
     """Loads nodes data and edge data from json file in which all nodes have 3D coordinates."""
-    network = json.load(filename)
+    with open(filename, "r") as f:
+        network = json.load(f)
     print(upload_files(project_name, project_name, network, **kwargs))
 
 
 if __name__ == "__main__":
     upload_network_from_file(
-        "/Users/till/Documents/Playground/STRING-VRNetzer/static/networks/test.VRNetz",
-        "test",
+        "/Users/till/Documents/Playground/STRING-VRNetzer/static/networks/STRING_network_-_Alzheimer's_disease.VRNetz",
+        "STRING_network_-_Alzheimer's_disease",
     )
     # if len(sys.argv) >= 3:
     #     skip_exists = True

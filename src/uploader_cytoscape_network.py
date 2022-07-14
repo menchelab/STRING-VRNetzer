@@ -28,7 +28,7 @@ def makeProjectFolders(name: str, projects_path: str = "static/projects"):
     with open(path + "/pfile.json", "w") as outfile:
         json.dump(pfile, outfile)
 
-    print("Successfully created directorys in %s " % path)
+    print("Successfully created directories in %s " % path)
 
 
 def loadProjectInfo(name: str, projects_path: str = "static/projects"):
@@ -76,7 +76,7 @@ def listProjects(projects_path: str = "static/projects"):
 # TODO other name for variable filename. maybe Layout name
 def makeNodeTex(
     project: str,
-    filenname: str,
+    filename: str,
     nodes: dict,
     projects_path: str = "static/projects",
     skip_exists=True,
@@ -132,24 +132,22 @@ def makeNodeTex(
 
     with open(path + "/names.json", "w") as outfile:
         json.dump(attrlist, outfile)
-    pathXYZ = path + "/layouts/" + filenname + "XYZ.bmp"
-    pathXYZl = path + "/layoutsl/" + filenname + "XYZl.bmp"
-    pathRGB = path + "/layoutsRGB/" + filenname + "RGB.png"
+    pathXYZ = path + "/layouts/" + filename + "XYZ.bmp"
+    pathXYZl = path + "/layoutsl/" + filename + "XYZl.bmp"
+    pathRGB = path + "/layoutsRGB/" + filename + "RGB.png"
 
     if not skip_exists:
         new_imgh.save(pathXYZ)
         new_imgl.save(pathXYZl)
         new_imgc.save(pathRGB, "PNG")
         return (
-            '<a style="color:green;">SUCCESS </a>'
-            + filenname
-            + " Node Textures Created"
+            '<a style="color:green;">SUCCESS </a>' + filename + " Node Textures Created"
         )
 
     if os.path.exists(pathXYZ):
         return (
             '<a style="color:red;">ERROR </a>'
-            + filenname
+            + filename
             + " Nodelist already in project"
         )
     else:
@@ -157,9 +155,7 @@ def makeNodeTex(
         new_imgl.save(pathXYZl)
         new_imgc.save(pathRGB, "PNG")
         return (
-            '<a style="color:green;">SUCCESS </a>'
-            + filenname
-            + " Node Textures Created"
+            '<a style="color:green;">SUCCESS </a>' + filename + " Node Textures Created"
         )
 
 
@@ -254,6 +250,8 @@ def upload_files(
     skip_exists: bool = True,
     layouts: dict = None,
 ):
+    project = clean_filename(project)
+    filename = clean_filename(filename)
     ingored_elements = ["data_type", "amount"]
     nodes_data = {
         node: data
@@ -348,6 +346,23 @@ def prepare_networkx_network(G: nx.Graph, positions: dict = None) -> tuple[dict,
             },
         )
     return G
+
+
+def clean_filename(name: str) -> str:
+    """Cleans the project name to be used in the file names."""
+    name = name.replace(" ", "_")
+    name = name.replace("/", "_")
+    name = name.replace("'", "")
+    name = name.replace("´", "")
+    name = name.replace("`", "")
+    name = name.replace("'", "")
+    name = name.replace("“", "")
+    name = name.replace(",", "_")
+    name = name.replace(".", "_")
+    name = name.replace("-", "_")
+    name = name.replace("–", "_")
+    name = name.replace("#", "_")
+    return name
 
 
 if __name__ == "__main__":
