@@ -67,14 +67,13 @@ def export_network(
     filename = filename.replace(" ", "_")
     network_loc = f"{_NETWORKS_PATH}/{filename}"
     network_file = f"{network_loc}.VRNetz"
-    style_loc = f"{_STYLES_PATH}/{filename}"
-    # style_file = f"{style_loc}.xml"
 
     parser.export_network(filename=network_loc)
     logger.info(f"Network exported: {network}")
 
     # generate a 3D layout
     layouter = apply_layout(f"{network_loc}.VRNetz", layout_algo)
+
     # Export current style
     # parser.export_style(filename=style_loc, **kwargs)
 
@@ -97,6 +96,8 @@ def apply_layout(file_name: str, layout_algo=None):
     if layout_algo is None:
         layout_algo = "spring"
     logger.info(f"Layout algorithm {layout_algo} applied!")
+    # Correct Cytoscape positions to be positive.
+    layouter.correct_cytoscape_pos()
     return layouter
 
 
@@ -121,7 +122,6 @@ def create_project(
     keep_tmp=False,
 ):
     nodes = dict(graph.nodes(data=True))
-    print(nodes)
     edges = {tuple((edge[0], edge[1])): edge[2] for edge in graph.edges(data=True)}
     """Uses a layout to generate a new VRNetzer Project."""
     # if keep temp, we save the network as a file

@@ -84,6 +84,7 @@ def makeNodeTex(
     projects_path: str = "static/projects",
     skip_exists=True,
     skip_attr=["pos", "color", "selected"],
+    coord_column="VRNetzer_pos",
 ) -> str:
     """Generates Node textures from a dictionary of nodes."""
     elem = len(nodes)
@@ -102,7 +103,7 @@ def makeNodeTex(
     attrlist = {}
     attrlist["names"] = []
     for i, elem in enumerate(nodes):
-        position = elem["VRNetzer_pos"]
+        position = elem[coord_column]
         name = ["NA"]
         if "stringdb_canonical name" in elem.keys():
             name = elem["stringdb_canonical name"]
@@ -117,6 +118,7 @@ def makeNodeTex(
             attrlist[attr].append([elem[attr]])
         coords = [0, 0, 0]  # x,y,z
         color = [255, 0, 255, 255]  # r,g,b,a
+
         if "node_color" in elem.keys():
             if isinstance(elem["node_color"], list):
                 color = elem["node_color"]
@@ -313,11 +315,24 @@ def upload_files(
     json_file.close()
 
     state = ""
+    # 2D Layout of Cytoscape coordinates
+    _2dlayout_filename = f"{filename}_2d"
+    output = makeNodeTex(
+        project,
+        _2dlayout_filename,
+        nodes_data.values(),
+        projects_path,
+        skip_exists,
+        coord_column="node_Cytoscape_pos",
+    )
+    state += f"{state}<br>{output}"
+    pfile["layouts"].append(f"{_2dlayout_filename}XYZ")
+    pfile["layoutsRGB"].append(f"{_2dlayout_filename}RGB")
+
     # layout_files = request.files.getlist("layouts")  # If a network has multiple layouts
     state += f"{state}<br>{makeNodeTex(project, filename, nodes_data.values(), projects_path, skip_exists)}"
     pfile["layouts"].append(f"{filename}XYZ")
     pfile["layoutsRGB"].append(f"{filename}RGB")
-
     # print(contents)
     # x = validate_layout(contents.split("\n"))
     # print("layout errors are", x)

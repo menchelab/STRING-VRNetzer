@@ -46,27 +46,47 @@ class Layouter:
         layouts = {"spring": self.create_spring_layout}
         layout = layouts[layout_algo]()
         points = np.array(list(layout.values()))
-        min_values = [min(points[:, i]) for i in range(3)]
-        max_values = [max(points[:, i]) for i in range(3)]
-        # Move everything into positive space
-        for i, point in enumerate(points):
-            for d, dim in enumerate(point):
-                points[i, d] += abs(min_values[d])
-
-        # Normalize Values between 0 and 1
-        min_values = [min(points[:, i]) for i in range(3)]
-        max_values = [max(points[:, i]) for i in range(3)]
-        norms = [max_values[i] - min_values[i] for i in range(3)]
-        for i, point in enumerate(points):
-            for d, dim in enumerate(point):
-                points[i, d] /= norms[d]
-
+        points = self.to_positive(points, 3)
+        points = self.normalize_values(points, 3)
         # write points to node and add position to node data.
         for i, key in enumerate(layout):
             layout[key] = points[i]
         for node, position in layout.items():
             self.graph.nodes[node]["VRNetzer_pos"] = tuple(position)
         return layout
+
+    def correct_cytoscape_pos(self):
+        """Corrects the Cytoscape positions to be positive and between 0 and 1."""
+        points = [
+            self.graph.nodes[node]["node_Cytoscape_pos"] for node in self.graph.nodes
+        ]
+        points = np.array(points)
+        points = self.to_positive(points, 2)
+        points = self.normalize_values(points, 2)
+        for node, position in zip(self.graph.nodes, points):
+            self.graph.nodes[node]["node_Cytoscape_pos"] = tuple(position)
+        print(points)
+        return points
+
+    @staticmethod
+    def to_positive(points, dims=3):
+        min_values = [min(points[:, i]) for i in range(dims)]
+        # Move everything into positive space
+        for i, point in enumerate(points):
+            for d, _ in enumerate(point[:dims]):
+                points[i, d] += abs(min_values[d])
+        return points
+
+    @staticmethod
+    def normalize_values(points, dims=3):
+        # Normalize Values between 0 and 1
+        min_values = [min(points[:, i]) for i in range(dims)]
+        max_values = [max(points[:, i]) for i in range(dims)]
+        norms = [max_values[i] - min_values[i] for i in range(dims)]
+        for i, point in enumerate(points):
+            for d, _ in enumerate(point[:dims]):
+                points[i, d] /= norms[d]
+        return points
 
 
 if __name__ == "__main__":

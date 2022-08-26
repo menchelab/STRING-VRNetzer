@@ -111,13 +111,13 @@ def call_export(parser, argv=None):
 def call_create_project():
     argv = {
         "network": None,
-        "style": None,
         "layout_algo": None,
         "keep_tmp": True,
         "skip_exists": False,
         "project_name": None,
     }
     argv = extract_arguments(argv, sys.argv[2:])
+    print(argv.items())
     if argv["project_name"] is None:
         argv["project_name"] = str(argv["network"].split("/")[-1]).replace(
             ".VRNetz", ""
@@ -151,7 +151,7 @@ def main():
             + "main.py export <network> <filename> <opt:KeepTmp> <opt:*> <opt:overwrite_file>"
             + "\n"
             + "or\n"
-            + "main.py project <network> <style> <opt:layout_algo> <opt:KeepTmp> <opt:skip_exists> <opt:project_name>"
+            + "main.py project <network> <opt:layout_algo> <opt:KeepTmp> <opt:skip_exists> <opt:project_name>"
             + "\n"
             + "or\n"
             + "main.py names"
