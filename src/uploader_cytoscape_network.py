@@ -1,11 +1,14 @@
 import json
 import os
+from re import A
+from typing import List
 
 import networkx as nx
 from flask import jsonify
 from PIL import Image
 
 from GlobalData import sessionData
+from settings import _STATIC_PATH
 
 
 def makeProjectFolders(name: str, projects_path: str = "static/projects"):
@@ -114,9 +117,9 @@ def makeNodeTex(
             attrlist[attr].append([elem[attr]])
         coords = [0, 0, 0]  # x,y,z
         color = [255, 0, 255, 255]  # r,g,b,a
-        if "color" in elem.keys():
-            if isinstance(elem["color"], tuple):
-                color = elem["color"]
+        if "node_color" in elem.keys():
+            if isinstance(elem["node_color"], list):
+                color = elem["node_color"]
         for d, _ in enumerate(position):
             coords[d] = int(float(position[d]) * 65280)
         high = [value // 255 for value in coords]
@@ -125,7 +128,12 @@ def makeNodeTex(
         texh[i] = tuple(high)
         texl[i] = tuple(low)
         texc[i] = tuple(color)
-
+    with open(os.path.join(path, "texth"), "w") as f:
+        f.write(str(texh))
+    with open(os.path.join(path, "texl"), "w") as f:
+        f.write(str(texh))
+    with open(os.path.join(path, "texth"), "w") as f:
+        f.write(str(texc))
     new_imgh.putdata(texh)
     new_imgl.putdata(texl)
     new_imgc.putdata(texc)
@@ -181,10 +189,16 @@ def makeLinkTex(
     for i, node in enumerate(nodes):
         node_ids[node] = i
 
+    # observed_edges = []
     for i, edge in enumerate(edges):
         edge = edges[edge]
-        source = int(edge["source"])
-        sink = int(edge["sink"])
+        source = node_ids[int(edge["source"])]
+        sink = node_ids[int(edge["sink"])]
+        # # Prevent duplicate edges
+        # if [source, sink] in observed_edges or [sink, source] in observed_edges:
+        #     continue
+        # else:
+        #     observed_edges.append([source, sink])
 
         sx = source % 128
         syl = source // 128 % 128
@@ -208,6 +222,10 @@ def makeLinkTex(
         texl[i * 2] = pixell1
         texl[i * 2 + 1] = pixell2
         texc[i] = pixelc
+    with open(os.path.join(path, filenname + "_texl"), "w") as f:
+        f.write(str(texl))
+    with open(os.path.join(path, filenname + "_texc"), "w") as f:
+        f.write(str(texc))
     new_imgl.putdata(texl)
     new_imgc.putdata(texc)
     pathl = path + "/links/" + filenname + "XYZ.bmp"
@@ -320,6 +338,7 @@ def upload_files(
         # GET EDGES
         pfile["links"].append(f"{layout}XYZ")
         pfile["linksRGB"].append(f"{layout}RGB")
+        # TODO Missing Links in VR
         state += f"{state}<br>{makeLinkTex(project,layout,edges,nodes_data.keys(),projects_path,skip_exists)}"
 
     # update the projects file
