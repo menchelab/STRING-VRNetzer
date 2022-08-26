@@ -143,11 +143,11 @@ def create_project(
         skip_exists=skip_exists,
     )
     if keep_tmp:
-        outfile = f"{_NETWORKS_PATH}/{project_name}.VRNetz"
+        outfile = f"{_NETWORKS_PATH}/{project_name}_with_3D_Coords.VRNetz"
         print(f"OUTFILE:{outfile}")
         with open(outfile, "w") as f:
             json.dump(network, f)
-        logging.info(f"Saved network as {outfile}.VRNetz")
+        logging.info(f"Saved network as {outfile}")
 
     logging.info(f"Project created: {project_name}")
     return state

@@ -119,9 +119,11 @@ def call_create_project():
     }
     argv = extract_arguments(argv, sys.argv[2:])
     if argv["project_name"] is None:
-        argv["project_name"] = str(argv["network"].split("/")[-1]).strip(".graphml")
+        argv["project_name"] = str(argv["network"].split("/")[-1]).replace(
+            ".VRNetz", ""
+        )
     layouter = apply_layout(argv["network"], argv["layout_algo"])
-    graph = apply_style(layouter.graph, argv["style"])
+    graph = layouter.graph
     state = create_project(
         graph,
         project_name=argv["project_name"],
@@ -156,17 +158,18 @@ def main():
         )
         return
     keyword = sys.argv[1]
-    parser = CytoscapeParser()
-    if keyword == "query":
-        call_query(parser)
-    elif keyword == "export":
-        state = call_export(parser)
-        print(state)
+    if keyword in ["query", "export", "names"]:
+        parser = CytoscapeParser()
+        if keyword == "query":
+            call_query(parser)
+        elif keyword == "names":
+            print_networks(parser)
+        elif keyword == "export":
+            state = call_export(parser)
+            logging.debug(state)
     elif keyword == "project":
         state = call_create_project()
-        print(state)
-    elif keyword == "names":
-        print_networks(parser)
+        logging.debug(state)
 
 
 if __name__ == "__main__":

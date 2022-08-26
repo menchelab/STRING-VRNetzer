@@ -104,8 +104,8 @@ def makeNodeTex(
     for i, elem in enumerate(nodes):
         position = elem["VRNetzer_pos"]
         name = ["NA"]
-        if "uniprotid" in elem.keys():
-            name = elem["uniprotid"]
+        if "stringdb_canonical name" in elem.keys():
+            name = elem["stringdb_canonical name"]
         elif "display name" in elem.keys():
             gene_name = elem["display name"]
             name = f"GENENAME={gene_name}"
@@ -128,12 +128,12 @@ def makeNodeTex(
         texh[i] = tuple(high)
         texl[i] = tuple(low)
         texc[i] = tuple(color)
-    with open(os.path.join(path, "texth"), "w") as f:
-        f.write(str(texh))
-    with open(os.path.join(path, "texl"), "w") as f:
-        f.write(str(texh))
-    with open(os.path.join(path, "texth"), "w") as f:
-        f.write(str(texc))
+    # with open(os.path.join(path, "texth"), "w") as f:
+    #     f.write(str(texh))
+    # with open(os.path.join(path, "texl"), "w") as f:
+    #     f.write(str(texh))
+    # with open(os.path.join(path, "texth"), "w") as f:
+    #     f.write(str(texc))
     new_imgh.putdata(texh)
     new_imgl.putdata(texl)
     new_imgc.putdata(texc)
@@ -187,8 +187,7 @@ def makeLinkTex(
     new_imgc = Image.new("RGBA", (512, hight))
     node_ids = {}
     for i, node in enumerate(nodes):
-        node_ids[node] = i
-
+        node_ids[int(node)] = i
     # observed_edges = []
     for i, edge in enumerate(edges):
         edge = edges[edge]
@@ -222,10 +221,10 @@ def makeLinkTex(
         texl[i * 2] = pixell1
         texl[i * 2 + 1] = pixell2
         texc[i] = pixelc
-    with open(os.path.join(path, filenname + "_texl"), "w") as f:
-        f.write(str(texl))
-    with open(os.path.join(path, filenname + "_texc"), "w") as f:
-        f.write(str(texc))
+    # with open(os.path.join(path, filenname + "_texl"), "w") as f:
+    #     f.write(str(texl))
+    # with open(os.path.join(path, filenname + "_texc"), "w") as f:
+    #     f.write(str(texc))
     new_imgl.putdata(texl)
     new_imgc.putdata(texc)
     pathl = path + "/links/" + filenname + "XYZ.bmp"
@@ -326,6 +325,8 @@ def upload_files(
 
     # Upload.upload_layouts(namespace, layout_files)
     for layout in layouts:
+        pfile["layouts"].append(f"{filename}XYZ")
+        pfile["layoutsRGB"].append(f"{filename}RGB")
         edges = edges_data.copy()
         if not layout == "any":
             edges = {
