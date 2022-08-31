@@ -130,12 +130,6 @@ def makeNodeTex(
         texh[i] = tuple(high)
         texl[i] = tuple(low)
         texc[i] = tuple(color)
-    # with open(os.path.join(path, "texth"), "w") as f:
-    #     f.write(str(texh))
-    # with open(os.path.join(path, "texl"), "w") as f:
-    #     f.write(str(texh))
-    # with open(os.path.join(path, "texth"), "w") as f:
-    #     f.write(str(texc))
     new_imgh.putdata(texh)
     new_imgl.putdata(texl)
     new_imgc.putdata(texc)
@@ -267,7 +261,7 @@ def upload_files(
     network: dict,
     projects_path: str = "static/projects",
     skip_exists: bool = True,
-    layouts: dict = None,
+    evidences: dict = None,
 ):
     project = clean_filename(project)
     filename = clean_filename(filename)
@@ -283,8 +277,8 @@ def upload_files(
         if edge not in ingored_elements
     }
     """Generates textures and upload the needed network files."""
-    if layouts is None:
-        layouts = {
+    if evidences is None:
+        evidences = {
             "any": (200, 200, 200, 255),
             "stringdb_interspecies": (125, 225, 240, 255),
             "stringdb_experiments": (255, 100, 160, 255),
@@ -315,7 +309,7 @@ def upload_files(
     json_file.close()
 
     state = ""
-    # 2D Layout of Cytoscape coordinates
+    # Create 2D Layout of Cytoscape coordinates node texture
     _2dlayout_filename = f"{filename}_2d"
     output = makeNodeTex(
         project,
@@ -328,34 +322,43 @@ def upload_files(
     state += f"{state}<br>{output}"
     pfile["layouts"].append(f"{_2dlayout_filename}XYZ")
     pfile["layoutsRGB"].append(f"{_2dlayout_filename}RGB")
+    pfile["links"].append(f"anyXYZ")
+    pfile["linksRGB"].append(f"anyRGB")
 
     # layout_files = request.files.getlist("layouts")  # If a network has multiple layouts
+    # Create 3D Layout node textures
     state += f"{state}<br>{makeNodeTex(project, filename, nodes_data.values(), projects_path, skip_exists)}"
-    pfile["layouts"].append(f"{filename}XYZ")
-    pfile["layoutsRGB"].append(f"{filename}RGB")
     # print(contents)
     # x = validate_layout(contents.split("\n"))
     # print("layout errors are", x)
     # if x[1] == 0:
 
     # Upload.upload_layouts(namespace, layout_files)
-    for layout in layouts:
-        pfile["layouts"].append(f"{filename}XYZ")
-        pfile["layoutsRGB"].append(f"{filename}RGB")
+    # For each evidence type, create a texture and upload it
+    for evidence in evidences:
         edges = edges_data.copy()
-        if not layout == "any":
+        if not evidence == "any":
             edges = {
-                edge: data for edge, data in edges.items() if layout in data.keys()
+                edge: data for edge, data in edges.items() if evidence in data.keys()
             }
-        for edge in edges:
-            edges[edge]["color"] = layouts[layout]
+        # Skip This evidence if there are not edges for this evidence
         if len(edges) == 0:
             continue
-        # GET EDGES
-        pfile["links"].append(f"{layout}XYZ")
-        pfile["linksRGB"].append(f"{layout}RGB")
-        # TODO Missing Links in VR
-        state += f"{state}<br>{makeLinkTex(project,layout,edges,nodes_data.keys(),projects_path,skip_exists)}"
+
+        # Color each link with the color of the evidence
+        for edge in edges:
+            edges[edge]["color"] = evidences[evidence]
+
+        # Add node layout to pflie for this link layout
+        pfile["layouts"].append(f"{filename}XYZ")
+        pfile["layoutsRGB"].append(f"{filename}RGB")
+
+        # Add link layout to pfile
+        pfile["links"].append(f"{evidence}XYZ")
+        pfile["linksRGB"].append(f"{evidence}RGB")
+
+        # Generate link texture
+        state += f"{state}<br>{makeLinkTex(project,evidence,edges,nodes_data.keys(),projects_path,skip_exists)}"
 
     # update the projects file
     with open(folder + "pfile.json", "w") as json_file:

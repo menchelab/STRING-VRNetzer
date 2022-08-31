@@ -63,9 +63,11 @@ class Layouter:
         points = np.array(points)
         points = self.to_positive(points, 2)
         points = self.normalize_values(points, 2)
+        # Write new formated node positions on the xz axis
         for node, position in zip(self.graph.nodes, points):
-            self.graph.nodes[node]["node_Cytoscape_pos"] = tuple(position)
-        print(points)
+            self.graph.nodes[node]["node_Cytoscape_pos"] = tuple(
+                (0.0, position[0], position[1])
+            )
         return points
 
     @staticmethod
