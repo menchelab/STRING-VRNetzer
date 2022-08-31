@@ -106,13 +106,22 @@ def makeNodeTex(
         position = elem[coord_column]
         name = ["NA"]
         if "stringdb_canonical name" in elem.keys():
-            name = elem["stringdb_canonical name"]
+            uniprod = elem["stringdb_canonical name"]
+            name = [
+                uniprod,  # identifier
+                "None",  # Attribute
+                uniprod,  # Annotation
+                50,  # Additional
+            ]
         elif "display name" in elem.keys():
             gene_name = elem["display name"]
-            name = f"GENENAME={gene_name}"
-        attrlist["names"].append([name])
+            name = [f"GENENAME={gene_name}"]
+        attrlist["names"].append(name)
         attributes = [k for k in elem.keys() if k not in skip_attr]
+        attrlist["additional"] = []
         for attr in attributes:
+            if attr == "stringdb_sequence":
+                attrlist["additional"].append([elem[attr]])
             if not attr in attrlist:
                 attrlist[attr] = []
             attrlist[attr].append([elem[attr]])
@@ -280,14 +289,15 @@ def upload_files(
     if evidences is None:
         evidences = {
             "any": (200, 200, 200, 255),
-            "stringdb_interspecies": (125, 225, 240, 255),
-            "stringdb_experiments": (255, 100, 160, 255),
+            # "stringdb_interspecies": (125, 225, 240, 255), # Not Used anywhere
+            "stringdb_textmining": (199, 234, 70, 255),
+            "stringdb_experiments": (254, 0, 255, 255),
             "stringdb_coexpression": (50, 50, 50, 255),
-            "stringdb_databases": (90, 255, 255, 255),
+            "stringdb_databases": (0, 255, 255, 255),
             "stringdb_neighborhood": (0, 255, 0, 255),
             "stringdb_cooccurence": (0, 0, 255, 255),
             "stringdb_fusion": (255, 0, 0, 255),
-            "stringdb_similarity": (255, 255, 255, 255),
+            "stringdb_similarity": (157, 157, 248, 255),
         }
     prolist = listProjects(projects_path)
     # GET LAYOUT
@@ -347,7 +357,13 @@ def upload_files(
 
         # Color each link with the color of the evidence
         for edge in edges:
-            edges[edge]["color"] = evidences[evidence]
+            if evidence not in edges[edge].keys():
+                color = evidences[evidence]
+            else:
+                color = evidences[evidence][:2] + (
+                    int(edges[edge][evidence] * 255),
+                )  # Alpha scales with score
+            edges[edge]["color"] = color
 
         # Add node layout to pflie for this link layout
         pfile["layouts"].append(f"{filename}XYZ")
