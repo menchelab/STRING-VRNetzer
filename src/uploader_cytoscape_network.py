@@ -1,18 +1,16 @@
 import json
 import os
-from re import A
-from typing import List
 
-import networkx as nx
 from flask import jsonify
 from PIL import Image
 
 from GlobalData import sessionData
-from settings import _STATIC_PATH
+from settings import _PROJECTS_PATH, EdgeTags, Evidences, NodeTags
+from src.settings import EdgeTags
 
 
 def makeProjectFolders(name: str, projects_path: str = "static/projects"):
-    path = f"{projects_path}/{name}"
+    path = os.path.join(_PROJECTS_PATH, name)
     pfile = {}
     pfile["name"] = name
     pfile["layouts"] = []
@@ -22,20 +20,20 @@ def makeProjectFolders(name: str, projects_path: str = "static/projects"):
     pfile["selections"] = []
 
     os.makedirs(path, exist_ok=os.X_OK)
-    os.makedirs(path + "/layouts", exist_ok=os.X_OK)
-    os.makedirs(path + "/layoutsl", exist_ok=os.X_OK)
-    os.makedirs(path + "/layoutsRGB", exist_ok=os.X_OK)
-    os.makedirs(path + "/links", exist_ok=os.X_OK)
-    os.makedirs(path + "/linksRGB", exist_ok=os.X_OK)
+    os.makedirs(os.path.join(path, "layouts"), exist_ok=os.X_OK)
+    os.makedirs(os.path.join(path, "layoutsl"), exist_ok=os.X_OK)
+    os.makedirs(os.path.join(path, "layoutsRGB"), exist_ok=os.X_OK)
+    os.makedirs(os.path.join(path, "links"), exist_ok=os.X_OK)
+    os.makedirs(os.path.join(path, "linksRGB"), exist_ok=os.X_OK)
 
-    with open(path + "/pfile.json", "w") as outfile:
+    with open(os.path.join(path, "pfile.json"), "w") as outfile:
         json.dump(pfile, outfile)
 
     print("Successfully created directories in %s " % path)
 
 
 def loadProjectInfo(name: str, projects_path: str = "static/projects"):
-    folder = f"{projects_path}/{name}/"
+    folder = os.path.join(projects_path, name)
     layoutfolder = folder + "layouts"
     layoutRGBfolder = folder + "layoutsRGB"
     linksRGBfolder = folder + "linksRGB"
@@ -84,7 +82,7 @@ def makeNodeTex(
     projects_path: str = "static/projects",
     skip_exists=True,
     skip_attr=["pos", "color", "selected"],
-    coord_column="VRNetzer_pos",
+    coord_column=NodeTags.vrnetzer_pos,
 ) -> str:
     """Generates Node textures from a dictionary of nodes."""
     elem = len(nodes)
@@ -105,22 +103,22 @@ def makeNodeTex(
     for i, elem in enumerate(nodes):
         position = elem[coord_column]
         name = ["NA"]
-        if "stringdb_canonical name" in elem.keys():
-            uniprod = elem["stringdb_canonical name"]
+        if NodeTags.stringdb_canoncial_name in elem.keys():
+            uniprod = elem[NodeTags.stringdb_canoncial_name]
             name = [
                 uniprod,  # identifier
                 "None",  # Attribute
                 uniprod,  # Annotation
                 50,  # Additional
             ]
-        elif "display name" in elem.keys():
-            gene_name = elem["display name"]
+        elif NodeTags.display_name in elem.keys():
+            gene_name = elem[NodeTags.display_name]
             name = [f"GENENAME={gene_name}"]
         attrlist["names"].append(name)
         attributes = [k for k in elem.keys() if k not in skip_attr]
         attrlist["additional"] = []
         for attr in attributes:
-            if attr == "stringdb_sequence":
+            if attr == NodeTags.stringdb_sequence:
                 attrlist["additional"].append([elem[attr]])
             if not attr in attrlist:
                 attrlist[attr] = []
@@ -128,9 +126,9 @@ def makeNodeTex(
         coords = [0, 0, 0]  # x,y,z
         color = [255, 0, 255, 255]  # r,g,b,a
 
-        if "node_color" in elem.keys():
-            if isinstance(elem["node_color"], list):
-                color = elem["node_color"]
+        if NodeTags.node_color in elem.keys():
+            if isinstance(elem[NodeTags.node_color], list):
+                color = elem[NodeTags.node_color]
         for d, _ in enumerate(position):
             coords[d] = int(float(position[d]) * 65280)
         high = [value // 255 for value in coords]
@@ -184,7 +182,7 @@ def makeLinkTex(
     """Generate a Link texture from a dictionary of edges."""
 
     hight = 512
-    path = f"{projects_path}/{project}"
+    path = os.path.join({projects_path}, {project})
 
     texl = [(0, 0, 0)] * 1024 * hight
     texc = [(0, 0, 0, 0)] * 512 * hight
@@ -196,8 +194,8 @@ def makeLinkTex(
     # observed_edges = []
     for i, edge in enumerate(edges):
         edge = edges[edge]
-        source = node_ids[int(edge["source"])]
-        sink = node_ids[int(edge["sink"])]
+        source = node_ids[int(edge[EdgeTags.source])]
+        sink = node_ids[int(edge[EdgeTags.sink])]
         # # Prevent duplicate edges
         # if [source, sink] in observed_edges or [sink, source] in observed_edges:
         #     continue
@@ -214,8 +212,8 @@ def makeLinkTex(
 
         color = [0, 100, 255, 255]
         if "color" in edge.keys():
-            if isinstance(edge["color"], tuple):
-                color = edge["color"]
+            if isinstance(edge[EdgeTags.color], tuple):
+                color = edge[EdgeTags.color]
         pixell1 = (sx, syl, syh)
         pixell2 = (ex, eyl, eyh)
         pixelc = tuple(color)
@@ -232,8 +230,8 @@ def makeLinkTex(
     #     f.write(str(texc))
     new_imgl.putdata(texl)
     new_imgc.putdata(texc)
-    pathl = path + "/links/" + filenname + "XYZ.bmp"
-    pathRGB = path + "/linksRGB/" + filenname + "RGB.png"
+    pathl = os.path.join(path, "links", filenname, "XYZ.bmp")
+    pathRGB = os.path(path, "linksRGB", filenname, "RGB.png")
 
     # new_imgl.save(pathl, "PNG")
     # new_imgc.save(pathRGB, "PNG")
@@ -287,18 +285,8 @@ def upload_files(
     }
     """Generates textures and upload the needed network files."""
     if evidences is None:
-        evidences = {
-            "any": (200, 200, 200, 255),
-            # "stringdb_interspecies": (125, 225, 240, 255), # Not Used anywhere
-            "stringdb_textmining": (199, 234, 70, 255),
-            "stringdb_experiments": (254, 0, 255, 255),
-            "stringdb_coexpression": (50, 50, 50, 255),
-            "stringdb_databases": (0, 255, 255, 255),
-            "stringdb_neighborhood": (0, 255, 0, 255),
-            "stringdb_cooccurence": (0, 0, 255, 255),
-            "stringdb_fusion": (255, 0, 0, 255),
-            "stringdb_similarity": (157, 157, 248, 255),
-        }
+        evidences = Evidences.get_default_scheme()
+
     prolist = listProjects(projects_path)
     # GET LAYOUT
     if not skip_exists:
@@ -311,10 +299,10 @@ def upload_files(
             # Make Folders
             makeProjectFolders(project, projects_path=projects_path)
 
-    folder = f"{projects_path}/{project}/"
+    folder = os.path.join(projects_path, project)
     pfile = {}
 
-    with open(folder + "pfile.json", "r") as json_file:
+    with open(os.path.join(folder, "pfile.json"), "r") as json_file:
         pfile = json.load(json_file)
     json_file.close()
 
@@ -377,29 +365,13 @@ def upload_files(
         state += f"{state}<br>{makeLinkTex(project,evidence,edges,nodes_data.keys(),projects_path,skip_exists)}"
 
     # update the projects file
-    with open(folder + "pfile.json", "w") as json_file:
+    with open(os.path.join(folder, "pfile.json"), "w") as json_file:
         json.dump(pfile, json_file)
 
     global sessionData
     sessionData["proj"] = listProjects(projects_path)
 
     return state
-
-
-def prepare_networkx_network(G: nx.Graph, positions: dict = None) -> tuple[dict, dict]:
-    """Transforms a basic networkx graph into a correct data structure to be uploaded by the Cytoscape uploader. If the positions are not given, the positions are calculated using the spring layout algorithm of networkx."""
-    if positions is None:
-        positions = nx.spring_layout(G, dim=3)
-    for node in G.nodes():
-        nx.set_node_attributes(
-            G,
-            {
-                "pos": positions[node],
-                "uniprotide": node,
-                "display_name": "Gene Name of the Protein",
-            },
-        )
-    return G
 
 
 def clean_filename(name: str) -> str:
