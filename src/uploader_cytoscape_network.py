@@ -6,11 +6,14 @@ from PIL import Image
 
 from GlobalData import sessionData
 from settings import _PROJECTS_PATH, EdgeTags, Evidences, NodeTags
-from src.settings import EdgeTags
 
 
-def makeProjectFolders(name: str, projects_path: str = "static/projects"):
-    path = os.path.join(_PROJECTS_PATH, name)
+def os_join(*args):
+    return os.path.join(*args)
+
+
+def makeProjectFolders(name: str, projects_path: str = _PROJECTS_PATH):
+    path = os_join(_PROJECTS_PATH, name)
     pfile = {}
     pfile["name"] = name
     pfile["layouts"] = []
@@ -20,24 +23,24 @@ def makeProjectFolders(name: str, projects_path: str = "static/projects"):
     pfile["selections"] = []
 
     os.makedirs(path, exist_ok=os.X_OK)
-    os.makedirs(os.path.join(path, "layouts"), exist_ok=os.X_OK)
-    os.makedirs(os.path.join(path, "layoutsl"), exist_ok=os.X_OK)
-    os.makedirs(os.path.join(path, "layoutsRGB"), exist_ok=os.X_OK)
-    os.makedirs(os.path.join(path, "links"), exist_ok=os.X_OK)
-    os.makedirs(os.path.join(path, "linksRGB"), exist_ok=os.X_OK)
+    os.makedirs(os_join(path, "layouts"), exist_ok=os.X_OK)
+    os.makedirs(os_join(path, "layoutsl"), exist_ok=os.X_OK)
+    os.makedirs(os_join(path, "layoutsRGB"), exist_ok=os.X_OK)
+    os.makedirs(os_join(path, "links"), exist_ok=os.X_OK)
+    os.makedirs(os_join(path, "linksRGB"), exist_ok=os.X_OK)
 
-    with open(os.path.join(path, "pfile.json"), "w") as outfile:
+    with open(os_join(path, "pfile.json"), "w") as outfile:
         json.dump(pfile, outfile)
 
     print("Successfully created directories in %s " % path)
 
 
-def loadProjectInfo(name: str, projects_path: str = "static/projects"):
-    folder = os.path.join(projects_path, name)
-    layoutfolder = folder + "layouts"
-    layoutRGBfolder = folder + "layoutsRGB"
-    linksRGBfolder = folder + "linksRGB"
-    linkfolder = folder + "links"
+def loadProjectInfo(name: str, projects_path: str = _PROJECTS_PATH):
+    folder = os_join(projects_path, name)
+    layoutfolder = os_join(folder, "layouts")
+    layoutRGBfolder = os_join(folder, "layoutsRGB")
+    linksRGBfolder = os_join(folder, "linksRGB")
+    linkfolder = os_join(folder, "links")
 
     if os.path.exists(folder):
 
@@ -53,22 +56,22 @@ def loadProjectInfo(name: str, projects_path: str = "static/projects"):
         return "no such project"
 
 
-def loadAnnotations(name: str, projects_path: str = "static/projects"):
+def loadAnnotations(name: str, projects_path: str = _PROJECTS_PATH):
     """Return all annotations corresponding to a project name."""
-    namefile = f"{projects_path}/{name}/names.json"
+    namefile = os_join(projects_path, name, "names.json")
     f = open(namefile)
     data = json.load(f)
     return data
 
 
-def listProjects(projects_path: str = "static/projects"):
+def listProjects(projects_path: str = _PROJECTS_PATH):
     """Returns a list of all projects."""
     projects_path
     os.makedirs(projects_path, exist_ok=os.X_OK)
     sub_folders = [
         name
         for name in os.listdir(projects_path)
-        if os.path.isdir(os.path.join(projects_path, name))
+        if os.path.isdir(os_join(projects_path, name))
     ]
     # print(sub_folders)
     return sub_folders
@@ -79,7 +82,7 @@ def makeNodeTex(
     project: str,
     filename: str,
     nodes: dict,
-    projects_path: str = "static/projects",
+    projects_path: str = _PROJECTS_PATH,
     skip_exists=True,
     skip_attr=["pos", "color", "selected"],
     coord_column=NodeTags.vrnetzer_pos,
@@ -89,7 +92,7 @@ def makeNodeTex(
     hight = 128 * (int(elem / 16384) + 1)
 
     size = 128 * hight
-    path = f"{projects_path}/{project}"
+    path = os_join(projects_path, project)
 
     texh = [(0, 0, 0)] * size
     texl = [(0, 0, 0)] * size
@@ -111,15 +114,14 @@ def makeNodeTex(
                 uniprod,  # Annotation
                 50,  # Additional
             ]
+            if NodeTags.stringdb_sequence in elem.keys():
+                name[-1] = elem[NodeTags.stringdb_sequence]
         elif NodeTags.display_name in elem.keys():
             gene_name = elem[NodeTags.display_name]
             name = [f"GENENAME={gene_name}"]
         attrlist["names"].append(name)
         attributes = [k for k in elem.keys() if k not in skip_attr]
-        attrlist["additional"] = []
         for attr in attributes:
-            if attr == NodeTags.stringdb_sequence:
-                attrlist["additional"].append([elem[attr]])
             if not attr in attrlist:
                 attrlist[attr] = []
             attrlist[attr].append([elem[attr]])
@@ -141,11 +143,11 @@ def makeNodeTex(
     new_imgl.putdata(texl)
     new_imgc.putdata(texc)
 
-    with open(path + "/names.json", "w") as outfile:
+    with open(os_join(path, "names.json"), "w") as outfile:
         json.dump(attrlist, outfile)
-    pathXYZ = path + "/layouts/" + filename + "XYZ.bmp"
-    pathXYZl = path + "/layoutsl/" + filename + "XYZl.bmp"
-    pathRGB = path + "/layoutsRGB/" + filename + "RGB.png"
+    pathXYZ = os_join(path, "layouts", f"{filename}XYZ.bmp")
+    pathXYZl = os_join(path, "layoutsl", f"{filename}XYZl.bmp")
+    pathRGB = os_join(path, "layoutsRGB", f"{filename}RGB.png")
 
     if not skip_exists:
         new_imgh.save(pathXYZ)
@@ -176,13 +178,13 @@ def makeLinkTex(
     filenname: str,
     edges: dict,
     nodes: list,
-    projects_path: str = "static/projects",
+    projects_path: str = _PROJECTS_PATH,
     skip_exists=True,
 ) -> str:
     """Generate a Link texture from a dictionary of edges."""
 
     hight = 512
-    path = os.path.join({projects_path}, {project})
+    path = os_join(projects_path, project)
 
     texl = [(0, 0, 0)] * 1024 * hight
     texc = [(0, 0, 0, 0)] * 512 * hight
@@ -224,14 +226,14 @@ def makeLinkTex(
         texl[i * 2] = pixell1
         texl[i * 2 + 1] = pixell2
         texc[i] = pixelc
-    # with open(os.path.join(path, filenname + "_texl"), "w") as f:
+    # with open(os_join(path, f"{filenname}_texl"), "w") as f:
     #     f.write(str(texl))
-    # with open(os.path.join(path, filenname + "_texc"), "w") as f:
+    # with open(os_join(path, f"{filenname}_texc"), "w") as f:
     #     f.write(str(texc))
     new_imgl.putdata(texl)
     new_imgc.putdata(texc)
-    pathl = os.path.join(path, "links", filenname, "XYZ.bmp")
-    pathRGB = os.path(path, "linksRGB", filenname, "RGB.png")
+    pathl = os_join(path, "links", f"{filenname}XYZ.bmp")
+    pathRGB = os_join(path, "linksRGB", f"{filenname}RGB.png")
 
     # new_imgl.save(pathl, "PNG")
     # new_imgc.save(pathRGB, "PNG")
@@ -266,7 +268,7 @@ def upload_files(
     project: str,
     filename: str,
     network: dict,
-    projects_path: str = "static/projects",
+    projects_path: str = _PROJECTS_PATH,
     skip_exists: bool = True,
     evidences: dict = None,
 ):
@@ -299,10 +301,10 @@ def upload_files(
             # Make Folders
             makeProjectFolders(project, projects_path=projects_path)
 
-    folder = os.path.join(projects_path, project)
+    folder = os_join(projects_path, project)
     pfile = {}
 
-    with open(os.path.join(folder, "pfile.json"), "r") as json_file:
+    with open(os_join(folder, "pfile.json"), "r") as json_file:
         pfile = json.load(json_file)
     json_file.close()
 
@@ -365,7 +367,7 @@ def upload_files(
         state += f"{state}<br>{makeLinkTex(project,evidence,edges,nodes_data.keys(),projects_path,skip_exists)}"
 
     # update the projects file
-    with open(os.path.join(folder, "pfile.json"), "w") as json_file:
+    with open(os_join(folder, "pfile.json"), "w") as json_file:
         json.dump(pfile, json_file)
 
     global sessionData

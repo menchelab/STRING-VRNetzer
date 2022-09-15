@@ -38,17 +38,18 @@ class Evidences:
     stringdb_fusion = "stringdb_fusion"
     stringdb_similarity = "stringdb_similarity"
 
-    def get_default_scheme(self):
+    @staticmethod
+    def get_default_scheme():
         """Return a dictionary with the color scheme for each evidence."""
         return {
             "any": (200, 200, 200, 255),  # Color for all evidences active
-            self.stringdb_textmining: (199, 234, 70, 255),
+            Evidences.stringdb_textmining: (199, 234, 70, 255),
             # "stringdb_interspecies": (125, 225, 240, 255), # Not Used anywhere
-            self.stringdb_experiments: (254, 0, 255, 255),
-            self.stringdb_coexpression: (50, 50, 50, 255),
-            self.stringdb_databases: (0, 255, 255, 255),
-            self.stringdb_neighborhood: (0, 255, 0, 255),
-            self.stringdb_cooccurence: (0, 0, 255, 255),
-            self.stringdb_fusion: (255, 0, 0, 255),
-            self.stringdb_similarity: (157, 157, 248, 255),
+            Evidences.stringdb_experiments: (254, 0, 255, 255),
+            Evidences.stringdb_coexpression: (50, 50, 50, 255),
+            Evidences.stringdb_databases: (0, 255, 255, 255),
+            Evidences.stringdb_neighborhood: (0, 255, 0, 255),
+            Evidences.stringdb_cooccurence: (0, 0, 255, 255),
+            Evidences.stringdb_fusion: (255, 0, 0, 255),
+            Evidences.stringdb_similarity: (157, 157, 248, 255),
         }
