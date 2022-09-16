@@ -28,6 +28,12 @@ class EdgeTags:
     color = "color"
 
 
+class LayoutAlgroithms:
+    spring = "spring"
+    kamada_kawai = "kamada_kawai"
+    cartoGRAPHS_spring = "cartoGRPAHS_spring"
+
+
 class Evidences:
     stringdb_textmining = "stringdb_textmining"
     stringdb_experiments = "stringdb_experiments"

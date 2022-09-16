@@ -36,6 +36,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 
 	final CyServiceRegistrar registrar;
 	private CyNetwork network;
+	//TODO Change that the default name of the file is "untitled"
 	@Tunable(description = "Save network as <fileName>.VRNetz", params = "input=false", 
 	         tooltip="<html>Note: for convenience spaces are replaced by underscores.</html>",gravity = 1.0)
 	public File fileName = null;
@@ -54,7 +55,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 	public void run(TaskMonitor monitor) throws Exception {
 		monitor.setTitle("Export network as VRNetz");
 		// Get current network
-
+		
         Collection<CyNetworkView> views = registrar.getService(CyNetworkViewManager.class).getNetworkViews(network);
         if (views.isEmpty()){
 		monitor.setTitle("Error: No network view!");
@@ -114,7 +115,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 			
 			monitor.showMessage(TaskMonitor.Level.INFO, "Writing data of '"+network.toString()+"'");
 	        startTime = System.nanoTime();
-			exportFile.writeObject(networkJson); // TODO Improve the writing performance!
+			exportFile.writeObject(networkJson); // TODO Improve the writing performance, if we need more nodes to be exported!
 	        stopTime = System.nanoTime();
 	        totalTime = stopTime - startTime;
 	        totalTimeInSeconds = (double) stopTime-startTime / 1_000_000_000;
