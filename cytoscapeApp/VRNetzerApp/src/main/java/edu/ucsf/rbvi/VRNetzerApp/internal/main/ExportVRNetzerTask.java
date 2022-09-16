@@ -27,14 +27,10 @@ import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.javatuples.Triplet;
 import org.json.simple.JSONObject;
-//import org.cytoscape.io.internal.cx_writer.*;
 
 // https://github.com/cytoscape/cx/tree/master/src/main/java/org/cytoscape/io/internal!!!!!!!!!!!
 import edu.ucsf.rbvi.VRNetzerApp.internal.util.ConstructJson;
-// Export Table
-// ExportEnrichmentTable
-// Call already implemented Task
-// MCLClusterTask
+
 
 public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 
@@ -43,6 +39,8 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 	@Tunable(description = "Save network as <fileName>.VRNetz", params = "input=false", 
 	         tooltip="<html>Note: for convenience spaces are replaced by underscores.</html>",gravity = 1.0)
 	public File fileName = null;
+//	@Tunable(description = "Select namespace to export.", params = "input=false",gravity = 2.0)
+//	public String namespace = null; // Not so sure about that one.
 	
 	private CyNetworkView netView;
 	final private List<String> skip_columns = Arrays.asList("stringdb::STRING style","selected","stringdb_namespace","stringdb_enhancedLabel Passthrough");
@@ -58,6 +56,11 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 		// Get current network
 
         Collection<CyNetworkView> views = registrar.getService(CyNetworkViewManager.class).getNetworkViews(network);
+        if (views.isEmpty()){
+		monitor.setTitle("Error: No network view!");
+    	   monitor.showMessage(TaskMonitor.Level.ERROR,"You first have to create a network view!");
+    	   throw new RuntimeException("You first have to create a network view!");
+        }
         // Get NetView
         for (CyNetworkView view: views) {
             if (view.getRendererId().equals("org.cytoscape.ding")) {
@@ -118,6 +121,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 			monitor.showMessage(TaskMonitor.Level.INFO, "Writing file took:"+String.valueOf(totalTimeInSeconds));
 			
 			monitor.setStatusMessage("Exported network to '"+_fileName+"'");
+			
 		}
 	}
 	public Map<String,Object> getStyle(CyNode node){
