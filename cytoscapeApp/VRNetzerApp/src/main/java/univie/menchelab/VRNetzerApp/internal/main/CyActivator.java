@@ -1,4 +1,4 @@
-package edu.ucsf.rbvi.VRNetzerApp.internal.main;
+package univie.menchelab.VRNetzerApp.internal.main;
 
 import org.cytoscape.task.NetworkTaskFactory;
 import org.osgi.framework.BundleContext;

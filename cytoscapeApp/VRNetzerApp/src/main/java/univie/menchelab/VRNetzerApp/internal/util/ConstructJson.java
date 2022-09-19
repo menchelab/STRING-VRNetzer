@@ -1,4 +1,4 @@
-package edu.ucsf.rbvi.VRNetzerApp.internal.util;
+package univie.menchelab.VRNetzerApp.internal.util;
 
 import java.io.IOException;
 import java.nio.file.Files;

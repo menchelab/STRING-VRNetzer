@@ -1,4 +1,4 @@
-package edu.ucsf.rbvi.VRNetzerApp.internal.main;
+package univie.menchelab.VRNetzerApp.internal.main;
 
 import java.awt.Color;
 import java.io.File;
@@ -28,8 +28,7 @@ import org.cytoscape.work.Tunable;
 import org.javatuples.Triplet;
 import org.json.simple.JSONObject;
 
-// https://github.com/cytoscape/cx/tree/master/src/main/java/org/cytoscape/io/internal!!!!!!!!!!!
-import edu.ucsf.rbvi.VRNetzerApp.internal.util.ConstructJson;
+import univie.menchelab.VRNetzerApp.internal.util.ConstructJson;
 
 
 public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
