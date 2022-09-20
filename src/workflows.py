@@ -4,9 +4,9 @@ import os
 
 import networkx as nx
 
-from create_network import Layouter
 from cytoscape_parser import CytoscapeParser
 from extract_colors_from_style import get_node_mapping
+from layouter import Layouter
 from settings import _NETWORKS_PATH, _PROJECTS_PATH
 from string_commands import (
     StringCompoundQuery,
