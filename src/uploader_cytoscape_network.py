@@ -106,13 +106,13 @@ def makeNodeTex(
     attrlist["names"] = []
     for i, elem in enumerate(nodes):
         if coord_column not in elem:
-            continue
-        position = [
-            np.random.randint(0, 1),
-            np.random.randint(0, 1),
-            np.random.randint(0, 1),
-        ]
-        position = elem[coord_column]
+            position = [
+                np.random.randint(0, 1),
+                np.random.randint(0, 1),
+                np.random.randint(0, 1),
+            ]
+        else:
+            position = elem[coord_column]
         name = ["NA"]
         if NodeTags.stringdb_canoncial_name in elem.keys():
             uniprod = elem[NodeTags.stringdb_canoncial_name]
