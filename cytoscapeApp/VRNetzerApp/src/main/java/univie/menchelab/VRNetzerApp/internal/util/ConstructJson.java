@@ -18,8 +18,8 @@ public class ConstructJson {
 	public JSONObject generateObject(String header,Map<String,Object> data) {
 		JSONObject objectToWrite = new JSONObject();
 		objectToWrite.putAll(data);
-	    objectToWrite.put("data_type", header);
-	    objectToWrite.put("amount", data.size());
+//	    objectToWrite.put("data_type", header); 	//Not needed and causes trouble
+//	    objectToWrite.put("amount", data.size());	//Not needed and causes trouble
 	    return objectToWrite;
 	}
 	public void writeObject(JSONObject myObject) throws IOException {
