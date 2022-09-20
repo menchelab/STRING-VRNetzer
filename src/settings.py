@@ -26,6 +26,7 @@ class EdgeTags:
     source = "source"
     sink = "sink"
     color = "color"
+    suid = "SUID"
 
 
 class LayoutAlgroithms:

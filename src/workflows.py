@@ -7,7 +7,7 @@ import networkx as nx
 from cytoscape_parser import CytoscapeParser
 from extract_colors_from_style import get_node_mapping
 from layouter import Layouter
-from settings import _NETWORKS_PATH, _PROJECTS_PATH
+from settings import _NETWORKS_PATH, _PROJECTS_PATH, EdgeTags
 from string_commands import (
     StringCompoundQuery,
     StringDiseaseQuery,
@@ -88,14 +88,15 @@ def export_network(
     return layouter, filename
 
 
-def apply_layout(file_name: str, layout_algo=None):
+def apply_layout(file_name: str, gen_layout=True, layout_algo=None):
     layouter = Layouter()
     layouter.read_from_json(file_name)
     logger.info(f"Network extracted from: {file_name}")
-    layouter.apply_layout(layout_algo)
-    if layout_algo is None:
-        layout_algo = "spring"
-    logger.info(f"Layout algorithm {layout_algo} applied!")
+    if gen_layout:
+        layouter.apply_layout(layout_algo)
+        if layout_algo is None:
+            layout_algo = "spring"
+        logger.info(f"Layout algorithm {layout_algo} applied!")
     # Correct Cytoscape positions to be positive.
     layouter.correct_cytoscape_pos()
     return layouter
@@ -131,7 +132,7 @@ def create_project(
     network["nodes"]["data_type"] = "nodes"
     network["nodes"]["amount"] = len(nodes)
     for edge in edges:
-        suid = edges[edge]["data"]["SUID"]
+        suid = edges[edge]["data"][EdgeTags.suid]
         network["edges"][suid] = edges[edge]["data"]
     network["edges"]["data_type"] = "edges"
     network["edges"]["amount"] = len(edges)

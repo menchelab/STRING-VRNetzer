@@ -18,10 +18,6 @@ class Layouter:
         network = literal_eval(open(file).read().strip("\n"))
         nodes = network["nodes"]
         edges = network["edges"]
-        nodes.pop("data_type")
-        nodes.pop("amount")
-        edges.pop("data_type")
-        edges.pop("amount")
         self.graph = nx.Graph()
         self.graph.add_nodes_from(
             [(node, {k: v for k, v in data.items()}) for (node, data) in nodes.items()]
@@ -67,14 +63,19 @@ class Layouter:
 
     def correct_cytoscape_pos(self):
         """Corrects the Cytoscape positions to be positive and between 0 and 1."""
+        cytoscape_nodes = [
+            node
+            for node in self.graph.nodes
+            if "node_Cytoscape_pos" in self.graph.nodes[node]
+        ]
         points = [
-            self.graph.nodes[node]["node_Cytoscape_pos"] for node in self.graph.nodes
+            self.graph.nodes[node]["node_Cytoscape_pos"] for node in cytoscape_nodes
         ]
         points = np.array(points)
         points = self.to_positive(points, 2)
         points = self.normalize_values(points, 2)
         # Write new formated node positions on the xz axis
-        for node, position in zip(self.graph.nodes, points):
+        for node, position in zip(cytoscape_nodes, points):
             self.graph.nodes[node]["node_Cytoscape_pos"] = tuple(
                 (0.0, position[0], position[1])
             )

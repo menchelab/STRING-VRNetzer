@@ -115,6 +115,7 @@ def call_create_project():
         "keep_tmp": True,
         "skip_exists": False,
         "project_name": None,
+        "gen_layout": True,
     }
     argv = extract_arguments(argv, sys.argv[2:])
     print(argv.items())
@@ -122,7 +123,7 @@ def call_create_project():
         argv["project_name"] = str(argv["network"].split("/")[-1]).replace(
             ".VRNetz", ""
         )
-    layouter = apply_layout(argv["network"], argv["layout_algo"])
+    layouter = apply_layout(argv["network"], argv["gen_layout"], argv["layout_algo"])
     graph = layouter.graph
     state = create_project(
         graph,
@@ -151,7 +152,7 @@ def main():
             + "main.py export <network> <filename> <opt:KeepTmp> <opt:*> <opt:overwrite_file>"
             + "\n"
             + "or\n"
-            + "main.py project <network> <opt:layout_algo> <opt:KeepTmp> <opt:skip_exists> <opt:project_name>"
+            + "main.py project <network> <opt:layout_algo> <opt:KeepTmp> <opt:skip_exists> <opt:project_name> <opt:gen_layout>"
             + "\n"
             + "or\n"
             + "main.py names"

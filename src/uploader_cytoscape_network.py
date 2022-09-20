@@ -104,6 +104,8 @@ def makeNodeTex(
     attrlist = {}
     attrlist["names"] = []
     for i, elem in enumerate(nodes):
+        if coord_column not in elem:
+            continue
         position = elem[coord_column]
         name = ["NA"]
         if NodeTags.stringdb_canoncial_name in elem.keys():
