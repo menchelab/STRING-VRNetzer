@@ -72,7 +72,9 @@ def mapValues(source_node, target_node, highlight_color: list = [255, 0, 0]):
     for k, v in source_node.items():
         if k not in target_node:
             target_node[k] = v
-    target_node[NodeTags.node_color] = highlight_color
+    target_node[
+        NodeTags.node_color
+    ] = highlight_color  # Could also just use the color from the source network
     return target_node
 
 

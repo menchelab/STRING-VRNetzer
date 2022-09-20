@@ -1,6 +1,7 @@
 import json
 import os
 
+import numpy as np
 from flask import jsonify
 from PIL import Image
 
@@ -106,6 +107,11 @@ def makeNodeTex(
     for i, elem in enumerate(nodes):
         if coord_column not in elem:
             continue
+        position = [
+            np.random.randint(0, 1),
+            np.random.randint(0, 1),
+            np.random.randint(0, 1),
+        ]
         position = elem[coord_column]
         name = ["NA"]
         if NodeTags.stringdb_canoncial_name in elem.keys():
