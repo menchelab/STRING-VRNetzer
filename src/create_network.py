@@ -1,7 +1,7 @@
 import json
 from ast import literal_eval
 
-import cartoGRAPHs
+# import cartoGRAPHs
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
@@ -42,8 +42,8 @@ class Layouter:
     def create_kamada_kawai_layout(self) -> dict:
         return nx.kamada_kawai_layout(self.graph, dim=3)
 
-    def create_cartoGRPAHS_spring(self) -> dict:
-        return cartoGRAPHs.springlayout_3D(self.graph, itr=500)
+    # def create_cartoGRPAHS_spring(self) -> dict:
+    #     return cartoGRAPHs.springlayout_3D(self.graph, itr=500)
 
     def apply_layout(self, layout_algo: str = None) -> nx.layout:
         """Applies a networkx layout algorithm and adds the node positions to the self.nodes_data dictionary."""
@@ -52,7 +52,7 @@ class Layouter:
         layouts = {
             LA.spring: self.create_spring_layout,
             LA.kamada_kawai: self.create_kamada_kawai_layout,
-            LA.cartoGRAPHS_spring: self.create_cartoGRPAHS_spring,
+            # LA.cartoGRAPHS_spring: self.create_cartoGRPAHS_spring,
         }
         layout = layouts[layout_algo]()
         points = np.array(list(layout.values()))
