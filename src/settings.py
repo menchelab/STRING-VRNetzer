@@ -20,6 +20,7 @@ class NodeTags:
     description = "description"
     stringdb_canoncial_name = "stringdb_canonical name"
     stringdb_sequence = "stringdb_sequence"
+    ppi_id = "ppi_id"
 
 
 class EdgeTags:
@@ -27,6 +28,7 @@ class EdgeTags:
     sink = "sink"
     color = "color"
     suid = "SUID"
+    ppi_id = "ppi_id"
 
 
 class LayoutAlgroithms:

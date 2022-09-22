@@ -279,6 +279,7 @@ def upload_files(
     projects_path: str = _PROJECTS_PATH,
     skip_exists: bool = True,
     evidences: dict = None,
+    create_2d_layout: bool = True,
 ):
     project = clean_filename(project)
     filename = clean_filename(filename)
@@ -317,21 +318,22 @@ def upload_files(
     json_file.close()
 
     state = ""
-    # Create 2D Layout of Cytoscape coordinates node texture
-    _2dlayout_filename = f"{filename}_2d"
-    output = makeNodeTex(
-        project,
-        _2dlayout_filename,
-        nodes_data.values(),
-        projects_path,
-        skip_exists,
-        coord_column="node_Cytoscape_pos",
-    )
-    state += f"{state}<br>{output}"
-    pfile["layouts"].append(f"{_2dlayout_filename}XYZ")
-    pfile["layoutsRGB"].append(f"{_2dlayout_filename}RGB")
-    pfile["links"].append(f"anyXYZ")
-    pfile["linksRGB"].append(f"anyRGB")
+    if create_2d_layout:
+        # Create 2D Layout of Cytoscape coordinates node texture
+        _2dlayout_filename = f"{filename}_2d"
+        output = makeNodeTex(
+            project,
+            _2dlayout_filename,
+            nodes_data.values(),
+            projects_path,
+            skip_exists,
+            coord_column="node_Cytoscape_pos",
+        )
+        state += f"{state}<br>{output}"
+        pfile["layouts"].append(f"{_2dlayout_filename}XYZ")
+        pfile["layoutsRGB"].append(f"{_2dlayout_filename}RGB")
+        pfile["links"].append(f"anyXYZ")
+        pfile["linksRGB"].append(f"anyRGB")
 
     # layout_files = request.files.getlist("layouts")  # If a network has multiple layouts
     # Create 3D Layout node textures

@@ -44,7 +44,7 @@ class Layouter:
     def apply_layout(self, layout_algo: str = None) -> nx.layout:
         """Applies a networkx layout algorithm and adds the node positions to the self.nodes_data dictionary."""
         if layout_algo is None:
-            layout_algo = LA.SPRING
+            layout_algo = LA.spring
         layouts = {
             LA.spring: self.create_spring_layout,
             LA.kamada_kawai: self.create_kamada_kawai_layout,

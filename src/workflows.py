@@ -88,7 +88,9 @@ def export_network(
     return layouter, filename
 
 
-def apply_layout(file_name: str, gen_layout=True, layout_algo=None):
+def apply_layout(
+    file_name: str, gen_layout=True, layout_algo=None, create_2d_layout=True
+):
     layouter = Layouter()
     layouter.read_from_json(file_name)
     logger.info(f"Network extracted from: {file_name}")
@@ -98,7 +100,9 @@ def apply_layout(file_name: str, gen_layout=True, layout_algo=None):
             layout_algo = "spring"
         logger.info(f"Layout algorithm {layout_algo} applied!")
     # Correct Cytoscape positions to be positive.
-    layouter.correct_cytoscape_pos()
+    if create_2d_layout:
+        layouter.correct_cytoscape_pos()
+        logger.info(f"2D layout created!")
     return layouter
 
 
@@ -121,6 +125,7 @@ def create_project(
     projects_path=_PROJECTS_PATH,
     skip_exists=False,
     keep_tmp=False,
+    create_2d_layout=True,
 ):
     nodes = dict(graph.nodes(data=True))
     edges = {tuple((edge[0], edge[1])): edge[2] for edge in graph.edges(data=True)}
@@ -132,7 +137,11 @@ def create_project(
     network["nodes"]["data_type"] = "nodes"
     network["nodes"]["amount"] = len(nodes)
     for edge in edges:
-        suid = edges[edge]["data"][EdgeTags.suid]
+        data = edges[edge]["data"]
+        if EdgeTags.suid in data:
+            suid = data[EdgeTags.suid]
+        elif EdgeTags.ppi_id:
+            suid = data[EdgeTags.ppi_id]
         network["edges"][suid] = edges[edge]["data"]
     network["edges"]["data_type"] = "edges"
     network["edges"]["amount"] = len(edges)
@@ -142,6 +151,7 @@ def create_project(
         network,
         projects_path=projects_path,
         skip_exists=skip_exists,
+        create_2d_layout=create_2d_layout,
     )
     if keep_tmp:
         outfile = f"{_NETWORKS_PATH}/{project_name}_with_3D_Coords.VRNetz"
