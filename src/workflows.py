@@ -4,11 +4,12 @@ import os
 
 import networkx as nx
 
+from convert import VRNetzConverter
 from cytoscape_parser import CytoscapeParser
 from extract_colors_from_style import get_node_mapping
 from layouter import Layouter
 from map_small_on_large import map_source_to_target
-from settings import _NETWORKS_PATH, _PROJECTS_PATH, EdgeTags
+from settings import _NETWORKS_PATH, _PROJECTS_PATH, UNIPROT_MAP, EdgeTags
 from string_commands import (
     StringCompoundQuery,
     StringDiseaseQuery,
@@ -22,28 +23,28 @@ logger = logging.getLogger("VRNetzer Cytoscape App")
 logger.setLevel(logging.DEBUG)
 
 
-def call_protein_query(parser: CytoscapeParser, p_query: list[str], **kwargs):
+def protein_query_workflow(parser: CytoscapeParser, p_query: list[str], **kwargs):
     """Fetches a network for given protein query."""
     query = StringProteinQuery(query=p_query, **kwargs)
     logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
-def call_disease_query(parser: CytoscapeParser, disease: str, **kwargs):
+def disease_query_workflow(parser: CytoscapeParser, disease: str, **kwargs):
     """Fetches a network for given disease query."""
     query = StringDiseaseQuery(disease=disease, **kwargs)
     logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
-def call_compound_query(parser: CytoscapeParser, query: list[str], **kwargs):
+def compound_query_workflow(parser: CytoscapeParser, query: list[str], **kwargs):
     """Fetches a network for given compound query."""
     query = StringCompoundQuery(query=query, **kwargs)
     logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
-def call_pubmed_query(parser: CytoscapeParser, pubmed: list[str], **kwargs):
+def pubmed_query_workflow(parser: CytoscapeParser, pubmed: list[str], **kwargs):
     """Fetches a network for given pubmed query."""
     query = StringPubMedQuery(pubmed=pubmed, **kwargs)
     logger.info(f"Command as list:{query.cmd_list}")
@@ -51,7 +52,7 @@ def call_pubmed_query(parser: CytoscapeParser, pubmed: list[str], **kwargs):
     print(query.cmd_list)
 
 
-def export_network(
+def export_network_workflow(
     parser: CytoscapeParser,
     filename: str = None,
     network: str = None,
@@ -73,7 +74,7 @@ def export_network(
     logger.info(f"Network exported: {network}")
 
     # generate a 3D layout
-    layouter = apply_layout(f"{network_loc}.VRNetz", layout_algo)
+    layouter = apply_layout_workflow(f"{network_loc}.VRNetz", layout_algo)
 
     # Export current style
     # parser.export_style(filename=style_loc, **kwargs)
@@ -89,7 +90,7 @@ def export_network(
     return layouter, filename
 
 
-def apply_layout(
+def apply_layout_workflow(
     file_name: str, gen_layout=True, layout_algo=None, create_2d_layout=True
 ):
     layouter = Layouter()
@@ -107,7 +108,7 @@ def apply_layout(
     return layouter
 
 
-def apply_style(graph: nx.Graph, style: str):
+def apply_style_workflow(graph: nx.Graph, style: str):
     color_mapping = get_node_mapping(style)
     if color_mapping is None:
         return graph
@@ -120,7 +121,7 @@ def apply_style(graph: nx.Graph, style: str):
     return graph
 
 
-def create_project(
+def create_project_workflow(
     graph: nx.Graph,
     project_name: str,
     projects_path=_PROJECTS_PATH,
@@ -165,9 +166,16 @@ def create_project(
     return state
 
 
-def map_small_on_large(small_net: str, large_net: str, destination: str):
+def map_workflow(small_net: str, large_net: str, destination: str):
     """Maps a small network onto a large network."""
     map_source_to_target(small_net, large_net, destination)
+
+
+def convert_workflow(node_list, edge_list, uniprot_mapping=UNIPROT_MAP, project=None):
+    """Converts a network from a edge and node list to a .VRNetz file."""
+    output = os.path.join(_NETWORKS_PATH, project)
+    VRNetzConverter(node_list, edge_list, uniprot_mapping, project)
+    return output
 
 
 # TODO: Networkx export with separate table export. Does not work do fails in matching node/edge names to SUIDs

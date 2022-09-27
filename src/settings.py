@@ -10,7 +10,23 @@ os.makedirs(_PROJECTS_PATH, exist_ok=os.X_OK)
 os.makedirs(_NETWORKS_PATH, exist_ok=os.X_OK)
 # os.makedirs(_STYLES_PATH, exist_ok=os.X_OK)
 
-
+UNIPROT_MAP = os.path.join(_STATIC_PATH, "uniprot_mapping.txt")
+HELP_TEXT = (
+    "Usage:\n"
+    + "main.py query <query type=[protein/disease/compound/pubmed]> <query> <opt:cutoff> <opt:limit> <opt:species> <opt:taxonID>"
+    + "\n"
+    "or\n"
+    + "main.py export <network> <filename> <opt:KeepTmp> <opt:*> <opt:overwrite_file>"
+    + "\n"
+    + "or\n"
+    + "main.py project <network> <opt:layout_algo> <opt:KeepTmp> <opt:skip_exists> <opt:project_name> <opt:gen_layout> <opt:create_2d_layout>"
+    + "\n"
+    + "or\n"
+    + "main.py names"
+    + "\n"
+    + "or\n"
+    + "main.py map <source_network> <target_network> <opt:output_name>"
+)
 # Tags
 class NodeTags:
     vrnetzer_pos = "VRNetzer_pos"
