@@ -8,7 +8,7 @@ from settings import HELP_TEXT
 
 
 def main():
-    """Guides the user through the workflow."""
+    """Guides the user through the workflows."""
 
     if len(sys.argv) == 1:
         print(HELP_TEXT)
@@ -25,9 +25,9 @@ def main():
     elif keyword == "project":
         ap.call_create_project_workflow()
     elif keyword == "map":
-        ap.map_workflow()
+        ap.call_map_workflow()
     elif keyword == "convert":
-        ap.convert_workflow()
+        ap.call_convert()
 
 
 if __name__ == "__main__":

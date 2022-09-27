@@ -4,7 +4,7 @@ import os
 
 import networkx as nx
 
-from convert import VRNetzConverter
+from converter import VRNetzConverter
 from cytoscape_parser import CytoscapeParser
 from extract_colors_from_style import get_node_mapping
 from layouter import Layouter

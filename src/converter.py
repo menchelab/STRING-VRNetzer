@@ -18,14 +18,19 @@ class VRNetzConverter:
         uniprot_mapping_file: str = None,
         project_name: str = None,
     ):
+
+        # Catch None values
+        if uniprot_mapping_file is None:
+            uniprot_mapping_file = UNIPROT_MAP
+        if project_name is None:
+            project_name = "PPI.VrNetz"
+        if not project_name.endswith(".VRNetz"):
+            project_name += ".VRNetz"
+        # initialize values
         self.nodes_file = nodes_file
         self.links_file = links_file
-        if uniprot_mapping_file is None:
-            self.uniprot_mapping_file = UNIPROT_MAP
-        else:
-            self.uniprot_mapping_file = uniprot_mapping_file
-        if project_name is None:
-            self.project_name = "PPI.VrNetz"
+        self.uniprot_mapping_file = uniprot_mapping_file
+        self.project_name = project_name
         self.convert()
 
     def convert(self) -> None:
@@ -39,7 +44,7 @@ class VRNetzConverter:
 
     def gen_node_layout(self) -> list:
         """Extract node list from a node csv file"""
-        uniprot_map = pd.read_csv(uniprot_mapping_file, sep=",")
+        uniprot_map = pd.read_csv(self.uniprot_mapping_file, sep=",")
         nodes = pd.read_csv(
             self.nodes_file,
             sep=",",

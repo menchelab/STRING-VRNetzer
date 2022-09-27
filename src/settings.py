@@ -10,7 +10,7 @@ os.makedirs(_PROJECTS_PATH, exist_ok=os.X_OK)
 os.makedirs(_NETWORKS_PATH, exist_ok=os.X_OK)
 # os.makedirs(_STYLES_PATH, exist_ok=os.X_OK)
 
-UNIPROT_MAP = os.path.join(_STATIC_PATH, "uniprot_mapping.txt")
+UNIPROT_MAP = os.path.join(_STATIC_PATH, "uniprot_mapping.csv")
 HELP_TEXT = (
     "Usage:\n"
     + "main.py query <query type=[protein/disease/compound/pubmed]> <query> <opt:cutoff> <opt:limit> <opt:species> <opt:taxonID>"
@@ -26,6 +26,9 @@ HELP_TEXT = (
     + "\n"
     + "or\n"
     + "main.py map <source_network> <target_network> <opt:output_name>"
+    + "\n"
+    + "or\n"
+    + "main.py convert <node_list> <edge_list> <opt:uniprot_mapping> <opt:project_name>"
 )
 # Tags
 class NodeTags:
