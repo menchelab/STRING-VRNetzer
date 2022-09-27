@@ -7,7 +7,7 @@ import networkx as nx
 from cytoscape_parser import CytoscapeParser
 from extract_colors_from_style import get_node_mapping
 from layouter import Layouter
-from map_onto_ppi import map_source_to_target
+from map_small_on_large import map_source_to_target
 from settings import _NETWORKS_PATH, _PROJECTS_PATH, EdgeTags
 from string_commands import (
     StringCompoundQuery,
