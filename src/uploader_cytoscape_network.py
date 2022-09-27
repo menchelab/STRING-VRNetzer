@@ -13,7 +13,7 @@ def os_join(*args):
     return os.path.join(*args)
 
 
-def makeProjectFolders(name: str, projects_path: str = _PROJECTS_PATH):
+def makeProjectFolders(name: str, projects_path: str = _PROJECTS_PATH) -> None:
     path = os_join(_PROJECTS_PATH, name)
     pfile = {}
     pfile["name"] = name
@@ -36,7 +36,7 @@ def makeProjectFolders(name: str, projects_path: str = _PROJECTS_PATH):
     print("Successfully created directories in %s " % path)
 
 
-def loadProjectInfo(name: str, projects_path: str = _PROJECTS_PATH):
+def loadProjectInfo(name: str, projects_path: str = _PROJECTS_PATH) -> dict or str:
     folder = os_join(projects_path, name)
     layoutfolder = os_join(folder, "layouts")
     layoutRGBfolder = os_join(folder, "layoutsRGB")
@@ -57,7 +57,7 @@ def loadProjectInfo(name: str, projects_path: str = _PROJECTS_PATH):
         return "no such project"
 
 
-def loadAnnotations(name: str, projects_path: str = _PROJECTS_PATH):
+def loadAnnotations(name: str, projects_path: str = _PROJECTS_PATH) -> dict:
     """Return all annotations corresponding to a project name."""
     namefile = os_join(projects_path, name, "names.json")
     f = open(namefile)
@@ -65,7 +65,7 @@ def loadAnnotations(name: str, projects_path: str = _PROJECTS_PATH):
     return data
 
 
-def listProjects(projects_path: str = _PROJECTS_PATH):
+def listProjects(projects_path: str = _PROJECTS_PATH) -> list:
     """Returns a list of all projects."""
     projects_path
     os.makedirs(projects_path, exist_ok=os.X_OK)
@@ -280,7 +280,7 @@ def upload_files(
     skip_exists: bool = True,
     evidences: dict = None,
     create_2d_layout: bool = True,
-):
+) -> str:
     project = clean_filename(project)
     filename = clean_filename(filename)
     ingored_elements = ["data_type", "amount"]

@@ -14,7 +14,7 @@ class Layouter:
 
     graph: nx.Graph = nx.Graph()
 
-    def read_from_json(self, file: str):
+    def read_from_json(self, file: str) -> nx.Graph:
         network = literal_eval(open(file).read().strip("\n"))
         nodes = network["nodes"]
         edges = network["edges"]
@@ -28,7 +28,7 @@ class Layouter:
             )
         return self.graph
 
-    def read_from_grahpml(self, file: str):
+    def read_from_grahpml(self, file: str) -> nx.Graph:
         self.graph = nx.read_graphml(file)
         return self.graph
 
@@ -61,7 +61,7 @@ class Layouter:
             self.graph.nodes[node]["VRNetzer_pos"] = tuple(position)
         return layout
 
-    def correct_cytoscape_pos(self):
+    def correct_cytoscape_pos(self) -> np.array:
         """Corrects the Cytoscape positions to be positive and between 0 and 1."""
         cytoscape_nodes = [
             node
@@ -82,7 +82,7 @@ class Layouter:
         return points
 
     @staticmethod
-    def to_positive(points, dims=3):
+    def to_positive(points, dims=3) -> np.array:
         min_values = [min(points[:, i]) for i in range(dims)]
         # Move everything into positive space
         for i, point in enumerate(points):
@@ -91,7 +91,7 @@ class Layouter:
         return points
 
     @staticmethod
-    def normalize_values(points, dims=3):
+    def normalize_values(points, dims=3) -> np.array:
         # Normalize Values between 0 and 1
         min_values = [min(points[:, i]) for i in range(dims)]
         max_values = [max(points[:, i]) for i in range(dims)]

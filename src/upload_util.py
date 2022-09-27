@@ -11,7 +11,7 @@ from settings import _NETWORKS_PATH, _PROJECTS_PATH, EdgeTags, NodeTags
 from uploader_cytoscape_network import upload_files
 
 
-def upload_network_from_file(filename: str, project_name: str, **kwargs):
+def upload_network_from_file(filename: str, project_name: str, **kwargs) -> None:
     """Loads nodes data and edge data from json file in which all nodes have 3D coordinates."""
     with open(filename, "r") as f:
         network = json.load(f)
@@ -34,7 +34,7 @@ def prepare_networkx_network(G: nx.Graph, positions: dict = None) -> tuple[dict,
     return G
 
 
-def convert_csv_to_json(node_file: str, project_name: str, **kwargs):
+def convert_csv_to_json(node_file: str, project_name: str, **kwargs) -> None:
     """Loads a csv network file and translates it to the new json format."""
     nodes = []
     edges = []

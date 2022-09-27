@@ -23,28 +23,32 @@ logger = logging.getLogger("VRNetzer Cytoscape App")
 logger.setLevel(logging.DEBUG)
 
 
-def protein_query_workflow(parser: CytoscapeParser, p_query: list[str], **kwargs):
+def protein_query_workflow(
+    parser: CytoscapeParser, p_query: list[str], **kwargs
+) -> None:
     """Fetches a network for given protein query."""
     query = StringProteinQuery(query=p_query, **kwargs)
     logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
-def disease_query_workflow(parser: CytoscapeParser, disease: str, **kwargs):
+def disease_query_workflow(parser: CytoscapeParser, disease: str, **kwargs) -> None:
     """Fetches a network for given disease query."""
     query = StringDiseaseQuery(disease=disease, **kwargs)
     logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
-def compound_query_workflow(parser: CytoscapeParser, query: list[str], **kwargs):
+def compound_query_workflow(
+    parser: CytoscapeParser, query: list[str], **kwargs
+) -> None:
     """Fetches a network for given compound query."""
     query = StringCompoundQuery(query=query, **kwargs)
     logger.info(f"Command as list:{query.cmd_list}")
     parser.exec_cmd(query.cmd_list)
 
 
-def pubmed_query_workflow(parser: CytoscapeParser, pubmed: list[str], **kwargs):
+def pubmed_query_workflow(parser: CytoscapeParser, pubmed: list[str], **kwargs) -> None:
     """Fetches a network for given pubmed query."""
     query = StringPubMedQuery(pubmed=pubmed, **kwargs)
     logger.info(f"Command as list:{query.cmd_list}")
@@ -59,7 +63,7 @@ def export_network_workflow(
     keep_output: bool = True,
     layout_algo: str = None,
     **kwargs,
-) -> tuple[Layouter, dict, str]:
+) -> tuple[Layouter, str]:
     """Exports a network as GraphML file, generates a 3D layout."""
     networks = parser.get_network_list()
     if network is None:
@@ -91,8 +95,11 @@ def export_network_workflow(
 
 
 def apply_layout_workflow(
-    file_name: str, gen_layout=True, layout_algo=None, create_2d_layout=True
-):
+    file_name: str,
+    gen_layout: bool = True,
+    layout_algo: str = None,
+    create_2d_layout: bool = True,
+) -> Layouter:
     layouter = Layouter()
     layouter.read_from_json(file_name)
     logger.info(f"Network extracted from: {file_name}")
@@ -108,7 +115,7 @@ def apply_layout_workflow(
     return layouter
 
 
-def apply_style_workflow(graph: nx.Graph, style: str):
+def apply_style_workflow(graph: nx.Graph, style: str) -> nx.Graph:
     color_mapping = get_node_mapping(style)
     if color_mapping is None:
         return graph
@@ -124,10 +131,10 @@ def apply_style_workflow(graph: nx.Graph, style: str):
 def create_project_workflow(
     graph: nx.Graph,
     project_name: str,
-    projects_path=_PROJECTS_PATH,
-    skip_exists=False,
-    keep_tmp=False,
-    create_2d_layout=True,
+    projects_path: str = _PROJECTS_PATH,
+    skip_exists: bool = False,
+    keep_tmp: bool = False,
+    create_2d_layout: bool = True,
 ):
     nodes = dict(graph.nodes(data=True))
     edges = {tuple((edge[0], edge[1])): edge[2] for edge in graph.edges(data=True)}
@@ -166,12 +173,14 @@ def create_project_workflow(
     return state
 
 
-def map_workflow(small_net: str, large_net: str, destination: str):
+def map_workflow(small_net: str, large_net: str, destination: str) -> None:
     """Maps a small network onto a large network."""
     map_source_to_target(small_net, large_net, destination)
 
 
-def convert_workflow(node_list, edge_list, uniprot_mapping=UNIPROT_MAP, project=None):
+def convert_workflow(
+    node_list: str, edge_list: str, uniprot_mapping=UNIPROT_MAP, project=None
+) -> str:
     """Converts a network from a edge and node list to a .VRNetz file."""
     output = os.path.join(_NETWORKS_PATH, project)
     VRNetzConverter(node_list, edge_list, uniprot_mapping, project)

@@ -22,7 +22,7 @@ logging.getLogger("py4...").setLevel(logging.INFO)
 class CytoscapeParser:
     """Class that serves as a parser for Cytoscapes cyREST API."""
 
-    def __init__(self, CYTOSCAPE=None):
+    def __init__(self, CYTOSCAPE=None) -> None:
         self.CYTOSCAPE = CYTOSCAPE
         self.POSSIBLE_PROC_NAMES = {
             "Darwin": ["javaapplicationstub"],
@@ -82,7 +82,9 @@ class CytoscapeParser:
         #     print(e)
         raise Exception("Cytoscape is not started, please start it manually.")
 
-    def export_network_graphML(self, filename, network=None, **kwargs):
+    def export_network_graphML(
+        self, filename: str, network: str = None, **kwargs
+    ) -> None:
         """Export the current network."""
         column_names = p4c.get_table_column_names(network=network)
         if "stringdb::STRING style" in column_names:
@@ -93,17 +95,17 @@ class CytoscapeParser:
             )
         p4c.export_network(filename=filename, network=network, **kwargs)
 
-    def export_network(self, filename, network=None, **kwargs):
+    def export_network(self, filename: str, network: str = None, **kwargs) -> None:
         cmd = ["vrnetzer", "export", f"fileName={filename}"]
         self.exec_cmd(cmd)
 
-    def export_style(self, filename, styles=None, **kwargs):
-        p4c.export_visual_styles(filename=filename, styles=styles, **kwargs)
+    # def export_style(self, filename: str, styles: str = None, **kwargs):
+    #     p4c.export_visual_styles(filename=filename, styles=styles, **kwargs)
 
-    def get_visual_style_names(self):
+    def get_visual_style_names(self) -> None:
         return p4c.get_visual_style_names()
 
-    def get_networkx_network(self, network, **kwargs):
+    def get_networkx_network(self, network: str, **kwargs) -> None:
         return p4c.create_networkx_from_network(network)
 
     # FIXME: Does not work, they destroying it by using name_identifier to get SUIDs
@@ -141,17 +143,17 @@ class CytoscapeParser:
             logging.warning(f"Error running command: {cmd}.")
         return False
 
-    def close_cytoscape(self):
+    def close_cytoscape(self) -> None:
         os.kill(self.pid)
 
-    def get_network_list(self):
+    def get_network_list(self) -> list[str]:
         names = p4c.get_network_list()
         networks = {}
         for i, name in enumerate(names):
             networks[name] = p4c.get_network_suid(name)
         return networks
 
-    def check_for_string_app(self):
+    def check_for_string_app(self) -> None:
         wait_until_ready(url=self.URL)
         status = p4c.get_app_status("stringApp")
         if not "status" in status.keys():

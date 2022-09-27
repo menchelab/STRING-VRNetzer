@@ -67,7 +67,7 @@ class Evidences:
     stringdb_similarity = "stringdb_similarity"
 
     @staticmethod
-    def get_default_scheme():
+    def get_default_scheme() -> dict:
         """Return a dictionary with the color scheme for each evidence."""
         return {
             "any": (200, 200, 200, 255),  # Color for all evidences active #c8c8c8

@@ -38,7 +38,7 @@ def wait_until_ready(url, time_limit=30) -> bool:
     return True
 
 
-def prepare_networkx_network(G: nx.Graph, positions: dict = None):
+def prepare_networkx_network(G: nx.Graph, positions: dict = None) -> tuple[dict, dict]:
     """Transforms a basic networkx graph into a correct data structure to be uploaded by the Cytoscape uploader. If the positions are not given, the positions are calculated using the spring layout algorithm of networkx."""
     if positions is None:
         positions = nx.spring_layout(G, dim=3)

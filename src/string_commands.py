@@ -20,7 +20,7 @@ class StringCmd(AbstractCommand):
     species: Union[str, None] = None
     taxonID: Union[str, None] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         # self.verifications = {
         #     self.network_type: NetworkType.__dict__,
         #     self.cutoff: range(0, 1),
@@ -39,7 +39,7 @@ class StringProteinQuery(StringCmd):
 
     query: Union[list[str], None] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         StringCmd.__post_init__(self)
         self.query_type = "protein query"
         if self.query is None:
@@ -54,7 +54,7 @@ class StringDiseaseQuery(StringCmd):
 
     disease: str = None  # type: ignore
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         StringCmd.__post_init__(self)
         self.query_type = "disease query"
         if self.disease is None:
@@ -69,7 +69,7 @@ class StringCompoundQuery(StringCmd):
 
     query: str = None  # type: ignore
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         StringCmd.__post_init__(self)
         self.query_type = "compound query"
         if self.query is None:
@@ -84,7 +84,7 @@ class StringPubMedQuery(StringCmd):
 
     pubmed: str = None  # type: ignore
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         StringCmd.__post_init__(self)
         self.query_type = "pubmed query"
         if self.pubmed is None:

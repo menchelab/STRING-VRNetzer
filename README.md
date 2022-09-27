@@ -32,6 +32,8 @@ Apps -> App Manger -> Install from File... -> select the "VRNetzerApp-x.x.x.jar"
 3. Select the location where to save the network, as well as a name in the propted window.
 
 You network is now exported as an VRNetz which can be used in the [VRNetzer](https://github.com/menchelab/VRNetzer) to present your network as a 3D network.
+### **Create an upload the VRNetz**
+To upload the VRNetz to the VRNetzer...
 ## **Dependencies**
 python==3.9<br>
 networkx==<br>

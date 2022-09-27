@@ -17,7 +17,7 @@ class VRNetzConverter:
         links_file: str = None,
         uniprot_mapping_file: str = None,
         project_name: str = None,
-    ):
+    ) -> None:
 
         # Catch None values
         if uniprot_mapping_file is None:
@@ -66,7 +66,6 @@ class VRNetzConverter:
             node[NodeTags.display_name] = display_name
             for col in ["x", "y", "z"]:
                 del node[col]
-
         points = np.array(points)
         points = Layouter.to_positive(points, 3)
         points = Layouter.normalize_values(points, 3)

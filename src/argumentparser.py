@@ -7,7 +7,7 @@ from cytoscape_parser import CytoscapeParser
 from settings import _NETWORKS_PATH
 
 
-def call_create_project_workflow():
+def call_create_project_workflow() -> None:
     """Creates a VRNetz project from a given .VRNetz file."""
     argv = {
         "network": None,
@@ -56,7 +56,7 @@ def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
     return argv
 
 
-def call_query_workflow(parser: CytoscapeParser):
+def call_query_workflow(parser: CytoscapeParser) -> None:
     """Calls either a protein query, disease query, compound query or a PubMed query."""
     argv = {
         "query_type": None,
@@ -92,7 +92,7 @@ def call_query_workflow(parser: CytoscapeParser):
         exit()
 
 
-def prepare_export():
+def prepare_export() -> dict[str, any]:
     """Prepares the arguments for the export function."""
     while True:
         new_argv = input(
@@ -112,7 +112,7 @@ def prepare_export():
     return argv
 
 
-def call_export_workflow(parser, argv=None):
+def call_export_workflow(parser, argv=None) -> None:
     """Export the targeted network to a .VRNetz file."""
     if argv is None:
         argv = {
@@ -143,13 +143,13 @@ def call_export_workflow(parser, argv=None):
     wf.logger.info("Network exported!")
 
 
-def print_networks_workflow(parser: CytoscapeParser):
+def print_networks_workflow(parser: CytoscapeParser) -> None:
     print("Network\t\t\t SUID")
     for k, v in parser.get_network_list().items():
         print(f"{k}\t\t\t {v}")
 
 
-def call_map_workflow():
+def call_map_workflow() -> None:
     argv = {
         "source_network": None,
         "target_network": None,
@@ -173,7 +173,7 @@ def call_map_workflow():
     )
 
 
-def call_convert():
+def call_convert() -> None:
     """Takes an node list and an link list and converts them to a .VRNetz file."""
     argv = {
         "node_list": None,
@@ -183,8 +183,8 @@ def call_convert():
     }
     argv = extract_arguments(argv, sys.argv[2:])
     output = wf.convert_workflow(
-        argv["link_list"],
         argv["node_list"],
+        argv["link_list"],
         argv["uniprot_mapping_file"],
         argv["project_name"],
     )

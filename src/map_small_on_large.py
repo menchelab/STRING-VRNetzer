@@ -24,7 +24,7 @@ from settings import _NETWORKS_PATH, NodeTags
 #     return target_edge
 
 
-def add_edge_evidences(source_edges, target_net):
+def add_edge_evidences(source_edges: dict, target_net: dict) -> dict:
     """Add the edge evidences from the string network to the ppi network"""
     next_id = len(target_net["edges"])
     for _, edge in source_edges.items():
@@ -33,7 +33,7 @@ def add_edge_evidences(source_edges, target_net):
     return target_net["edges"]
 
 
-def gen_name_suid_map(source_net):
+def gen_name_suid_map(source_net: dict) -> tuple[dict, dict]:
     all_dis_names = {}
     all_canoncial_names = {}
     for suid, s_node in source_net["nodes"].items():
@@ -43,7 +43,9 @@ def gen_name_suid_map(source_net):
     return all_dis_names, all_canoncial_names
 
 
-def map_values(source_node, target_node, highlight_color: list = [255, 0, 0]):
+def map_values(
+    source_node: dict, target_node: dict, highlight_color: list = [255, 0, 0]
+) -> dict:
     """Adds the values from the String Network onto the node in the PPI"""
     for k, v in source_node.items():
         if (
