@@ -7,6 +7,7 @@ import networkx as nx
 from cytoscape_parser import CytoscapeParser
 from extract_colors_from_style import get_node_mapping
 from layouter import Layouter
+from map_onto_ppi import map_source_to_target
 from settings import _NETWORKS_PATH, _PROJECTS_PATH, EdgeTags
 from string_commands import (
     StringCompoundQuery,
@@ -162,6 +163,11 @@ def create_project(
 
     logging.info(f"Project created: {project_name}")
     return state
+
+
+def map_small_on_large(small_net: str, large_net: str, destination: str):
+    """Maps a small network onto a large network."""
+    map_source_to_target(small_net, large_net, destination)
 
 
 # TODO: Networkx export with separate table export. Does not work do fails in matching node/edge names to SUIDs

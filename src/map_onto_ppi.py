@@ -122,7 +122,9 @@ def gen_name_suid_map(source_net):
     return all_dis_names, all_canoncial_names
 
 
-def map_source_to_target(source: str, target: str) -> None:
+def map_source_to_target(
+    source: str, target: str, output_name: str = "PPI_out.VRNetz"
+) -> None:
     """Map the smaller network onto the larger network"""
     arbitrary_color = [255, 255, 255]
     with open(source, "r") as f:
@@ -151,7 +153,7 @@ def map_source_to_target(source: str, target: str) -> None:
     target_net["edges"] = add_edge_evidences(
         ppi_to_suid, suid_to_ppi, source_net["edges"], target_net
     )
-    with open(os.path.join(_NETWORKS_PATH, "PPI_out.VRNetz"), "w+") as f:
+    with open(os.path.join(_NETWORKS_PATH, output_name), "w+") as f:
         json.dump(target_net, f)
 
 

@@ -1,10 +1,12 @@
 #! python3
+import logging
 import os
 import sys
 from ast import literal_eval
 
+import workflows as wf
 from cytoscape_parser import CytoscapeParser
-from workflows import *
+from settings import _NETWORKS_PATH
 
 
 def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
@@ -23,7 +25,7 @@ def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
     return argv
 
 
-def call_query(parser: CytoscapeParser):
+def call_query_workflow(parser: CytoscapeParser):
     """Calls either a protein query, disease query, compound query or a PubMed query."""
     argv = {
         "query_type": None,
@@ -35,10 +37,10 @@ def call_query(parser: CytoscapeParser):
     }
     argv = extract_arguments(argv, sys.argv[2:])
     queries = {
-        "protein": call_protein_query,
-        "disease": call_disease_query,
-        "compound": call_compound_query,
-        "pubmed": call_pubmed_query,
+        "protein": wf.call_protein_query,
+        "disease": wf.call_disease_query,
+        "compound": wf.call_compound_query,
+        "pubmed": wf.call_pubmed_query,
     }
     # Call the desired Query
     success = queries[argv["query_type"]](
@@ -53,7 +55,7 @@ def call_query(parser: CytoscapeParser):
         choice = input("Want to export this network?\n")
         if choice == "y":
             argv = prepare_export()
-            call_export(parser, argv)
+            call_export_workflow(parser, argv)
     else:
         exit()
 
@@ -78,7 +80,7 @@ def prepare_export():
     return argv
 
 
-def call_export(parser, argv=None):
+def call_export_workflow(parser, argv=None):
     """Export the targeted network to a GraphML file."""
     if argv is None:
         argv = {
@@ -92,7 +94,7 @@ def call_export(parser, argv=None):
         argv = extract_arguments(argv, sys.argv[2:])
 
     # Export Network as GraphML
-    layouter, filename = export_network(
+    layouter, filename = wf.export_network(
         parser,
         argv["filename"],
         argv["network"],
@@ -102,13 +104,13 @@ def call_export(parser, argv=None):
     print(isinstance(argv["network"], int))
     # Create VRNetzer Project
     skip_exists = not argv["overwrite_files"]
-    state = create_project(
+    state = wf.create_project(
         layouter.graph, filename, skip_exists=skip_exists, keep_tmp=argv["keep_tmp"]
     )
     return state
 
 
-def call_create_project():
+def call_create_project_workflow():
     argv = {
         "network": None,
         "layout_algo": None,
@@ -119,19 +121,18 @@ def call_create_project():
         "create_2d_layout": True,
     }
     argv = extract_arguments(argv, sys.argv[2:])
-    print(argv.items())
     if argv["project_name"] is None:
         argv["project_name"] = str(argv["network"].split("/")[-1]).replace(
             ".VRNetz", ""
         )
-    layouter = apply_layout(
+    layouter = wf.apply_layout(
         argv["network"],
         argv["gen_layout"],
         argv["layout_algo"],
         argv["create_2d_layout"],
     )
     graph = layouter.graph
-    state = create_project(
+    state = wf.create_project(
         graph,
         project_name=argv["project_name"],
         keep_tmp=argv["keep_tmp"],
@@ -141,10 +142,34 @@ def call_create_project():
     return state
 
 
-def print_networks(parser: CytoscapeParser):
+def print_networks_workflow(parser: CytoscapeParser):
     print("Network\t\t\t SUID")
     for k, v in parser.get_network_list().items():
         print(f"{k}\t\t\t {v}")
+
+
+def map_workflow():
+    argv = {
+        "source_network": None,
+        "target_network": None,
+        "output_name": None,
+    }
+    argv = extract_arguments(argv, sys.argv[2:])
+    if argv["output_name"] is None:
+        overwrite = input(
+            f"Output name is not give, overwrite {argv['target_network']}? [y/n]"
+        )
+        if overwrite == "y":
+            argv["output_name"] = argv["target_network"]
+        else:
+            print("Aborting...")
+            exit()
+    output_dest = wf.map_source_to_target(
+        argv["source_network"], argv["target_network"], argv["output_name"]
+    )
+    wf.logging.info(
+        f"Smaller network mapped to larger network, output can be found at {output_dest}"
+    )
 
 
 def main():
@@ -163,21 +188,26 @@ def main():
             + "\n"
             + "or\n"
             + "main.py names"
+            + "\n"
+            + "or\n"
+            + "main.py map <source_network> <target_network> <opt:output_name>"
         )
         return
     keyword = sys.argv[1]
     if keyword in ["query", "export", "names"]:
         parser = CytoscapeParser()
         if keyword == "query":
-            call_query(parser)
+            call_query_workflow(parser)
         elif keyword == "names":
-            print_networks(parser)
+            print_networks_workflow(parser)
         elif keyword == "export":
-            state = call_export(parser)
-            logging.debug(state)
+            state = call_export_workflow(parser)
+            wf.logging.debug(state)
     elif keyword == "project":
-        state = call_create_project()
-        logging.debug(state)
+        state = call_create_project_workflow()
+        wf.logging.debug(state)
+    elif keyword == "map":
+        map_workflow()
 
 
 if __name__ == "__main__":
