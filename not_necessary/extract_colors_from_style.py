@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup as BS
 from PIL import ImageColor
 
 
-def get_node_mapping(file: str):
+def get_node_mapping(file: str) -> dict or None:
     with open(file) as f:
         soup = BS(f, "xml")
     tag = soup.node

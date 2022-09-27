@@ -7,7 +7,7 @@ from cytoscape_parser import CytoscapeParser
 from settings import HELP_TEXT
 
 
-def main():
+def main() -> None:
     """Guides the user through the workflows."""
 
     if len(sys.argv) == 1:

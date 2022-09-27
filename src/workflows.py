@@ -6,7 +6,6 @@ import networkx as nx
 
 from converter import VRNetzConverter
 from cytoscape_parser import CytoscapeParser
-from extract_colors_from_style import get_node_mapping
 from layouter import Layouter
 from map_small_on_large import map_source_to_target
 from settings import _NETWORKS_PATH, _PROJECTS_PATH, UNIPROT_MAP, EdgeTags
@@ -18,6 +17,9 @@ from string_commands import (
 )
 from uploader_cytoscape_network import upload_files
 from util import colorize_nodes
+
+# from extract_colors_from_style import get_node_mapping
+
 
 logger = logging.getLogger("VRNetzer Cytoscape App")
 logger.setLevel(logging.DEBUG)
@@ -115,17 +117,17 @@ def apply_layout_workflow(
     return layouter
 
 
-def apply_style_workflow(graph: nx.Graph, style: str) -> nx.Graph:
-    color_mapping = get_node_mapping(style)
-    if color_mapping is None:
-        return graph
-    mapping_type = color_mapping["type"]
-    logger.info(
-        f"Color mapping extracted from: {style}.xml. Mapping Type: {mapping_type}"
-    )
-    graph = colorize_nodes(graph, color_mapping)
-    logger.info(f"Colored nodes according to color mapping.")
-    return graph
+# def apply_style_workflow(graph: nx.Graph, style: str) -> nx.Graph:
+#     color_mapping = get_node_mapping(style)
+#     if color_mapping is None:
+#         return graph
+#     mapping_type = color_mapping["type"]
+#     logger.info(
+#         f"Color mapping extracted from: {style}.xml. Mapping Type: {mapping_type}"
+#     )
+#     graph = colorize_nodes(graph, color_mapping)
+#     logger.info(f"Colored nodes according to color mapping.")
+#     return graph
 
 
 def create_project_workflow(
