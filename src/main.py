@@ -28,6 +28,9 @@ def main() -> None:
         ap.call_map_workflow()
     elif keyword == "convert":
         ap.call_convert()
+    else:
+        print(HELP_TEXT)
+        return
 
 
 if __name__ == "__main__":

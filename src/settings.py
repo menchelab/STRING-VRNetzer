@@ -53,7 +53,7 @@ class EdgeTags:
 class LayoutAlgroithms:
     spring = "spring"
     kamada_kawai = "kamada_kawai"
-    # cartoGRAPHS_spring = "cartoGRPAHS_spring"
+    cartoGRAPHs_global = "cartoGRPAHS_global"
 
 
 class Evidences:

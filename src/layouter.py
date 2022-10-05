@@ -17,10 +17,6 @@ class Layouter:
         network = literal_eval(open(file).read().strip("\n"))
         nodes = network["nodes"]
         edges = network["edges"]
-        print(type(nodes))
-        for (node, data) in nodes.items():
-            print(node, data)
-        exit()
         self.graph.add_nodes_from(
             [(node, {k: v for k, v in data.items()}) for (node, data) in nodes.items()]
         )
@@ -40,8 +36,10 @@ class Layouter:
     def create_kamada_kawai_layout(self) -> dict:
         return nx.kamada_kawai_layout(self.graph, dim=3)
 
-    # def create_cartoGRPAHS_spring(self) -> dict:
-    #     return cartoGRAPHs.springlayout_3D(self.graph, itr=500)
+    def create_cartoGRPAHS_spring(self) -> dict:
+        import cartoGRAPHtest
+
+        return cartoGRAPHtest.cartoGRAHP_global_umap(self.graph)
 
     def apply_layout(self, layout_algo: str = None) -> nx.layout:
         """Applies a networkx layout algorithm and adds the node positions to the self.nodes_data dictionary."""
@@ -50,7 +48,7 @@ class Layouter:
         layouts = {
             LA.spring: self.create_spring_layout,
             LA.kamada_kawai: self.create_kamada_kawai_layout,
-            # LA.cartoGRAPHS_spring: self.create_cartoGRPAHS_spring,
+            LA.cartoGRAPHs_global: self.create_cartoGRPAHS_spring,
         }
         layout = layouts[layout_algo]()
         points = np.array(list(layout.values()))
