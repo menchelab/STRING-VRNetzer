@@ -1,0 +1,575 @@
+<!-- PUT YOUR UI ELEMENTS IN HERE AND DEFINE MAPPINGS IN main_UI.js -->
+
+<!-- HTML STARTS HERE -->
+
+<!DOCTYPE html>
+<html>
+
+
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui.css') }}">
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/SwagStyle.css') }}">
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/StringStlye.css') }}">
+                
+
+                    <!-- <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css" -->
+                    <!-- rel = "stylesheet"> -->
+                    <!-- <link href="jquery-ui.css" rel="stylesheet"> 
+                    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+                    -->
+                    <script src="https://d3js.org/d3.v4.js"></script>
+                    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+                    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+                    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+                    
+                    <script type="text/javascript" src="{{ url_for('static', filename='js/UI_Module_Config.js') }}"></script>
+                    <script src="{{ url_for('static', filename='js/mc_UI_Elements.js') }}"></script>
+                    <script src="{{ url_for('static', filename='js/connect_socketIO.js') }}"></script>
+
+                    
+                    <!--
+                    <script type="text/javascript" src="{{ url_for('static', filename='js/VRNetzer_API.js') }}"></script>
+                    <script type="text/javascript" src="{{ url_for('static', filename='js/main_UI.js') }}"></script>
+                    
+
+                    <script type="text/javascript" src="{{ url_for('static', filename='js/d3ForceGraph.js') }}"></script>
+                    <script type="text/javascript" src="{{ url_for('static', filename='js/d3barchart.js') }}"></script>
+                    <script type="text/javascript" src="{{ url_for('static', filename='js/d3barchart_works.js') }}"></script>
+                    <script type="text/javascript" src="{{ url_for('static', filename='js/jszip.min.js') }}"></script>
+                    <script type="text/javascript" src="{{ url_for('static', filename='js/kendo.all.min.js') }}"></script>
+                    -->
+
+    </head>
+
+
+    
+
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                TEMPLATES
+                                        
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+    <template id="mcRB-template" >
+        <style>
+            button {
+                width: 15%;
+                font-family: 'Future', sans-serif;
+               
+                cursor: pointer;
+                box-sizing: border-box;
+                padding: 5px 2px;
+                border-radius: 20px;
+                border-top: 2px solid ;
+                border-bottom: 0px solid ;
+                border-left: 0px solid;
+                border-right: 2px solid ;
+                border-color:  rgb(255, 255, 255);
+                color: rgb(255, 255, 255);
+                font-size: 20px;
+            }
+        </style>
+
+        <div id="container" style = "width: 120px; height: 30p0x; display: inline-block; padding: 4px 2px">
+            <button id="name" style = "width: 90px; height: 30p0x; border-top-right-radius: 0px; border-bottom-right-radius: 0px; border-right: 0px"></button><button id="x" style = "width: 30px; height: 30p0x;border-top-left-radius: 0px; border-bottom-left-radius: 0px; background-color: #3d3d3d;">X</button>
+        </div>
+    </template>
+
+    <template id="mcSresult-template" >
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/SwagStyle.css') }}">
+
+        
+        <button id = 'name' name = 'name' style = 'width: 100%; height: auto; overflow:hidden; border-radius: 12px;  background-color: #adadad; display: inline-block; border-color: rgb(10, 24, 221); border-right: 2px solid ; border-top: 2px solid; border-left: 2px solid ; border-bottom: 2px solid'>
+        
+        </button>
+    </template>
+
+
+    <template id="mcScrollBox-template" >
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/SwagStyle.css') }}">
+
+        <!-- <div id = "label" class = "swagLabelSmall">TEXT</div> -->
+        <div id = 'box' name = 'box' class = 'swagBox'>
+        
+        </div>
+    </template>
+
+
+    <template id="mcTextBox-template" >
+
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/SwagStyle.css') }}">
+
+        <div id = "label" class = "swagLabelSmall">TEXT</div>
+        <input type="Text" id = "text" autocomplete="off">
+    </template>
+
+
+    
+    <template id="mcColorBox-template" >
+
+        <style>
+        input{
+            border-radius: 50%;
+            height: 50px;
+            width: 50px;
+            border: none;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+        input::-webkit-color-swatch-wrapper {
+            padding: 0; 
+        }
+        </style>
+
+        <input type="Color" id = "color">
+    </template>
+
+    
+    <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                       body
+                                        
+    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+    <body>
+                    
+                    <script>
+                        var sessiondata = JSON.parse({{sessionData|tojson}});
+                        var pdata = JSON.parse({{pfile|tojson}});
+                        var username = '{{session['username']}}';
+                        console.log(username);
+                        
+                    </script>
+
+
+                    
+
+                    <div id="tabs" class="disable-select">
+                        <script>   // MULTICAST TAB CHANGES 
+                            $(function () {
+                                $("#tabs").tabs();
+                            });
+
+                            var lastactive = 0;
+                            $('#tabs').on('click', function (event, ui) {
+                                var active = $('#tabs').tabs('option', 'active');
+                                if (active != lastactive){
+                                    console.log("changed tab to " + active);
+                                    lastactive = active;
+                                    socket.emit('ex', {msg: active, id: "tabs", fn: "cht"});
+                                }
+                                
+                            });
+                        </script>
+                        <ul>
+                            <li><a href="#tabs-1"><img draggable="false" onmousedown="return false" height='40' width='40'
+                                            src="{{ url_for('static', filename='img/active_open.png') }}" /></a></li>
+                            <!--<li><a href="#tabs-2"><img draggable="false" onmousedown="return false" height='40' width='40'
+                                            src="{{ url_for('static', filename='img/active_sel.png') }}" /></a></li>-->
+                            <li><a href="#tabs-3"><img draggable="false" onmousedown="return false" height='40' width='40'
+                                            src="{{ url_for('static', filename='img/active_tune.png') }}" /></a></li>
+                            <li><a href="#tabs-4"><img draggable="false" onmousedown="return false" height='40' width='40'
+                                            src="{{ url_for('static', filename='img/active_search.png') }}" /></a></li>
+                            <!--<li><a href="#tabs-5"><img draggable="false" onmousedown="return false" height='40' width='40'
+                                            src="{{ url_for('static', filename='img/active_pin.png') }}" /></a></li>-->
+                            <!--<li><a href="#tabs-6"><img draggable="false" onmousedown="return false" height='40' width='40'
+                                            src="{{ url_for('static', filename='img/active_gears.png') }}" /></a></li>-->
+                        </ul>
+
+                        <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                        tab 1 - uploading projectfiles
+                                        
+                        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+                        <div id="tabs-1" class="container">
+
+                            <div class="twelve columns">
+                                <h2 class="lineglowslow" style="font-size: 68px; margin-bottom:30px;margin-top:30px">VRNetzer</h2>
+                            </div>
+
+                                <div class="twelve columns">
+                                    <div id="projects-section" class="five columns">   
+                                            <h3 class="lineglowslow" style="background-size: contain;"><span>PROJECT</span></h3>
+                                        </div>
+                                            <div class="seven columns">
+                                                <div class="cornerBox">
+                                                <select id='projects'></select>
+                                                <script>
+                                                    initDropdown('projects', sessiondata["proj"],sessiondata["actPro"]);
+                                                </script>
+                                                </div>
+                                            </div>
+                                </div>  
+                                <br></br>
+                                <div class="twelve columns">
+                                    <h3> LAYOUT MORPHING SEQUENCE</h3>
+                                    <!--<h4 class="eight columns">LAYOUTS</h4>
+                                    <h4 class="four columns" style="padding-left:20px;"> MORPH</h4>-->
+                                </div>
+
+                                
+                                <div class="frameBox">
+                                    <div class="twelve columns">
+                                        <h4 class="eight columns">POSITION</h4>
+                                        <!--
+                                            <div class="cornerBox">
+                                                <select id = 'layouts'></select>
+                                                <script>
+                                                    initDropdown('layouts',pdata["layouts"],pdata["layouts"][0]);
+                                                </script>
+                                            </div>
+                                        -->
+                                        <div class="four columns"> 
+                                                <!-- <input type="checkbox" id = 'chbXYZ' class="swagCheckbox"></checkbox>-->
+                                                <div class="slideTwo">	
+                                                    <input type="checkbox" value="None" id = "chbXYZ" name="check"></checkbox>
+                                                    <label for="chbXYZ"></label>
+                                                <script>
+                                                    initCheckbox("chbXYZ");
+                                                </script>
+                                                </div>
+                                        </div>
+                                    </div>
+                                
+                                
+                                    <div class="twelve columns">
+                                        <h4 class="eight columns"> NODE COLOR</h4>
+                                        
+                                        <!--
+                                            <div class="cornerBox">
+                                                <select id = 'nodecolors'></select>
+                                                <script>
+                                                    initDropdown('nodecolors',pdata["layoutsRGB"],pdata["layoutsRGB"][0]);
+                                                </script>
+                                            </div>  
+                                        </div>
+                                        -->
+
+                                        <div class="four columns">
+                                            <!-- <input type="checkbox" id = 'chbNrgb' class="swagCheckbox"></button>-->
+                                            <div class="slideTwo">	
+                                                <input type="checkbox" value="None" id = "chbNrgb" name="check"></checkbox>
+                                                <label for="chbNrgb"></label>
+                                            <script>
+                                                initCheckbox("chbNrgb");
+                                            </script>
+                                            </div>
+                                        </div>
+                                    </div>
+                                
+                                    <!--
+                                    <h4 class="twelve columns">LINKS</h4>
+                                    <div class="twelve columns">
+                                        <div class="eight columns">                 
+                                                <div class="cornerBox">
+                                                <select id = 'links'></select>
+                                                <script>
+                                                    initDropdown('links',pdata["links"],pdata["links"][0]);
+                                                </script>
+                                                </div>
+                                        </div>
+                                    </div>
+                                    -->
+
+                                    <div class="twelve columns">
+                                        <h4 class="eight columns"> LINK COLOR</h4>
+                                        
+                                        <!--       
+                                        <div class="cornerBox">
+                                                <select id = 'linkcolors'></select>
+                                                <script>
+                                                    initDropdown('linkcolors',pdata["linksRGB"],pdata["linksRGB"][0]);
+                                                </script>
+                                        </div> 
+                                        -->
+
+                                        <div class="four columns">
+                                            <!-- <input type="checkbox" id = 'chbLrgb' class="swagCheckbox"></button>-->
+                                            <div class="slideTwo">	
+                                                <input type="checkbox" value="None" id = "chbLrgb" name="check"></checkbox>
+                                                <label for="chbLrgb"></label>
+                                            <script>
+                                                initCheckbox("chbLrgb");
+                                            </script>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <!--<div class="twelve columns">-->
+                                <div class="frameBox" style="display:inline-block; margin-top:8px; margin-bottom:8px;"> 
+                                    <!-- <div class="eight columns"> 
+                                        <br></br>
+                                    </div> -->
+
+                                    <!-- backward button -->
+                                    <div class="four columns">
+                                        <input type="button"  id = 'backwardstep' class="swagBackwardButton"></button> 
+                                        <script>
+                                            initButton('backwardstep');
+                                        </script>
+                                    </div> 
+
+                                    <!-- Play Pause button  --> 
+                                    <!--
+                                    <div class="four columns" style="margin-left:4px; margin-right:4px">
+                                    <input type="button"  id = 'play' class="swagPlayButton"></button> 
+                                        <script>
+                                            initToggle('play', 
+                                            ['PLAY','PAUSE']);
+                                        </script>
+                                    </div> 
+                                    --> 
+
+                                    <!-- forward button -->
+                                    <div class="four columns"> 
+                                        <input type="button"  id = 'forwardstep' class="swagForwardButton"></button> 
+                                        <script>
+                                            initButton('forwardstep');
+                                        </script>
+                                    </div> 
+                                
+
+                                    <div class="four columns">
+                                        <input type="button" value="RESET" id = 'reset' class="swagTextButton"></button> 
+                                            <script>
+                                                initButton('reset');
+                                            </script>
+                                    </div>
+
+                                </div>
+
+                                <!--</div> -->
+                                <!-- <div class="twelve columns"> 
+                                    <div  class="lineglowslow"><br></br></div>
+                                </div>-->
+
+                        </div> 
+
+                        <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                     tab 2 - general Network information 
+                                        
+                        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        <div id="tabs-2" class="container">
+                            <div class="twelve columns">
+                                <h2 class="lineglowslow" style="font-size: 68px; margin-bottom:30px;margin-top:30px">INFO BASE</h2>
+                            </div>
+
+                            <div class="twelve columns">
+                                <h4 class="six columns">Nr. of Layouts: </h4>
+                                <h5 class="fivecolumns" > 
+                                    <script>
+                                        count_layouts = pdata["layouts"].length;
+                                        document.write(count_layouts );
+                                    </script>
+                                </h5>
+                            </div>
+                            <div class="twelve columns">
+                                <h4 class="six columns">Nr. of Nodes: </h4>
+                                <h5 class="fivecolumns"> 
+                                <div>{{names}}</div> 
+                                </h5>
+
+                            </div>
+                            
+
+                        </div>-->
+
+                        <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                    tab 3 - sliders for visual network mods
+                                        
+                        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+                        <div id="tabs-3">
+                            <div class="twelve columns">
+                                <h2 class="lineglowslow" style="font-size: 68px; margin-bottom:30px;margin-top:30px">VISUALS</h2>
+                            </div>
+                                <!-- SLIDERS 
+                                <h3 class="border">SCALE</h3>
+                                <div id="slider_scale"></div> -->
+                                <h3 class="border">NODE SIZE</h3>
+                                <div id="slider-node_size"></div>
+                                <h3 class="border">LINK SIZE</h3>
+                                <div id="slider-link_size"></div>
+                                <h3 class="border">LINK OPACITY</h3>
+                                <div id="slider-link_transparency"></div>
+                                <h3 class="border">LABEL SIZE</h3>
+                                <div id="slider-label_scale"></div>
+                                <script>
+                                    initSlider('slider_scale');
+                                    initSlider('slider-node_size');
+                                    initSlider('slider-link_size');
+                                    initSlider('slider-link_transparency');
+                                    initSlider('slider-label_scale');
+                                </script> 
+                                                          
+                        </div>
+                        <div id="tabs-4" class="container">
+
+                            <div class="twelve columns">
+                                <h2 class="lineglowslow" style="font-size: 68px; margin-bottom:30px;margin-top:30px">String App</h2>
+                            </div>
+
+                                <div class="twelve columns">
+                                    <div id="evidence-section" class="five columns">
+                                    <div class="twelve columns">
+                                            <h3> Evidence filter</h3>
+                                            <h4 class="five columns" style="padding-left:20px;background-color:#c8c8c8;
+                                            border-radius: 20px;">
+                                                All</h4>
+                                            <script>
+                                                // TODO script for selecting "all" layout
+                                            </script>
+                                </div>
+                                <div class="twelve columns">
+                                        <h3> Known interactions</h3>
+                                            <h4 class="five columns" style="padding-left:20px;background-color:#ff00ff;
+                                            border-radius: 20px;">
+                                            Experiments</h4>
+                                            <script>
+                                                // TODO script for selecting "Experiments" layout
+                                            </script>
+                                            <h4 class="five columns" style="padding-left:20px;background-color:#00ffff;
+                                            border-radius: 20px;"> Database</h4>
+                                            <script>
+                                                // TODO script for selecting "Database" layout
+                                            </script>
+                                </div>
+                                <div class="twelve columns">
+                                    <h3> Predicted interactions</h3>
+                                        <h4 class="five columns" style="padding-left:20px;background-color:#00ff00;
+                                        border-radius: 20px;"> 
+                                            Neighborhood</h4>
+                                            <script>
+                                                // TODO script for selecting "Neighborhood" layout
+                                            </script>
+                                        <h4 class="five columns" style="padding-left:20px;background-color:#ff0000;
+                                        border-radius: 20px;">
+                                            Fusion</h4>
+                                            <script>
+                                                // TODO script for selecting "Fusion" layout
+                                            </script>
+                                        <h4 class="five columns" style="padding-left:20px;background-color:#0000ff;
+                                        border-radius: 20px;"> 
+                                            Cooccurrence</h4>
+                                            <script>
+                                                // TODO script for selecting "cooccurrence" layout
+                                            </script>
+                                </div>
+                                <div class="twelve columns">
+                                    <h3> Other Evidences</h3>
+                                        <h4 class="five columns" style="padding-left:20px;background-color:#c6ea46;
+                                        border-radius: 20px;"> 
+                                            Textmining</h4>
+                                            <script>
+                                                // TODO script for selecting "Textmining" layout
+                                            </script>
+                                        <h4 class="five columns" style="padding-left:20px;background-color:#323232;
+                                        border-radius: 20px;"> 
+                                            Coexpression</h4>
+                                            <script>
+                                                // TODO script for selecting "Coexpression" layout
+                                            </script>
+                                        <h4 class="five columns" style="padding-left:20px;background-color:#9d9df8;border-radius: 20px;">
+                                            Homology</h4>
+                                            <script>
+                                                // TODO script for selecting "similarity"/"homology" layout
+                                            </script>
+                                </div>
+                                <div class="twelve columns">
+                                    <h3> Information</h3>
+                                    <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus</p>
+                                </div>
+                                <br></br>
+                        </div> 
+                        
+
+
+                        <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                        tab 4 - search 
+                                        
+                        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        <div id="tabs-4">
+                            <div class="twelve columns">
+                                <h2 class="lineglowslow" style="font-size: 68px; margin-bottom:30px;margin-top:30px;">QUERY</h2>
+                            </div>
+                                    <mc-textbox id = 'search' ></mc-textbox>
+                                    <br><br>
+                                    <mc-scrollbox id = 'sres'></mc-scrollbox>
+                        </div>-->
+
+
+                        <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                        tab 5 - Arch Worlds 
+
+                        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        <div id="tabs-5">
+                                    
+                            <div class="twelve columns">
+                                <h2 class="lineglowslow" style="font-size: 68px; margin-bottom:30px;margin-top:30px">VR ROOMS</h2>
+                            </div>
+
+                            <div class="twelve columns">
+                                <div class="cornerBox">
+                                <select id='archworlds'></select>
+                                <script>
+                                    initDropdown('archworlds', ["empty","lecturehall","studyspace"], "empty");
+                                </script>
+                                </div>
+                            </div>
+
+                        </div>-->
+
+                        <!-- ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+                                        tab 6 - SETTINGS
+                                        
+                        +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        <div id="tabs-6" class="container">
+                            <div class="twelve columns">
+                                <h2 class="lineglowslow" style="font-size: 68px; margin-bottom:30px;margin-top:30px">USER LOG</h2>
+                            </div>
+                                    <div  id= "url" class="texthidden"></div>
+                                    <h4>logged in as {{session['username']}}</h4>
+                                    <script>
+                                        document.getElementById('url').innerHTML = window.location.href;
+                                    </script>
+
+                        </div>-->
+
+                    </div>
+
+
+    </body>
+
+
+
+
+
+
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

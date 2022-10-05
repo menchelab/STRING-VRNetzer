@@ -1,7 +1,19 @@
 {
 	"folders": [
 		{
+			"name": "STRING-VRNetzer",
 			"path": ".."
+		},
+		{
+			"name": "VRNetzer_Backend",
+			"path": "../../VRNetzer_Backend"
+		},
+		{
+			"name": "PPI_network",
+			"path": "../../PPI_network"
+		},
+		{
+			"path": "../../CartoGRAPHs"
 		}
 	],
 	"settings": {}

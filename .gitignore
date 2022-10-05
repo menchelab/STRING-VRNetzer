@@ -9,4 +9,5 @@ __pycache__/
 *.bmp
 *.png
 *.DS_Store
-/static/*
+/static/networks
+/static/projects

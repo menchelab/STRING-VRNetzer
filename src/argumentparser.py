@@ -1,43 +1,8 @@
-import os
 import sys
 from ast import literal_eval
 
 import workflows as wf
 from cytoscape_parser import CytoscapeParser
-from settings import _NETWORKS_PATH
-
-
-def call_create_project_workflow() -> None:
-    """Creates a VRNetz project from a given .VRNetz file."""
-    argv = {
-        "network": None,
-        "layout_algo": None,
-        "keep_tmp": True,
-        "skip_exists": False,
-        "project_name": None,
-        "gen_layout": True,
-        "create_2d_layout": True,
-    }
-    argv = extract_arguments(argv, sys.argv[2:])
-    if argv["project_name"] is None:
-        argv["project_name"] = str(argv["network"].split("/")[-1]).replace(
-            ".VRNetz", ""
-        )
-    layouter = wf.apply_layout_workflow(
-        argv["network"],
-        argv["gen_layout"],
-        argv["layout_algo"],
-        argv["create_2d_layout"],
-    )
-    graph = layouter.graph
-    state = wf.create_project_workflow(
-        graph,
-        project_name=argv["project_name"],
-        keep_tmp=argv["keep_tmp"],
-        skip_exists=argv["skip_exists"],
-        create_2d_layout=argv["create_2d_layout"],
-    )
-    wf.logging.debug(state)
 
 
 def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
@@ -189,3 +154,36 @@ def call_convert() -> None:
         argv["project_name"],
     )
     wf.logging.info(f"Network converted to {output}.")
+
+
+def call_create_project_workflow() -> None:
+    """Creates a VRNetz project from a given .VRNetz file."""
+    argv = {
+        "network": None,
+        "layout_algo": None,
+        "keep_tmp": True,
+        "skip_exists": False,
+        "project_name": None,
+        "gen_layout": True,
+        "create_2d_layout": True,
+    }
+    argv = extract_arguments(argv, sys.argv[2:])
+    if argv["project_name"] is None:
+        argv["project_name"] = str(argv["network"].split("/")[-1]).replace(
+            ".VRNetz", ""
+        )
+    layouter = wf.apply_layout_workflow(
+        argv["network"],
+        argv["gen_layout"],
+        argv["layout_algo"],
+        argv["create_2d_layout"],
+    )
+    graph = layouter.graph
+    state = wf.create_project_workflow(
+        graph,
+        project_name=argv["project_name"],
+        keep_tmp=argv["keep_tmp"],
+        skip_exists=argv["skip_exists"],
+        create_2d_layout=argv["create_2d_layout"],
+    )
+    wf.logging.debug(state)

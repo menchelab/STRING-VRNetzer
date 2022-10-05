@@ -1,3 +1,5 @@
+"""Comes from the VRNetzer Backend. Seems to be some constant definitions."""
+
 import json
 
 idata = {"mes": "dfhdfhfh", "usr": "NaS7QA89nxLg9nKQAAAn", "tag": "flask"}
