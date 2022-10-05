@@ -5,8 +5,12 @@ import string_commands as scmd
 import vrnetzer_commands as vcmd
 import workflows as workf
 from cytoscape_parser import CytoscapeParser
-from src.workflows import (call_compound_query, call_disease_query,
-                           call_protein_query, call_pubmed_query)
+from src.workflows import (
+    call_compound_query,
+    call_disease_query,
+    call_protein_query,
+    call_pubmed_query,
+)
 
 app = Flask(__name__)
 app.debug = False
@@ -36,17 +40,17 @@ def fetch_string_network(mode, query, network_type, cutoff, limit, species, taxo
     query_namespace["disease"] = "disease"
     query_namespace["pubmed"] = "pubmed"
     variable_namespace = {
-        "network_type":"networkType",
+        "network_type": "networkType",
     }
 
     parser = CytoscapeParser()
-    
+
     # parse arguments
     arguments = [query, network_type, cutoff, limit, species, taxonID]
     args = [arg for arg in arguments if arg is not None]
-    for i,arg in enumerate(args):
+    for i, arg in enumerate(args):
         keyword = __dict__.items()
-        args[i] = 
+        args[i] = 2
 
     modes[mode](
         parser,

@@ -2,7 +2,6 @@ import json
 from ast import literal_eval
 
 # import cartoGRAPHs
-import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 
@@ -18,7 +17,10 @@ class Layouter:
         network = literal_eval(open(file).read().strip("\n"))
         nodes = network["nodes"]
         edges = network["edges"]
-        self.graph = nx.Graph()
+        print(type(nodes))
+        for (node, data) in nodes.items():
+            print(node, data)
+        exit()
         self.graph.add_nodes_from(
             [(node, {k: v for k, v in data.items()}) for (node, data) in nodes.items()]
         )
