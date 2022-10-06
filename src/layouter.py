@@ -1,7 +1,5 @@
-import json
 from ast import literal_eval
 
-# import cartoGRAPHs
 import networkx as nx
 import numpy as np
 
@@ -36,21 +34,39 @@ class Layouter:
     def create_kamada_kawai_layout(self) -> dict:
         return nx.kamada_kawai_layout(self.graph, dim=3)
 
-    def create_cartoGRPAHS_spring(self) -> dict:
-        import cartoGRAPHtest
+    def create_cartoGRAPH_layout(self, layout_algo) -> dict:
+        """Will pick the correct cartoGRAPH layout algorithm and apply it to the graph. If cartoGRAPH is not installed, it will ask the user whether to use networkx spring algorithm instead."""
+        try:
+            return self.pick_cg_layout_alogrithm(layout_algo)
+        except ImportError:
+            print("cartoGRAPHs is not installed.")
+            use_spring = input("Use spring layout instead? [y/n]: ")
+            if use_spring == "y":
+                return self.create_spring_layout()
+            else:
+                exit()
 
-        return cartoGRAPHtest.cartoGRAHP_global_umap(self.graph)
+    def pick_cg_layout_alogrithm(self, layout_algo):
+        """Will pick the correct cartoGRAPH layout algorithm and apply it to the graph and return positions"""
+        import cartoGRAPHs as cg
+
+        _, layoutmethod, dimred_method = layout_algo.split("_")
+        return cg.generate_layout(
+            self.graph, dim=3, layoutmethod=layoutmethod, dimred_method=dimred_method
+        )
 
     def apply_layout(self, layout_algo: str = None) -> nx.layout:
         """Applies a networkx layout algorithm and adds the node positions to the self.nodes_data dictionary."""
         if layout_algo is None:
             layout_algo = LA.spring
-        layouts = {
-            LA.spring: self.create_spring_layout,
-            LA.kamada_kawai: self.create_kamada_kawai_layout,
-            LA.cartoGRAPHs_global: self.create_cartoGRPAHS_spring,
-        }
-        layout = layouts[layout_algo]()
+        if LA.cartoGRAPH in layout_algo:
+            layout = self.create_cartoGRAPH_layout(layout_algo)
+        else:
+            layouts = {
+                LA.spring: self.create_spring_layout,
+                LA.kamada_kawai: self.create_kamada_kawai_layout,
+            }
+            layout = layouts[layout_algo]()  # Will use the desired layout algorithm
         points = np.array(list(layout.values()))
         points = self.to_positive(points, 3)
         points = self.normalize_values(points, 3)
@@ -59,6 +75,7 @@ class Layouter:
             layout[key] = points[i]
         for node, position in layout.items():
             self.graph.nodes[node]["VRNetzer_pos"] = tuple(position)
+            self.graph.nodes[node]["node_new_2d_pos"] = (position[0], position[1], 0.0)
         return layout
 
     def correct_cytoscape_pos(self) -> np.array:
@@ -77,7 +94,7 @@ class Layouter:
         # Write new formated node positions on the xz axis
         for node, position in zip(cytoscape_nodes, points):
             self.graph.nodes[node]["node_Cytoscape_pos"] = tuple(
-                (0.0, position[0], position[1])
+                (position[0], position[1], 0.0)
             )
         return points
 
