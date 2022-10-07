@@ -39,6 +39,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 	@Tunable(description = "Save network as <fileName>.VRNetz", params = "input=false", 
 	         tooltip="<html>Note: for convenience spaces are replaced by underscores.</html>",gravity = 1.0)
 	public File fileName = null;
+	
 //	@Tunable(description = "Select namespace to export.", params = "input=false",gravity = 2.0)
 //	public String namespace = null; // Not so sure about that one.
 	

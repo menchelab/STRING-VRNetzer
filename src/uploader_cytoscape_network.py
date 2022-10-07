@@ -271,19 +271,7 @@ def makeLinkTex(
         )
 
 
-# TODO other name for variable filename. maybe Layout name
-def upload_files(
-    project: str,
-    filename: str,
-    network: dict,
-    projects_path: str = _PROJECTS_PATH,
-    skip_exists: bool = True,
-    evidences: dict = None,
-    create_2d_layout: bool = True,
-) -> str:
-    project = clean_filename(project)
-    filename = clean_filename(filename)
-    ingored_elements = ["data_type", "amount"]
+def extract_desired_data(network, ingored_elements):
     nodes_data = {
         node: data
         for node, data in network["nodes"].items()
@@ -294,72 +282,57 @@ def upload_files(
         for edge, data in network["edges"].items()
         if edge not in ingored_elements
     }
-    """Generates textures and upload the needed network files."""
-    if evidences is None:
-        evidences = Evidences.get_default_scheme()
+    return nodes_data, edges_data
 
-    prolist = listProjects(projects_path)
-    # GET LAYOUT
-    if not skip_exists:
-        makeProjectFolders(project, projects_path=projects_path)
-    else:
-        if project in prolist:
 
-            print("project exists")
-        else:
-            # Make Folders
-            makeProjectFolders(project, projects_path=projects_path)
+def create_2d_layouts(
+    filename, project, nodes_data, projects_path, pfile, skip_exists, state
+):
+    # Create 2D Layout of Cytoscape coordinates node texture
+    _2dlayout_filename = f"{filename}_2d_cy"
+    output = makeNodeTex(
+        project,
+        _2dlayout_filename,
+        nodes_data.values(),
+        projects_path,
+        skip_exists,
+        coord_column="node_Cytoscape_pos",
+    )
+    state += f"{state}<br>{output}"
+    pfile["layouts"].append(f"{_2dlayout_filename}XYZ")
+    pfile["layoutsRGB"].append(f"{_2dlayout_filename}RGB")
+    pfile["links"].append(f"anyXYZ")
+    pfile["linksRGB"].append(f"anyRGB")
 
-    folder = os_join(projects_path, project)
-    pfile = {}
+    # Add 2D Layout with new 2d positions
+    _2dlayout_filename = f"{filename}_2d_new"
+    output = makeNodeTex(
+        project,
+        _2dlayout_filename,
+        nodes_data.values(),
+        projects_path,
+        skip_exists,
+        coord_column="node_new_2d_pos",
+    )
+    state += f"{state}<br>{output}"
+    pfile["layouts"].append(f"{_2dlayout_filename}XYZ")
+    pfile["layoutsRGB"].append(f"{_2dlayout_filename}RGB")
+    pfile["links"].append(f"anyXYZ")
+    pfile["linksRGB"].append(f"anyRGB")
+    return state
 
-    with open(os_join(folder, "pfile.json"), "r") as json_file:
-        pfile = json.load(json_file)
-    json_file.close()
 
-    state = ""
-    if create_2d_layout:
-        # Create 2D Layout of Cytoscape coordinates node texture
-        _2dlayout_filename = f"{filename}_2d_cy"
-        output = makeNodeTex(
-            project,
-            _2dlayout_filename,
-            nodes_data.values(),
-            projects_path,
-            skip_exists,
-            coord_column="node_Cytoscape_pos",
-        )
-        state += f"{state}<br>{output}"
-        pfile["layouts"].append(f"{_2dlayout_filename}XYZ")
-        pfile["layoutsRGB"].append(f"{_2dlayout_filename}RGB")
-        pfile["links"].append(f"anyXYZ")
-        pfile["linksRGB"].append(f"anyRGB")
-
-        # Add 2D Layout with new 2d positions
-        _2dlayout_filename = f"{filename}_2d_new"
-        output = makeNodeTex(
-            project,
-            _2dlayout_filename,
-            nodes_data.values(),
-            projects_path,
-            skip_exists,
-            coord_column="node_new_2d_pos",
-        )
-        state += f"{state}<br>{output}"
-        pfile["layouts"].append(f"{_2dlayout_filename}XYZ")
-        pfile["layoutsRGB"].append(f"{_2dlayout_filename}RGB")
-        pfile["links"].append(f"anyXYZ")
-        pfile["linksRGB"].append(f"anyRGB")
-
-    # layout_files = request.files.getlist("layouts")  # If a network has multiple layouts
-    # Create 3D Layout node textures
-    state += f"{state}<br>{makeNodeTex(project, filename, nodes_data.values(), projects_path, skip_exists)}"
-    # print(contents)
-    # x = validate_layout(contents.split("\n"))
-    # print("layout errors are", x)
-    # if x[1] == 0:
-
-    # Upload.upload_layouts(namespace, layout_files)
+def create_3D_layouts_edge(
+    state,
+    project,
+    filename,
+    nodes_data,
+    projects_path,
+    pfile,
+    skip_exists,
+    evidences,
+    edges_data,
+):
     # For each evidence type, create a texture and upload it
     for evidence in evidences:
         edges = edges_data.copy()
@@ -391,6 +364,67 @@ def upload_files(
 
         # Generate link texture
         state += f"{state}<br>{makeLinkTex(project,evidence,edges,nodes_data.keys(),projects_path,skip_exists)}"
+
+
+# TODO other name for variable filename. maybe Layout name
+def upload_files(
+    project: str,
+    filename: str,
+    network: dict,
+    projects_path: str = _PROJECTS_PATH,
+    skip_exists: bool = True,
+    evidences: dict = None,
+    create_2d_layout: bool = True,
+) -> str:
+    project = clean_filename(project)
+    filename = clean_filename(filename)
+    ingored_elements = ["data_type", "amount"]
+    nodes_data, edges_data = extract_desired_data(network, ingored_elements)
+    """Generates textures and upload the needed network files. If created_2d_layout is True, it will create 2d layouts of the network one based on the cytoscape coordinates and one based on the new coordinated that come from the 3D layout without the z-coordinate.
+    Furthermore, for each STRING evidence a edge texture with the respective color will be generated. If it is not a STRING network, only a single edge layout is created."""
+    # Set up the colors for each evidence type
+    if evidences is None:
+        evidences = Evidences.get_default_scheme()
+
+    # Set up project directories
+    prolist = listProjects(projects_path)
+
+    if not skip_exists:
+        makeProjectFolders(project, projects_path=projects_path)
+    else:
+        if project in prolist:
+
+            print("project exists")
+        else:
+            # Make Folders
+            makeProjectFolders(project, projects_path=projects_path)
+
+    folder = os_join(projects_path, project)
+    pfile = {}
+
+    with open(os_join(folder, "pfile.json"), "r") as json_file:
+        pfile = json.load(json_file)
+    json_file.close()
+
+    state = ""
+    # Create 2D Layouts
+    if create_2d_layout:
+        state = create_2d_layouts(
+            filename, project, nodes_data, projects_path, pfile, skip_exists, state
+        )
+    # Create 3D Layout node textures
+    state += f"{state}<br>{makeNodeTex(project, filename, nodes_data.values(), projects_path, skip_exists)}"
+    state = create_3D_layouts_edge(
+        state,
+        project,
+        filename,
+        nodes_data,
+        projects_path,
+        pfile,
+        skip_exists,
+        evidences,
+        edges_data,
+    )
 
     # update the projects file
     with open(os_join(folder, "pfile.json"), "w") as json_file:
