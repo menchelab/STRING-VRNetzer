@@ -346,8 +346,9 @@ def create_3D_layouts_edge(
 
         # Color each link with the color of the evidence
         for edge in edges:
-            if evidence not in edges[edge].keys():
+            if evidence == "any":
                 color = evidences[evidence]
+                # TODO extract the alpha value with the highest score.
             else:
                 color = evidences[evidence][:2] + (
                     int(edges[edge][evidence] * 255),

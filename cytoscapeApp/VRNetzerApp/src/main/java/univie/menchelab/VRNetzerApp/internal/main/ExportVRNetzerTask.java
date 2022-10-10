@@ -2,6 +2,7 @@ package univie.menchelab.VRNetzerApp.internal.main;
 
 import java.awt.Color;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -86,14 +87,14 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 
 
         startTime = System.currentTimeMillis();
-		Map<String,Object>nodesData = getData(nodes,CyNode.class);
+        List<HashMap<String, Object>> nodesData = getData(nodes,CyNode.class);
         stopTime = System.currentTimeMillis();
         totalTime = stopTime - startTime;
         totalTimeInSeconds = (double) stopTime-startTime / 1_000_000_000;
 		monitor.showMessage(TaskMonitor.Level.INFO, "Generating node Map took:"+String.valueOf(totalTime));
 
         startTime = System.currentTimeMillis();
-		Map<String,Object>edgesData = getData(edges,CyEdge.class);
+        List<HashMap<String, Object>> edgesData = getData(edges,CyEdge.class);
         stopTime = System.currentTimeMillis();
         totalTime = stopTime - startTime;
         totalTimeInSeconds = (double) stopTime-startTime / 1_000_000_000;
@@ -110,8 +111,11 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 			JSONObject nodesJson = exportFile.generateObject("nodes", nodesData);
 			JSONObject edgesJson = exportFile.generateObject("edges", edgesData);
 			JSONObject networkJson = new JSONObject();
-			networkJson.put("nodes", nodesJson);
-			networkJson.put("edges", edgesJson);
+			ArrayList<String> layouts = new ArrayList<String>();
+			layouts.add("cytoscape");
+			networkJson.put("nodes", nodesData);
+			networkJson.put("edges", edgesData);
+			networkJson.put("layouts",layouts);
 			
 			monitor.showMessage(TaskMonitor.Level.INFO, "Writing data of '"+network.toString()+"'");
 	        startTime = System.nanoTime();
@@ -148,15 +152,21 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 		Triplet<Integer, Integer, Integer> rgb = new Triplet<Integer, Integer, Integer>(node_color.getRed(),
 				node_color.getGreen(), node_color.getBlue());
 		Triplet<Double, Double, Double> xyz = new Triplet<Double, Double, Double>(x,y,z);
-		node_prop.put("node_label", node_label);
-		node_prop.put("node_Cytoscape_pos", xyz);
-		node_prop.put("node_color", rgb);
-		node_prop.put("node_size", node_size);
+		
+		node_prop.put("n", node_label); // set node name
+		
+		Map<String,Object> layouts = new HashMap<>();
+		layouts.put("p", xyz); // set node Cytoscape position
+		layouts.put("c",rgb); // set node color
+		layouts.put("s", node_size); // set node size
+		
+		node_prop.put("layouts", layouts);
+
 		return  node_prop;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Map<String,Object> getData(CyTable table, Class<? extends CyIdentifiable> type){
+	public List<HashMap<String, Object>> getData(CyTable table, Class<? extends CyIdentifiable> type){
 		 /**
 		 * Extracts Data from CyTable (Nodes/Edges)                          (1)
 		 * <p>
@@ -171,7 +181,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 		
 		// Define the type of the Elements in the given List.
 		if (!(type == CyNode.class) & !(type == CyEdge.class))
-			return new HashMap<>();
+			return new ArrayList<HashMap<String, Object>>();
 		
 		// get all Columns in the corresponding table
 		Collection<CyColumn> columns = table.getColumns();
@@ -179,7 +189,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 		
 		// extract all rows
 		List<CyRow> rows = table.getAllRows();
-		Map<String,Object> identMap = new HashMap<>();
+		List<HashMap<String, Object>> identMap = new ArrayList<HashMap<String, Object>>();
 		
 		for (int i=0; i<rows.size(); i++) {
 			 CyRow row = rows.get(i);
@@ -187,18 +197,20 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 			 // Get the SUID for corresponding Line (i.e. SUID of node/edge)
 			 
 			 // Generate a new HashMap for Data of node/edge
-			 Map<String,Object> data = new HashMap<>();
+			 HashMap<String,Object> data = new HashMap<>();
 			 
 			 // For nodes, extract the color from the style
 			 if (type == CyNode.class) {
 				 CyNode node =  network.getNode(suid);
 				 data.putAll(getStyle(node));
+				 data.put("id", suid.intValue());
 			 }
 			 // For edges, extract source and sink and add it to the map
 			 else if (type == CyEdge.class){
 				 CyEdge edge =  network.getEdge(suid);
-				 data.put("source",   edge.getSource().getSUID());
-				 data.put("sink",  edge.getTarget().getSUID());
+				 data.put("id", suid.intValue());
+				 data.put("s",   edge.getSource().getSUID()); // write start
+				 data.put("e",  edge.getTarget().getSUID()); // write end
 			 }
 			 // iterate through all columns and save data in the HashMap
 			 for(int j=0; j< columnsArray.length;j++) {
@@ -215,9 +227,9 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 					 data.put(key.replace("::", "_"), value); // Remove weird :: characters from column names
 				 }
 			 }
-			 identMap.put(suid.toString(),data);
+			 identMap.add(data);
 		}
-		return identMap;
+		return (List<HashMap<String, Object>>) identMap;
 	}
 	@ProvidesTitle
 	public String getTitle() {
