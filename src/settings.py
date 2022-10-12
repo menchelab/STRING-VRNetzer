@@ -113,7 +113,7 @@ class Evidences:
         """Return a dictionary with the color scheme for each evidence."""
         ev = {
             Evidences.any: (
-                200,s
+                200,
                 200,
                 200,
                 255,

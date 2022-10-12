@@ -2,9 +2,9 @@
 
 import sys
 
-import STRING_Netzer.util.argumentparser as ap
-from STRING_Netzer.util.cytoscape_parser import CytoscapeParser
-from STRING_Netzer.util.settings import HELP_TEXT
+import argumentparser as ap
+from cytoscape_parser import CytoscapeParser
+from settings import HELP_TEXT
 
 
 def main(arg=sys.argv) -> None:

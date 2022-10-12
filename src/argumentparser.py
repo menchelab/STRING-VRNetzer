@@ -1,9 +1,9 @@
 import sys
 from ast import literal_eval
 
-from . import workflows as wf
-from .cytoscape_parser import CytoscapeParser
-from .settings import VRNetzElements as VRNE
+import workflows as wf
+from cytoscape_parser import CytoscapeParser
+from settings import VRNetzElements as VRNE
 
 
 def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
