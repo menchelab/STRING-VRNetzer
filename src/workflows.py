@@ -4,19 +4,19 @@ import os
 
 import networkx as nx
 
-from converter import VRNetzConverter
-from cytoscape_parser import CytoscapeParser
-from layouter import Layouter
-from map_small_on_large import map_source_to_target
-from settings import _NETWORKS_PATH, _PROJECTS_PATH, UNIPROT_MAP, EdgeTags
-from string_commands import (
+from .converter import VRNetzConverter
+from .cytoscape_parser import CytoscapeParser
+from .layouter import Layouter
+from .map_small_on_large import map_source_to_target
+from .settings import _NETWORKS_PATH, _PROJECTS_PATH, UNIPROT_MAP
+from .settings import VRNetzElements as VRNE
+from .string_commands import (
     StringCompoundQuery,
     StringDiseaseQuery,
     StringProteinQuery,
     StringPubMedQuery,
 )
-from uploader_cytoscape_network import upload_files
-from util import colorize_nodes
+from .uploader import Uploader
 
 # from extract_colors_from_style import get_node_mapping
 
@@ -82,17 +82,11 @@ def export_network_workflow(
     # generate a 3D layout
     layouter = apply_layout_workflow(f"{network_loc}.VRNetz", layout_algo)
 
-    # Export current style
-    # parser.export_style(filename=style_loc, **kwargs)
-
-    # logger.info(f"Style exported: {style_file}")
-    # layouter.graph = apply_style(layouter.graph, style_file)
     # if keep_output is False, we remove the tmp GraphML file
     if not keep_output:
         os.remove(network_file)
         logger.info(f"Removed tmp file: {network_file}")
-        # os.remove(style_file)
-        # logger.info(f"Removed tmp file: {style_file}")
+
     return layouter, filename
 
 
@@ -100,20 +94,24 @@ def apply_layout_workflow(
     file_name: str,
     gen_layout: bool = True,
     layout_algo: str = None,
-    create_2d_layout: bool = True,
+    cy_layout: bool = True,
+    stringify: bool = True,
 ) -> Layouter:
     layouter = Layouter()
-    layouter.read_from_json(file_name)
+    layouter.read_from_vrnetz(file_name)
     logger.info(f"Network extracted from: {file_name}")
+
     if gen_layout:
         layouter.apply_layout(layout_algo)
         if layout_algo is None:
             layout_algo = "spring"
         logger.info(f"Layout algorithm {layout_algo} applied!")
     # Correct Cytoscape positions to be positive.
-    if create_2d_layout:
+    if cy_layout:
         layouter.correct_cytoscape_pos()
         logger.info(f"2D layout created!")
+    if stringify:
+        layouter.gen_evidence_layouts()
     return layouter
 
 
@@ -131,46 +129,26 @@ def apply_layout_workflow(
 
 
 def create_project_workflow(
-    graph: nx.Graph,
+    network: dict,
     project_name: str,
     projects_path: str = _PROJECTS_PATH,
     skip_exists: bool = False,
     keep_tmp: bool = False,
-    create_2d_layout: bool = True,
+    cy_layout: bool = True,
+    stringifiy: bool = True,
 ):
-    nodes = dict(graph.nodes(data=True))
-    edges = {tuple((edge[0], edge[1])): edge[2] for edge in graph.edges(data=True)}
     """Uses a layout to generate a new VRNetzer Project."""
-    # if keep temp, we save the network as a file
-    network = {"nodes": {}, "edges": {}}
-    for node in nodes:
-        network["nodes"][node] = nodes[node]
-    network["nodes"]["data_type"] = "nodes"
-    network["nodes"]["amount"] = len(nodes)
-    for edge in edges:
-        data = edges[edge]["data"]
-        if EdgeTags.suid in data:
-            suid = data[EdgeTags.suid]
-        elif EdgeTags.ppi_id:
-            suid = data[EdgeTags.ppi_id]
-        network["edges"][suid] = edges[edge]["data"]
-    network["edges"]["data_type"] = "edges"
-    network["edges"]["amount"] = len(edges)
-    state = upload_files(
-        project_name,
-        project_name,
-        network,
-        projects_path=projects_path,
-        skip_exists=skip_exists,
-        create_2d_layout=create_2d_layout,
-    )
+    uploader = Uploader(network, project_name, skip_exists, stringifiy, projects_path)
+    state = uploader.upload_files(network)
     if keep_tmp:
         outfile = f"{_NETWORKS_PATH}/{project_name}_with_3D_Coords.VRNetz"
         print(f"OUTFILE:{outfile}")
         with open(outfile, "w") as f:
             json.dump(network, f)
         logging.info(f"Saved network as {outfile}")
-
+    if stringifiy and cy_layout:
+        uploader.stringify_project()
+        logging.info(f"Layouts stringified: {project_name}")
     logging.info(f"Project created: {project_name}")
     return state
 
@@ -181,11 +159,16 @@ def map_workflow(small_net: str, large_net: str, destination: str) -> None:
 
 
 def convert_workflow(
-    node_list: str, edge_list: str, uniprot_mapping=UNIPROT_MAP, project=None
+    node_list: str, edge_list: str, uniprot_mapping=None, project=None
 ) -> str:
     """Converts a network from a edge and node list to a .VRNetz file."""
+    if uniprot_mapping is None:
+        uniprot_mapping = UNIPROT_MAP
+    if project is None:
+        project = "NA"
     output = os.path.join(_NETWORKS_PATH, project)
-    VRNetzConverter(node_list, edge_list, uniprot_mapping, project)
+    converter = VRNetzConverter(node_list, edge_list, uniprot_mapping, project)
+    converter.convert()
     return output
 
 

@@ -11,6 +11,9 @@ from matplotlib import pyplot as plt
 from PIL import ImageColor
 from requests.exceptions import ConnectionError
 
+from settings import LayoutTags as LT
+from settings import NodeTags as NT
+
 
 def get_pid_of_process(process_names: list):
     """Get the PID of a running process addressed by name."""
@@ -104,6 +107,33 @@ def colorize_nodes(
                 color = ImageColor.getcolor(color, "RGB") + (255,)
                 G.nodes[node]["color"] = color
     return G
+
+
+def find_cy_layout(node):
+    cy_layout, idx = None, None
+    if NT.layouts in node:
+        for idx, layout in enumerate(node[NT.layouts]):
+            if layout[LT.name] == LT.cy_layout:
+                cy_layout = layout
+                break
+    return cy_layout, idx
+
+
+def clean_filename(name: str) -> str:
+    """Cleans the project name to be used in the file names."""
+    name = name.replace(" ", "_")
+    name = name.replace("/", "_")
+    name = name.replace("'", "")
+    name = name.replace("´", "")
+    name = name.replace("`", "")
+    name = name.replace("'", "")
+    name = name.replace("“", "")
+    name = name.replace(",", "_")
+    name = name.replace(".", "_")
+    name = name.replace("-", "_")
+    name = name.replace("–", "_")
+    name = name.replace("#", "_")
+    return name
 
 
 if __name__ == "__main__":

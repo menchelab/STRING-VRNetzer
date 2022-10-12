@@ -2,32 +2,32 @@
 
 import sys
 
-import argumentparser as ap
-from cytoscape_parser import CytoscapeParser
-from settings import HELP_TEXT
+import STRING_Netzer.util.argumentparser as ap
+from STRING_Netzer.util.cytoscape_parser import CytoscapeParser
+from STRING_Netzer.util.settings import HELP_TEXT
 
 
-def main() -> None:
+def main(arg=sys.argv) -> None:
     """Guides the user through the workflows."""
-
-    if len(sys.argv) == 1:
+    if len(arg) == 1:
         print(HELP_TEXT)
         return
-    keyword = sys.argv[1]
+    keyword = arg[1]
     if keyword in ["query", "export", "names"]:
         cparser = CytoscapeParser()
         if keyword == "query":
-            ap.call_query_workflow(cparser)
+            ap.call_query_workflow(cparser, arg)
         elif keyword == "names":
             ap.print_networks_workflow(cparser)
         elif keyword == "export":
-            ap.call_export_workflow(cparser)
+            ap.call_export_workflow(cparser, arg=arg)
     elif keyword == "project":
-        ap.call_create_project_workflow()
+        ap.call_create_project_workflow(arg)
     elif keyword == "map":
-        ap.call_map_workflow()
+        ap.call_map_workflow(arg)
     elif keyword == "convert":
-        ap.call_convert()
+        ap.call_convert(arg)
+        print(keyword)
     else:
         print(HELP_TEXT)
         return

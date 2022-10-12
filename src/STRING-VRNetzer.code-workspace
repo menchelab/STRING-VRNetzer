@@ -5,15 +5,16 @@
 			"path": ".."
 		},
 		{
+			"name": "CartoGRAPHs",
+			"path": "../../CartoGRAPHs"
+		},
+		{
 			"name": "VRNetzer_Backend",
 			"path": "../../VRNetzer_Backend"
 		},
 		{
 			"name": "PPI_network",
 			"path": "../../PPI_network"
-		},
-		{
-			"path": "../../CartoGRAPHs"
 		}
 	],
 	"settings": {}

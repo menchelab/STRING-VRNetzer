@@ -1,11 +1,16 @@
 import json
+import ntpath
 import os
 
 import numpy as np
 import pandas as pd
 
-from layouter import Layouter
-from settings import _NETWORKS_PATH, UNIPROT_MAP, EdgeTags, NodeTags
+from .layouter import Layouter
+from .settings import _NETWORKS_PATH, UNIPROT_MAP
+from .settings import EdgeTags as ET
+from .settings import LayoutTags as LT
+from .settings import NodeTags as NT
+from .settings import VRNetzElements as VRNE
 
 
 class VRNetzConverter:
@@ -13,8 +18,8 @@ class VRNetzConverter:
 
     def __init__(
         self,
-        nodes_file: str,
-        links_file: str = None,
+        node_files: list[str] | str,
+        link_files: list[str] | str = None,
         uniprot_mapping_file: str = None,
         project_name: str = None,
     ) -> None:
@@ -27,26 +32,52 @@ class VRNetzConverter:
         if not project_name.endswith(".VRNetz"):
             project_name += ".VRNetz"
         # initialize values
-        self.nodes_file = nodes_file
-        self.links_file = links_file
+        if type(node_files) is str:
+            self.nodes_files = [node_files]
+        else:
+            self.nodes_files = node_files
+        if type(link_files) is str:
+            self.links_files = [link_files]
+        else:
+            self.links_files = link_files
         self.uniprot_mapping_file = uniprot_mapping_file
         self.project_name = project_name
-        self.convert()
+        self.n_layouts = []
+        self.l_layouts = []
 
     def convert(self) -> None:
         """Construct the VrNetz from the links and nodes csv files"""
+        nodes_map = {}
+        for node_file in self.nodes_files:
+            n_layout = ntpath.basename(node_file).split(".")[0]
+            self.n_layouts.append(n_layout)
+            nodes_map = self.gen_node_layout(node_file, n_layout, nodes_map)
 
-        links = self.gen_link_list()
-        nodes = self.gen_node_layout()
-        vr_netz = {"nodes": nodes, "edges": links}
+        nodes = list(nodes_map.values())
+
+        links_map = {}
+        for link_file in self.links_files:
+            l_layout = ntpath.basename(link_file).split(".")[0]
+            self.l_layouts.append(l_layout)
+            links_map = self.gen_link_list(link_file, l_layout, links_map)
+
+        links = list(links_map.values())
+
+        vr_netz = {
+            VRNE.nodes: nodes,
+            VRNE.links: links,
+            VRNE.node_layouts: self.n_layouts,
+            VRNE.link_layouts: self.l_layouts,
+        }
+
         with open(os.path.join(_NETWORKS_PATH, self.project_name), "w+") as f:
             json.dump(vr_netz, f)
 
-    def gen_node_layout(self) -> list:
+    def gen_node_layout(self, node_file: str, layout, nodes_map: list) -> list:
         """Extract node list from a node csv file"""
         uniprot_map = pd.read_csv(self.uniprot_mapping_file, sep=",")
         nodes = pd.read_csv(
-            self.nodes_file,
+            node_file,
             sep=",",
             header=None,
             names=["ppi_id", "x", "y", "z"],
@@ -58,33 +89,58 @@ class VRNetzConverter:
                 uniprot_map["NCBI Gene ID(supplied by NCBI)"] == node["ppi_id"]
             ].tolist()
             if len(index) > 0:
-                display_name = uniprot_map.loc[
+                node_label = uniprot_map.loc[
                     index[0], "UniProt ID(supplied by UniProt)"
                 ]
             else:
-                display_name = "NA"
-            node[NodeTags.display_name] = display_name
+                node_label = "NA"
+            node[NT.name] = node_label
             for col in ["x", "y", "z"]:
                 del node[col]
+
         points = np.array(points)
         points = Layouter.to_positive(points, 3)
         points = Layouter.normalize_values(points, 3)
-        res = {}
-        for i, node in enumerate(nodes):
-            node[NodeTags.vrnetzer_pos] = list(points[i])
-            res[node["ppi_id"]] = node
-        return res
 
-    def gen_link_list(self) -> dict:
+        for i, node in enumerate(nodes):
+            node[NT.id] = node["ppi_id"]
+
+            # if Node already contained in another layout, add this layout to the node. If not, add the node to the map
+            if node[NT.id] in nodes_map:
+                node = nodes_map[node[NT.id]]
+            else:
+
+                nodes_map[node[NT.id]] = node
+
+            if NT.layouts not in node:
+                node[NT.layouts] = []
+
+            for p, point in enumerate(points[i]):
+                if pd.isna(point):  # checks whether the point is NaN
+                    points[i][p] = 0.0
+            node[NT.layouts].append({LT.name: layout, LT.position: list(points[i])})
+            nodes_map[node[NT.id]] = node  # update the node in the map
+
+        return nodes_map
+
+    def gen_link_list(self, link_file, layout, links_map) -> dict:
         """Extract edge dict from a edge csv file"""
-        links = pd.read_csv(
-            self.links_file, sep=",", header=None, names=["source", "sink"]
-        ).to_dict(orient="records")
-        res = {}
+        links = pd.read_csv(link_file, sep=",", header=None, names=["s", "e"]).to_dict(
+            orient="records"
+        )
+
         for i, link in enumerate(links):
-            link[EdgeTags.ppi_id] = i
-            res[str(i)] = link
-        return res
+            link[ET.id] = i
+            if link[ET.id] in links_map:
+                link = links_map[link[ET.id]]
+            else:
+                links_map[link[ET.id]] = link
+
+            if ET.layouts not in link:
+                link[ET.layouts] = []
+            link[ET.layouts].append({LT.name: layout})
+
+        return links_map
 
 
 if __name__ == "__main__":

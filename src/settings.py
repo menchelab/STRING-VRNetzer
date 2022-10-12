@@ -19,7 +19,7 @@ HELP_TEXT = (
     + "main.py export <network> <filename> <opt:KeepTmp> <opt:*> <opt:overwrite_file>"
     + "\n"
     + "or\n"
-    + "main.py project <network> <opt:layout_algo> <opt:KeepTmp> <opt:skip_exists> <opt:project_name> <opt:gen_layout> <opt:create_2d_layout>"
+    + "main.py project <network> <opt:layout_algo> <opt:keep_temp> <opt:skip_exists> <opt:project_name> <opt:gen_layout> <opt:cy_layout> <opt:stringify>"
     + "\n"
     + "or\n"
     + "main.py names"
@@ -29,25 +29,61 @@ HELP_TEXT = (
     + "\n"
     + "or\n"
     + "main.py convert <node_list> <edge_list> <opt:uniprot_mapping> <opt:project_name>"
+    + "\n"
+    + "possible algorithms:\n"
+    + "spring, kamada_kawai, cg_local_tsne, cg_local_umap, cg_global_tsne, cg_global_umap, cg_importance_tsne, cg_importance_umap"
 )
 # Tags
+class LayoutTags:
+    position = "p"
+    color = "c"
+    size = "s"
+    id = "id"
+    cy_layout = "cy"
+    name = "n"
+    _3d = "3d"
+    string_3d = "st3d"
+    string_3d_no_z = "st2d"
+
+
 class NodeTags:
-    vrnetzer_pos = "VRNetzer_pos"
-    node_color = "node_color"
-    display_name = "display name"
+    layouts = "layouts"
+    vrnetzer_pos = "vp"
+    node_color = "c"
+    name = "n"
     suid = "SUID"
     description = "description"
     stringdb_canoncial_name = "stringdb_canonical name"
     stringdb_sequence = "stringdb_sequence"
     ppi_id = "ppi_id"
+    id = "id"
+
+
+class ProjectTag:
+    layouts = "layouts"
+    layouts_rgb = "layoutsRGB"
+    links = "links"
+    links_rgb = "linksRGB"
+
+
+class AttrTags:
+    names = "names"
 
 
 class EdgeTags:
-    source = "source"
-    sink = "sink"
-    color = "color"
+    id = "id"
+    start = "s"
+    end = "e"
     suid = "SUID"
     ppi_id = "ppi_id"
+    layouts = "c"
+
+
+class VRNetzElements:
+    nodes = "nodes"
+    links = "links"
+    node_layouts = "layouts"  # edge layout
+    link_layouts = "l_layout"  # link layout
 
 
 class LayoutAlgroithms:
@@ -62,6 +98,7 @@ class LayoutAlgroithms:
 
 
 class Evidences:
+    any = "any"
     stringdb_textmining = "stringdb_textmining"
     stringdb_experiments = "stringdb_experiments"
     stringdb_coexpression = "stringdb_coexpression"
@@ -74,8 +111,13 @@ class Evidences:
     @staticmethod
     def get_default_scheme() -> dict:
         """Return a dictionary with the color scheme for each evidence."""
-        return {
-            "any": (200, 200, 200, 255),  # Color for all evidences active #c8c8c8
+        ev = {
+            Evidences.any: (
+                200,s
+                200,
+                200,
+                255,
+            ),  # Color for all evidences active #c8c8c8
             Evidences.stringdb_textmining: (199, 234, 70, 255),  # #c6ea46
             # "stringdb_interspecies": (125, 225, 240, 255), # Not Used anywhere
             Evidences.stringdb_experiments: (254, 0, 255, 255),  # ##ff00ff
@@ -86,3 +128,4 @@ class Evidences:
             Evidences.stringdb_fusion: (255, 0, 0, 255),  # #ff0000
             Evidences.stringdb_similarity: (157, 157, 248, 255),  # #9d9df8
         }
+        return ev

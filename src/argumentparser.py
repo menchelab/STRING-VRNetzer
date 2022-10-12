@@ -1,8 +1,9 @@
 import sys
 from ast import literal_eval
 
-import workflows as wf
-from cytoscape_parser import CytoscapeParser
+from . import workflows as wf
+from .cytoscape_parser import CytoscapeParser
+from .settings import VRNetzElements as VRNE
 
 
 def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
@@ -21,7 +22,7 @@ def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
     return argv
 
 
-def call_query_workflow(parser: CytoscapeParser) -> None:
+def call_query_workflow(parser: CytoscapeParser, arg=sys.argv) -> None:
     """Calls either a protein query, disease query, compound query or a PubMed query."""
     argv = {
         "query_type": None,
@@ -31,7 +32,7 @@ def call_query_workflow(parser: CytoscapeParser) -> None:
         "species": None,
         "taxonID": None,
     }
-    argv = extract_arguments(argv, sys.argv[2:])
+    argv = extract_arguments(argv, arg[2:])
     queries = {
         "protein": wf.protein_query_workflow,
         "disease": wf.disease_query_workflow,
@@ -77,7 +78,7 @@ def prepare_export() -> dict[str, any]:
     return argv
 
 
-def call_export_workflow(parser, argv=None) -> None:
+def call_export_workflow(parser, argv=None, arg=sys.argv) -> None:
     """Export the targeted network to a .VRNetz file."""
     if argv is None:
         argv = {
@@ -88,7 +89,7 @@ def call_export_workflow(parser, argv=None) -> None:
             "*": None,
             "overwrite_files": True,
         }
-        argv = extract_arguments(argv, sys.argv[2:])
+        argv = extract_arguments(argv, arg[2:])
 
     # Export Network as VRNetz
     layouter, filename = wf.export_network_workflow(
@@ -114,13 +115,13 @@ def print_networks_workflow(parser: CytoscapeParser) -> None:
         print(f"{k}\t\t\t {v}")
 
 
-def call_map_workflow() -> None:
+def call_map_workflow(arg=sys.argv) -> None:
     argv = {
         "source_network": None,
         "target_network": None,
         "output_name": None,
     }
-    argv = extract_arguments(argv, sys.argv[2:])
+    argv = extract_arguments(argv, arg[2:])
     if argv["output_name"] is None:
         overwrite = input(
             f"Output name is not give, overwrite {argv['target_network']}? [y/n]"
@@ -138,7 +139,7 @@ def call_map_workflow() -> None:
     )
 
 
-def call_convert() -> None:
+def call_convert(arg=sys.argv) -> None:
     """Takes an node list and an link list and converts them to a .VRNetz file."""
     argv = {
         "node_list": None,
@@ -146,7 +147,8 @@ def call_convert() -> None:
         "uniprot_mapping_file": None,
         "project_name": None,
     }
-    argv = extract_arguments(argv, sys.argv[2:])
+    argv = extract_arguments(argv, arg[2:])
+    print(argv)
     output = wf.convert_workflow(
         argv["node_list"],
         argv["link_list"],
@@ -156,7 +158,7 @@ def call_convert() -> None:
     wf.logging.info(f"Network converted to {output}.")
 
 
-def call_create_project_workflow() -> None:
+def call_create_project_workflow(arg=sys.argv) -> None:
     """Creates a VRNetz project from a given .VRNetz file."""
     argv = {
         "network": None,
@@ -165,9 +167,10 @@ def call_create_project_workflow() -> None:
         "skip_exists": False,
         "project_name": None,
         "gen_layout": True,
-        "create_2d_layout": True,
+        "cy_layout": True,
+        "stringify": True,
     }
-    argv = extract_arguments(argv, sys.argv[2:])
+    argv = extract_arguments(argv, arg[2:])
     if argv["project_name"] is None:
         argv["project_name"] = str(argv["network"].split("/")[-1]).replace(
             ".VRNetz", ""
@@ -176,14 +179,16 @@ def call_create_project_workflow() -> None:
         argv["network"],
         argv["gen_layout"],
         argv["layout_algo"],
-        argv["create_2d_layout"],
+        argv["cy_layout"],
+        argv["stringify"],
     )
-    graph = layouter.graph
+    network = layouter.network
     state = wf.create_project_workflow(
-        graph,
+        network,
         project_name=argv["project_name"],
         keep_tmp=argv["keep_tmp"],
         skip_exists=argv["skip_exists"],
-        create_2d_layout=argv["create_2d_layout"],
+        cy_layout=argv["cy_layout"],
+        stringifiy=argv["stringify"],
     )
     wf.logging.debug(state)

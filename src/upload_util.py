@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from layouter import Layouter
-from settings import _NETWORKS_PATH, _PROJECTS_PATH, EdgeTags, NodeTags
+from settings import _NETWORKS_PATH, _PROJECTS_PATH, EdgeTags, NT
 from uploader_cytoscape_network import upload_files
 
 
@@ -45,11 +45,11 @@ def convert_csv_to_json(node_file: str, project_name: str, **kwargs) -> None:
             annot = row[7].split(";")
             suid = annot[1]
             nodes[suid] = {
-                NodeTags.vrnetzer_pos: row[:2],
-                NodeTags.node_color: row[4:6],
-                NodeTags.display_name: annot[0],
-                NodeTags.suid: suid,
-                NodeTags.description: annot[2],
+                NT.vrnetzer_pos: row[:2],
+                NT.node_color: row[4:6],
+                NT.display_name: annot[0],
+                NT.suid: suid,
+                NT.description: annot[2],
             }
     # extract edges
     with open(node_file, "r") as csvfile:
