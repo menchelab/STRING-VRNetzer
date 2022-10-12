@@ -1,7 +1,7 @@
 import os
 
 _WORKING_DIR = os.path.dirname(os.path.abspath(__file__))
-_STATIC_PATH = os.path.join(_WORKING_DIR, "..", "static")
+_STATIC_PATH = os.path.join(_WORKING_DIR, "..","..", "static")
 _PROJECTS_PATH = os.path.join(_STATIC_PATH, "projects")
 _NETWORKS_PATH = os.path.join(_STATIC_PATH, "networks")
 # _STYLES_PATH = os.path.join(_STATIC_PATH, "styles")

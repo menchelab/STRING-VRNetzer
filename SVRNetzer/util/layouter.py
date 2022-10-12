@@ -1,16 +1,15 @@
 import json
-from xmlrpc.client import Boolean
 
 import networkx as nx
 import numpy as np
 
-import util
-from settings import EdgeTags as ET
-from settings import Evidences
-from settings import LayoutAlgroithms as LA
-from settings import LayoutTags as LT
-from settings import NodeTags as NT
-from settings import VRNetzElements as VRNE
+from . import util
+from .settings import EdgeTags as ET
+from .settings import Evidences
+from .settings import LayoutAlgroithms as LA
+from .settings import LayoutTags as LT
+from .settings import NodeTags as NT
+from .settings import VRNetzElements as VRNE
 
 
 class Layouter:

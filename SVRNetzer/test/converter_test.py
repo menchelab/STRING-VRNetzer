@@ -1,7 +1,7 @@
 import os
 import sys
 
-from . import util
+from SVRNetzer.main import main
 
 
 def convert_csv_vrnetz(node_files: str, link_files: str):
@@ -13,7 +13,7 @@ def convert_csv_vrnetz(node_files: str, link_files: str):
         "None",
         "convert_test",
     ]
-    util(arg=arg)
+    main(arg=arg)
 
 
 def create_project(network, stringify="False"):
@@ -29,12 +29,12 @@ def create_project(network, stringify="False"):
         "False",  # cy_layout
         stringify,  # stringify
     ]
-    util(arg=arg)
+    main(arg=arg)
 
 
 def map_small_to_large(source, target, output_name):
     arg = ["", "map", source, target, output_name]
-    util(arg=arg)
+    main(arg=arg)
 
 
 if __name__ == "__main__":

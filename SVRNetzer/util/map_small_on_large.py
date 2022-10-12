@@ -1,11 +1,11 @@
 import json
 import os
 
-from settings import _NETWORKS_PATH
-from settings import Evidences as EV
-from settings import LayoutTags as LT
-from settings import NodeTags as NT
-from settings import VRNetzElements as VRNE
+from .settings import _NETWORKS_PATH
+from .settings import Evidences as EV
+from .settings import LayoutTags as LT
+from .settings import NodeTags as NT
+from .settings import VRNetzElements as VRNE
 
 # def process_edge(source, sink, target_edge, source_edges):
 #     edge_found = False

@@ -5,16 +5,16 @@ import numpy as np
 from flask import jsonify
 from PIL import Image
 
-from GlobalData import sessionData
-from settings import _PROJECTS_PATH
-from settings import AttrTags as AT
-from settings import EdgeTags as ET
-from settings import Evidences as EV
-from settings import LayoutTags as LT
-from settings import NodeTags as NT
-from settings import ProjectTag as PT
-from settings import VRNetzElements as VRNE
-from util import clean_filename
+from .GlobalData import sessionData
+from .settings import _PROJECTS_PATH
+from .settings import AttrTags as AT
+from .settings import EdgeTags as ET
+from .settings import Evidences as EV
+from .settings import LayoutTags as LT
+from .settings import NodeTags as NT
+from .settings import ProjectTag as PT
+from .settings import VRNetzElements as VRNE
+from .util import clean_filename
 
 
 def os_join(*args):

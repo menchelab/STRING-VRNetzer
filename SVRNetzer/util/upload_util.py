@@ -3,12 +3,8 @@ import json
 import os
 
 import networkx as nx
-import numpy as np
-import pandas as pd
-
-from layouter import Layouter
-from settings import _NETWORKS_PATH, _PROJECTS_PATH, EdgeTags, NT
-from uploader_cytoscape_network import upload_files
+from SVRNetzer.util.settings import _PROJECTS_PATH, NT, EdgeTags
+from SVRNetzer.util.uploader import upload_files
 
 
 def upload_network_from_file(filename: str, project_name: str, **kwargs) -> None:

@@ -12,3 +12,4 @@ __pycache__/
 /static/networks
 /static/projects
 *.code-workspace
+.venv

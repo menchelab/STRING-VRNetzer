@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Union
 
-from cytoscape_commands import AbstractCommand
+from .cytoscape_commands import AbstractCommand
 
 
 class NetworkType(Enum):
