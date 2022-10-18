@@ -1,9 +1,9 @@
 from flask import Flask
 from flask_socketio import SocketIO
 
-from ..cytoscape_util import string_commands as scmd
-from ..cytoscape_util import vrnetzer_commands as vcmd
-from ..cytoscape_util.cytoscape_parser import CytoscapeParser
+from ..util import string_commands as scmd
+from ..util import vrnetzer_commands as vcmd
+from ..util.cytoscape_parser import CytoscapeParser
 from ..util import workflows as wf
 
 app = Flask(__name__)
