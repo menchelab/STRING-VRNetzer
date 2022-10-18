@@ -216,7 +216,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 	}
 	@SuppressWarnings("unchecked")
 	public Object[] getNodeData(CyTable table){
-//	public List<HashMap<String, Object>> getData(CyTable table, Class<? extends CyIdentifiable> type){
+		//	public List<HashMap<String, Object>> getData(CyTable table, Class<? extends CyIdentifiable> type){
 		 /**
 		 * Extracts Data from CyTable (Nodes/Edges)                          (1)
 		 * <p>
@@ -230,8 +230,8 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 		 */
 		
 		// Define the type of the Elements in the given List.
-//		if (!(type == CyNode.class) & !(type == CyEdge.class))
-//			return new ArrayList<HashMap<String, Object>>();
+		//		if (!(type == CyNode.class) & !(type == CyEdge.class))
+		//			return new ArrayList<HashMap<String, Object>>();
 		
 		// get all Columns in the corresponding table
 		Collection<CyColumn> columns = table.getColumns();
@@ -258,11 +258,11 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 			 data.put("id", i);
 			 suidOnId.put(node.getSUID().intValue(), i);
 			 
-//			 if (type == CyNode.class) {
-//				 CyNode node =  network.getNode(suid);
-//				 data.putAll(getStyle(node));
-//				 data.put("id", i);
-//			 }
+			//			 if (type == CyNode.class) {
+			//				 CyNode node =  network.getNode(suid);
+			//				 data.putAll(getStyle(node));
+			//				 data.put("id", i);
+			//			 }
 			 data = util.writeData(data, columnsArray, row, skipColumns);
 			 identMap.add(data);
 		}
