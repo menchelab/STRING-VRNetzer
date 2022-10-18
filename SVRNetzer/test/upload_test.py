@@ -1,7 +1,6 @@
 import os
 import sys
 
-sys.path.append("/Users/till/Documents/Playground/STRING-VRNetzer")
 from SVRNetzer.main import main
 
 
