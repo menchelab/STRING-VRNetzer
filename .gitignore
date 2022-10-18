@@ -8,7 +8,7 @@ __pycache__/
 *.json
 *.bmp
 *.png
-*.DS_Store
+*/*/.DS_Store
 /static/networks
 /static/projects
 *.code-workspace
