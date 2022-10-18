@@ -2,9 +2,9 @@
 
 import sys
 
-from .cytoscape_util.cytoscape_parser import CytoscapeParser
-from .util import argumentparser as ap
-from .util.settings import HELP_TEXT
+from util import argumentparser as ap
+from util.cytoscape_parser import CytoscapeParser
+from util.settings import HELP_TEXT
 
 
 def main(arg=sys.argv) -> None:

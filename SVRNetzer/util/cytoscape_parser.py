@@ -13,7 +13,7 @@ from typing import Union
 
 import py4cytoscape as p4c
 
-from ..util.process_util import get_pid_of_process, wait_until_ready
+from .process_util import get_pid_of_process, wait_until_ready
 
 logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
 logging.getLogger("py4...").setLevel(logging.INFO)

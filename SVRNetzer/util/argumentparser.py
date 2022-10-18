@@ -1,8 +1,8 @@
 import sys
 from ast import literal_eval
 
-from ..cytoscape_util.cytoscape_parser import CytoscapeParser
 from . import workflows as wf
+from .cytoscape_parser import CytoscapeParser
 
 
 def extract_arguments(argv: list[str], source: list[str]) -> list[any]:
