@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Union
 
-from .cytoscape_commands import AbstractCommand
+from cytoscape_commands import AbstractCommand
 
 
 @dataclass

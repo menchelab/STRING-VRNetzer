@@ -4,10 +4,10 @@ import networkx as nx
 import numpy as np
 
 from . import util
-from .settings import EdgeTags as ET
 from .settings import Evidences
 from .settings import LayoutAlgroithms as LA
 from .settings import LayoutTags as LT
+from .settings import LinkTags as LiT
 from .settings import NodeTags as NT
 from .settings import VRNetzElements as VRNE
 
@@ -21,14 +21,14 @@ class Layouter:
         network = json.load(open(file))
         self.network = network
         nodes = network[VRNE.nodes]
-        edges = network[VRNE.links]
+        links = network[VRNE.links]
         # self.node_map = {}
         # self.edge_map = {}
         for node_data in nodes:
             self.graph.add_node(node_data[NT.id], data=node_data)
             # self.node_map[node_data["id"]] = node_data
-        for edge in edges:
-            self.graph.add_edge(edge[ET.start], edge[ET.end], data=edge)
+        for link in links:
+            self.graph.add_edge(link[LiT.start], link[LiT.end], data=link)
             # self.edge_map[(str(edge["s"]), str(edge["e"]))] = edge
         return self.graph
 
@@ -209,9 +209,9 @@ class Layouter:
                     color = evidences[ev][:2] + (
                         int(link[ev] * 255),
                     )  # Alpha scales with score
-                if ET.layouts not in self.network[VRNE.links][idx]:
-                    self.network[VRNE.links][idx][ET.layouts] = []
-                self.network[VRNE.links][idx][ET.layouts].append(
+                if LiT.layouts not in self.network[VRNE.links][idx]:
+                    self.network[VRNE.links][idx][LiT.layouts] = []
+                self.network[VRNE.links][idx][LiT.layouts].append(
                     {LT.name: ev, LT.color: color}
                 )
 

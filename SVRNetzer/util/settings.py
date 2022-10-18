@@ -1,7 +1,7 @@
 import os
 
 _WORKING_DIR = os.path.dirname(os.path.abspath(__file__))
-_STATIC_PATH = os.path.join(_WORKING_DIR, "..","..", "static")
+_STATIC_PATH = os.path.join(_WORKING_DIR, "..", "..", "static")
 _PROJECTS_PATH = os.path.join(_STATIC_PATH, "projects")
 _NETWORKS_PATH = os.path.join(_STATIC_PATH, "networks")
 # _STYLES_PATH = os.path.join(_STATIC_PATH, "styles")
@@ -57,6 +57,7 @@ class NodeTags:
     stringdb_sequence = "stringdb_sequence"
     ppi_id = "ppi_id"
     id = "id"
+    attr_lst = "attrlist"
 
 
 class ProjectTag:
@@ -70,7 +71,7 @@ class AttrTags:
     names = "names"
 
 
-class EdgeTags:
+class LinkTags:
     id = "id"
     start = "s"
     end = "e"

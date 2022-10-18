@@ -7,8 +7,8 @@ import pandas as pd
 
 from .layouter import Layouter
 from .settings import _NETWORKS_PATH, UNIPROT_MAP
-from .settings import EdgeTags as ET
 from .settings import LayoutTags as LT
+from .settings import LinkTags as LiT
 from .settings import NodeTags as NT
 from .settings import VRNetzElements as VRNE
 
@@ -130,15 +130,15 @@ class VRNetzConverter:
         )
 
         for i, link in enumerate(links):
-            link[ET.id] = i
-            if link[ET.id] in links_map:
-                link = links_map[link[ET.id]]
+            link[LiT.id] = i
+            if link[LiT.id] in links_map:
+                link = links_map[link[LiT.id]]
             else:
-                links_map[link[ET.id]] = link
+                links_map[link[LiT.id]] = link
 
-            if ET.layouts not in link:
-                link[ET.layouts] = []
-            link[ET.layouts].append({LT.name: layout})
+            if LiT.layouts not in link:
+                link[LiT.layouts] = []
+            link[LiT.layouts].append({LT.name: layout})
 
         return links_map
 
