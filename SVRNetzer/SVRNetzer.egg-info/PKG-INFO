@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: SVRNetzer
+Version: 0.0.1
+Summary: Extension for the VRNetzer to upload data from STRING networks exported from Cytoscape using the VRNetzer App
+Author-email: Till Pascal Oblau <till@menchelab.com>
+Project-URL: Homepage, https://github.com/menchelab/STRING-VRNetzer
+Project-URL: Bug Tracker, https://github.com/menchelab/STRING-VRNetzer/issues
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown

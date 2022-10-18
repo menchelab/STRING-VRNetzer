@@ -16,7 +16,7 @@ from .string_commands import (
     StringProteinQuery,
     StringPubMedQuery,
 )
-from .uploader import Uploader
+from .string_uploader import Uploader
 
 # from extract_colors_from_style import get_node_mapping
 

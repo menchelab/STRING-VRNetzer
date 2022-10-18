@@ -1,0 +1,5 @@
+pyproject.toml
+SVRNetzer.egg-info/PKG-INFO
+SVRNetzer.egg-info/SOURCES.txt
+SVRNetzer.egg-info/dependency_links.txt
+SVRNetzer.egg-info/top_level.txt
