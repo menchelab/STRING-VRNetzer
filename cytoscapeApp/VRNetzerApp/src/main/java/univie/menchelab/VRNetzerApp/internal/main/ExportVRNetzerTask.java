@@ -149,6 +149,7 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 		 */
 		Map<String,Object> node_prop = new HashMap<>();
 		View<CyNode> view = netView.getNodeView(node);
+//		System.out.println(view.getVisualProperty(BasicVisualLexicon.);
 		String node_label = view.getVisualProperty(BasicVisualLexicon.NODE_LABEL);
 		Double x = view.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
 		Double y = view.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);

@@ -1,6 +1,7 @@
 package univie.menchelab.VRNetzerApp.internal.util;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.cytoscape.model.CyRow;
@@ -19,6 +20,11 @@ public class Utility{
 			 if (key.equals( "display name")){
 				data.put("n",value);
 			 }
+			 if(key.equals("stringdb::canonical name")) {
+				 List<String> uniprot = new ArrayList<String>();
+				 uniprot.add(value.toString());
+				 data.put("uniprot",uniprot);
+			 }
 			 // ignore defined column
 			 if(skipColumns.contains(key)){
 				 continue;
@@ -33,10 +39,10 @@ public class Utility{
 			 }
 			 // ignore stringdb_structures, if there is no structure listed
 			 if (key.equals("stringdb::structures")) {
-				 List<String> someList = (List<String>) value;
-				 System.out.println(someList.size());
-				 if(someList.size()==1) {
-					 if(someList.get(0).equals("")){
+				 List<String> structures = (List<String>) value;
+				 System.out.println(structures.size());
+				 if(structures.size()==1) {
+					 if(structures.get(0).equals("")){
 						 continue;
 					 }
 
