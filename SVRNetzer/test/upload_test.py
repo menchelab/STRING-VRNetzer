@@ -1,21 +1,22 @@
 import os
 import sys
 
-from SVRNetzer.main import main
+from main import main
 
 
 def upload_100_alz():
+    # FIXME: Change of color will just color the first edge instead of moving the edges.
     network = "/Users/till/Documents/Playground/STRING-VRNetzer/static/networks/100_alzheimer.VRNetz"
     arg = [
         "",
         "project",
         network,
-        "None",
+        "cg_local_umap",
         "None",
         "None",
         "WebGL_Test",
-        "False",
-        "False",
+        "True",
+        "True",
         "True",
     ]
     main(arg=arg)

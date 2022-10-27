@@ -4,7 +4,7 @@ import os
 
 import networkx as nx
 from SVRNetzer.util.settings import _PROJECTS_PATH, NT, EdgeTags
-from SVRNetzer.util.string_uploader import upload_files
+from SVRNetzer.util.uploader import upload_files
 
 
 def upload_network_from_file(filename: str, project_name: str, **kwargs) -> None:

@@ -215,8 +215,6 @@ class Layouter:
                     {LT.name: ev, LT.color: color}
                 )
 
-        return self.network[VRNE.links]
-
 
 if __name__ == "__main__":
     import os

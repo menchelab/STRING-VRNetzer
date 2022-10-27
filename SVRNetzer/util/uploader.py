@@ -220,7 +220,11 @@ class Uploader:
             )
 
         for idx, elem in enumerate(nodes):
-            node = {NT.id: elem[NT.id], NT.name: elem[NT.name], NT.attr_lst: [NT.name]}
+            node = {
+                NT.id: elem[NT.id],
+                NT.name: elem[NT.name],
+                NT.attr_lst: [elem[NT.name]],
+            }
             self.nodes[VRNE.nodes].append(node)
             tex = self.extract_node_data(elem, layouts, self.attr_list, skip_attr)
             for l, _ in enumerate(layouts):

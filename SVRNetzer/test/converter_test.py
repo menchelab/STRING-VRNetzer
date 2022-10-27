@@ -1,7 +1,7 @@
 import os
 import sys
 
-from SVRNetzer.main import main
+from main import main
 
 
 def convert_csv_vrnetz(node_files: str, link_files: str):

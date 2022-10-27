@@ -7,9 +7,6 @@ See the webpage for more information and documentation:
 
 """
 import sys
+import test
 
-if sys.version_info < (3, 9):
-    raise ImportError("Python version 3.9 or above is required for SymPy.")
-del sys
-
-from .util import converter, settings, util
+from . import util

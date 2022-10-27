@@ -2,9 +2,9 @@
 
 import sys
 
-from .util import argumentparser as ap
-from .util.cytoscape_parser import CytoscapeParser
-from .util.settings import HELP_TEXT
+from SVRNetzer.util import argumentparser as ap
+from SVRNetzer.util.cytoscape_parser import CytoscapeParser
+from SVRNetzer.util.settings import HELP_TEXT
 
 
 def main(arg=sys.argv) -> None:

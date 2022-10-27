@@ -18,8 +18,8 @@ class VRNetzConverter:
 
     def __init__(
         self,
-        node_files: list[str] | str,
-        link_files: list[str] | str = None,
+        node_files: list[str] or str,
+        link_files: list[str] or str = None,
         uniprot_mapping_file: str = None,
         project_name: str = None,
     ) -> None:
