@@ -1,11 +1,16 @@
 import json
 import os
+import sys
 
-import numpy as np
+from .settings import _WORKING_DIR
+
+sys.path.append(os.path.join(_WORKING_DIR, "..", ".."))
+
 from flask import jsonify
 from PIL import Image
 
-from .GlobalData import sessionData
+from GlobalData import sessionData
+
 from .settings import _PROJECTS_PATH
 from .settings import AttrTags as AT
 from .settings import Evidences as EV
@@ -26,15 +31,15 @@ class Uploader:
         self,
         network: dict,
         p_name: str,
-        skip_exists: bool,
-        stringify: bool,
+        skip_exists: bool = False,
+        stringify: bool = True,
         p_path: str = _PROJECTS_PATH,
     ) -> None:
         self.network = network
         self.p_name = p_name  # Name of the project
         self.pf_path = p_path  # Path to the directory that contains all projects
         self.skip_exists = skip_exists  # boolean that indicates whether to skip existing project files or to update them
-        self.strigify = (
+        self.stringify = (
             stringify  # boolean that indicates whether a network should be stringified
         )
 
@@ -45,7 +50,10 @@ class Uploader:
         self.nodes_file = os_join(self.p_path, "nodes.json")
         self.links_file = os_join(self.p_path, "links.json")
 
-        pfile = {}
+        pfile = {"network": "NA"}
+        if self.stringify:
+            pfile["network"] = "string"
+
         self.attr_list = {}
         pfile["name"] = self.p_name
         pfile["layouts"] = []
@@ -72,7 +80,7 @@ class Uploader:
         with open(self.names_file, "w") as outfile:
             json.dump(self.attr_list, outfile)
 
-        print("Successfully created directories in %s " % path)
+        print(f"Successfully created directories in {path} ")
 
     def loadProjectInfo(self) -> dict or str:
         self.folder = os_join(self.p_path)
@@ -95,7 +103,7 @@ class Uploader:
             return "no such project"
 
     def write_json_files(self) -> None:
-        # update the projects file
+        """Will update the project files: pfile, names, nodes, links"""
         files = [self.pfile_file, self.names_file, self.nodes_file, self.links_file]
 
         contents = [self.pfile, self.attr_list, self.nodes, self.links]
@@ -160,12 +168,13 @@ class Uploader:
         return tex
 
     @staticmethod
-    def extract_link_data(elem, layouts):
+    def extract_link_data(elem: dict, layouts):
         tex = None
         if LiT.layouts in elem.keys():
             elem_lays = {lay[LT.name]: idx for idx, lay in enumerate(elem[LiT.layouts])}
             start = elem[LiT.start]
             end = elem[LiT.end]
+
             sx = start % 128
             syl = start // 128 % 128
             syh = start // 16384
@@ -175,7 +184,7 @@ class Uploader:
             eyh = end // 16384
             tex = []
             for idx, layout in enumerate(layouts):
-                color = [0, 100, 255, 255]
+                color = [0, 0, 0, 0]
                 tex.append([])
                 if layout in elem_lays:
                     layout_idx = elem_lays[layout]
@@ -183,8 +192,8 @@ class Uploader:
                     if LT.color in layout:
                         if isinstance(layout[LT.color], tuple):
                             color = layout[LT.color]
-                else:
-                    color = [0, 0, 0, 0]
+                    else:
+                        color = [0, 255, 0, 255]
 
                 tex[idx].append((sx, syl, syh))
                 tex[idx].append((ex, eyl, eyh))
@@ -219,17 +228,14 @@ class Uploader:
                 ]
             )
 
-        for idx, elem in enumerate(nodes):
-            node = {
-                NT.id: elem[NT.id],
-                NT.name: elem[NT.name],
-                NT.attr_lst: [elem[NT.name]],
-            }
-            self.nodes[VRNE.nodes].append(node)
+        for _, elem in enumerate(nodes):
+            self.nodes[VRNE.nodes].append(
+                {k: v for k, v in elem.items() if k not in skip_attr}
+            )
             tex = self.extract_node_data(elem, layouts, self.attr_list, skip_attr)
             for l, _ in enumerate(layouts):
                 for d in range(3):
-                    l_tex[l][d][idx] = tex[l][d]
+                    l_tex[l][d][elem[NT.id]] = tex[l][d]
         output = ""
 
         for l, layout in enumerate(layouts):
@@ -292,10 +298,11 @@ class Uploader:
 
         l_idx = [0 for _ in layouts]
         for elem in links:
+            elem: dict
             link = {
-                LiT.id: elem[LiT.id],
-                LiT.start: elem[LiT.start],
-                LiT.end: elem[LiT.end],
+                LiT.id: elem.get(LiT.id),
+                LiT.start: elem.get(LiT.start),
+                LiT.end: elem.get(LiT.end),
             }
             self.links[VRNE.links].append(link)
             tex = self.extract_link_data(elem, layouts)
@@ -367,16 +374,17 @@ class Uploader:
         ev_rgb = [f"{ev}RGB" for ev in ev]
         self.pfile[PT.links] = [ev_xyz[0], ev_xyz[0]] + ev_xyz
         self.pfile[PT.links_rgb] = [ev_rgb[0], ev_rgb[0]] + ev_rgb
-        self.pfile[PT.layouts] = [
-            f"{LT.cy_layout}XYZ",
-            f"{LT.string_3d_no_z}XYZ",
-            f"{LT.string_3d}XYZ",
-        ]
-        self.pfile[PT.layouts_rgb] = [
-            f"{LT.cy_layout}RGB",
-            f"{LT.string_3d_no_z}RGB",
-            f"{LT.string_3d}RGB",
-        ]
+        if f"{LT.cy_layout}XYZ" in self.pfile[PT.layouts]:
+            self.pfile[PT.layouts] = [
+                f"{LT.cy_layout}XYZ",
+                f"{LT.string_3d_no_z}XYZ",
+                f"{LT.string_3d}XYZ",
+            ]
+        else:
+            self.pfile[PT.layouts_rgb] = [
+                f"{LT.string_3d_no_z}RGB",
+                f"{LT.string_3d}RGB",
+            ]
         for _ in ev:
             self.pfile[PT.layouts].append(self.pfile[PT.layouts][-1])
             self.pfile[PT.layouts_rgb].append(self.pfile[PT.layouts_rgb][-1])
@@ -406,10 +414,10 @@ class Uploader:
 
         state = ""
 
-        nodes = network[VRNE.nodes]
-        links = network[VRNE.links]
-        n_lay = network[VRNE.node_layouts]  # Node layouts
-        l_lay = network[VRNE.link_layouts]
+        nodes = network.get(VRNE.nodes)
+        links = network.get(VRNE.links)
+        n_lay = network.get(VRNE.node_layouts, [])  # Node layouts
+        l_lay = network.get(VRNE.link_layouts, [])  # Link layouts
 
         with open(self.names_file, "r") as json_file:
             self.attr_list = json.load(json_file)
@@ -423,6 +431,7 @@ class Uploader:
 
         self.write_json_files()
 
+        # TODO: don't use global...
         global sessionData
         sessionData["proj"] = self.listProjects(self.pf_path)
 
@@ -430,81 +439,34 @@ class Uploader:
 
 
 def extract_attributes(attr_list, elem, skip_attr):
-    if AT.names not in attr_list:
-        attr_list["names"] = []
-    name = ["NA"]
+    # if AT.names not in attr_list:
+    #     attr_list["names"] = []
+    # name = ["NA"]
 
-    if NT.stringdb_canoncial_name in elem.keys():
-        uniprod = elem[NT.stringdb_canoncial_name]
-        name = [
-            uniprod,  # identifier
-            "None",  # Attribute
-            uniprod,  # Annotation
-            50,  # Additional
-        ]
-        if NT.stringdb_sequence in elem.keys():
-            name[-1] = elem[NT.stringdb_sequence]
-    elif NT.name in elem.keys():
-        gene_name = elem[NT.name]
-        name = [f"GENENAME={gene_name}"]
+    # if NT.stringdb_canoncial_name in elem.keys():
+    #     uniprod = elem[NT.stringdb_canoncial_name]
+    #     name = [
+    #         uniprod,  # identifier
+    #         "None",  # Attribute
+    #         uniprod,  # Annotation
+    #         50,  # Additional
+    #     ]
+    #     if NT.stringdb_sequence in elem.keys():
+    #         name[-1] = elem[NT.stringdb_sequence]
+    # elif NT.name in elem.keys():
+    #     gene_name = elem[NT.name]
+    #     name = [f"GENENAME={gene_name}"]
+    uniprod = elem.get(NT.stringdb_canoncial_name)
+    if uniprod is None:
+        uniprod = elem.get(NT.uniprot)
+        if uniprod:
+            uniprod = uniprod[0]
+        else:
+            elem.get(NT.name)
+    if uniprod:
+        name = [uniprod]
+        if "names" not in attr_list:
+            attr_list["names"] = []
+        attr_list["names"].append(name)
 
-    attr_list["names"].append(name)
-    attributes = [k for k in elem.keys() if k not in skip_attr]
-    for attr in attributes:
-        if not attr in attr_list:
-            attr_list[attr] = []
-        attr_list[attr].append([elem[attr]])
     return attr_list
-
-
-if __name__ == "__main__":
-    _FILE_PATH = os.path.abspath(f"{__file__}/../../")
-    _PROJECTS_PATH = f"{_FILE_PATH}/static/projects"
-    sessionData["proj"] = Uploader.listProjects(_PROJECTS_PATH)
-    print(sessionData["proj"])
-
-# def create_2d_layouts(self,nodes,layout
-# ):
-#     # Create 2D Layout of Cytoscape coordinates node texture
-#     filename = f"{self.project}_{layout}"
-#     output =self.makeNodeTex(nodes,layout)
-#     self.pfile["layouts"].append(f"{filename}XYZ")
-#     self.pfile["layoutsRGB"].append(f"{filename}RGB")
-#     self.pfile["links"].append(f"anyXYZ")
-#     self.pfile["linksRGB"].append(f"anyRGB")
-
-#     return output
-
-# def create_3d_eviedence_layout(self,linksevidences):
-#     # For each evidence type, create a texture and upload it
-#     for evidence in evidences:
-#         edges = edges_data.copy()
-#         if not evidence == "any":
-#             edges = {
-#                 edge: data for edge, data in edges.items() if evidence in data.keys()
-#             }
-#         # Skip This evidence if there are not edges for this evidence
-#         if len(edges) == 0:
-#             continue
-
-#         # Color each link with the color of the evidence
-#         for edge in edges:
-#             if evidence == "any":
-#                 color = evidences[evidence]
-#                 # TODO extract the alpha value with the highest score.
-#             else:
-#                 color = evidences[evidence][:2] + (
-#                     int(edges[edge][evidence] * 255),
-#                 )  # Alpha scales with score
-#             edges[edge]["color"] = color
-
-#         # Add node layout to pflie for this link layout
-#         pfile["layouts"].append(f"{filename}XYZ")
-#         pfile["layoutsRGB"].append(f"{filename}RGB")
-
-#         # Add link layout to pfile
-#         pfile["links"].append(f"{evidence}XYZ")
-#         pfile["linksRGB"].append(f"{evidence}RGB")
-
-#         # Generate link texture
-#         state += f"{state}<br>{makeLinkTex(project,evidence,edges,nodes_data.keys(),projects_path,skip_exists)}"

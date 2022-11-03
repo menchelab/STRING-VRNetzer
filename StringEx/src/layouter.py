@@ -1,4 +1,5 @@
 import json
+import random
 
 import networkx as nx
 import numpy as np
@@ -17,13 +18,7 @@ class Layouter:
 
     graph: nx.Graph = nx.Graph()
 
-    def read_from_vrnetz(self, file: str) -> nx.Graph:
-        network = json.load(open(file))
-        self.network = network
-        nodes = network[VRNE.nodes]
-        links = network[VRNE.links]
-        # self.node_map = {}
-        # self.edge_map = {}
+    def gen_graph(self, nodes, links):
         for node_data in nodes:
             self.graph.add_node(node_data[NT.id], data=node_data)
             # self.node_map[node_data["id"]] = node_data
@@ -31,6 +26,13 @@ class Layouter:
             self.graph.add_edge(link[LiT.start], link[LiT.end], data=link)
             # self.edge_map[(str(edge["s"]), str(edge["e"]))] = edge
         return self.graph
+
+    def read_from_vrnetz(self, file: str) -> nx.Graph:
+        network = json.load(open(file))
+        self.network = network
+        nodes = network[VRNE.nodes]
+        links = network[VRNE.links]
+        return self.gen_graph(nodes, links)
 
     def get_node_data(self, node):
         if "data" not in self.graph.nodes[node]:
@@ -72,9 +74,9 @@ class Layouter:
         )
 
     def apply_layout(self, layout_algo: str = None) -> nx.layout:
-        """Applies a networkx layout algorithm and adds the node positions to the self.nodes_data dictionary."""
-
+        """Applies a layout algorithm and adds the node positions to nodes in the self.network[VRNE.nodes] list."""
         if layout_algo is None:
+            """Select default layout algorithm"""
             layout_algo = LA.spring
 
         if LA.cartoGRAPH in layout_algo:
@@ -102,18 +104,22 @@ class Layouter:
         idx = 0
         for node, pos in layout.items():
             node = self.network[VRNE.nodes][idx]
+            color = [random.randint(0,255),random.randint(0,255),random.randint(0,255),255]
+            size = 1
 
             # find the correct layout
             cy_layout, _ = util.find_cy_layout(node)
-            if cy_layout is None:
-                idx += 1
-                continue
+            if cy_layout:
+                # extract color and (size) information
+                size = cy_layout[LT.size]
+                color = cy_layout[LT.color]
 
-            # extract color and (size) information
-            size = cy_layout[LT.size]
-            color = cy_layout[LT.color]
             if VRNE.node_layouts not in self.network:
                 self.network[VRNE.node_layouts] = []
+
+            if NT.layouts not in node:
+                node[NT.layouts] = []
+
             node[NT.layouts].append(
                 {
                     LT.name: LT.string_3d_no_z,
@@ -122,6 +128,7 @@ class Layouter:
                     LT.size: size,
                 }
             )  # Add 2D coordinates
+
             node[NT.layouts].append(
                 {
                     LT.name: LT.string_3d,
@@ -149,7 +156,9 @@ class Layouter:
 
                 # Get positions of only these
                 points.append(cy_layout[LT.position])
-
+                
+        if len(points) == 0:
+            return None
         # normalize positions between in [0,1]
         points = np.array(points)
         points = self.to_positive(points, 2)
@@ -201,19 +210,23 @@ class Layouter:
                 continue
 
             # Color each link with the color of the evidence
-            for idx, link in enumerate(cur_links):
-                if ev == Evidences.any:
-                    color = evidences[ev]
-                    # TODO extract the alpha value with the highest score.
+            for idx, link in enumerate(links):
+                if link in cur_links:
+                    if ev == Evidences.any:
+                        color = evidences[ev]
+                        # TODO extract the alpha value with the highest score.
+                    else:
+                        color = evidences[ev][:3] + (
+                            int(link[ev] * 255),
+                        )  # Alpha scales with score
                 else:
-                    color = evidences[ev][:2] + (
-                        int(link[ev] * 255),
-                    )  # Alpha scales with score
+                    color = (0, 0, 0, 0)  # No evidence
                 if LiT.layouts not in self.network[VRNE.links][idx]:
                     self.network[VRNE.links][idx][LiT.layouts] = []
                 self.network[VRNE.links][idx][LiT.layouts].append(
                     {LT.name: ev, LT.color: color}
                 )
+        return self.network[VRNE.links]
 
 
 if __name__ == "__main__":
@@ -226,4 +239,3 @@ if __name__ == "__main__":
         )
     )
     layouter.apply_layout()
-    print(layouter.graph)

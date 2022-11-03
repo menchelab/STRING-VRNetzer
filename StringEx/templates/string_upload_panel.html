@@ -1,0 +1,174 @@
+<html>
+
+<head>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <script src="{{ url_for('StringEx.static', filename='js/stringUI_Elements.js') }}"></script>
+</head>
+
+<body>
+    <div id="tabs-4" src="{{ url_for('static', filename='img/upload.png') }}">
+        <div id="fragment-1">
+            <div class="twelve columns">
+                <div class="eight columns">
+                    <h2 class="lineglowslow" style="margin-top:30px">STRING
+                        <br>
+                        <br>
+                        &ensp;VRNetzer
+                    </h2>
+                </div>
+                <div class="four columns">
+                    <div class="swagLogo"><br></br></div>
+                </div>
+            </div>
+            <div>Check out the new webGL preview!</div>
+            <form action="/StringEx/preview">
+                <input type="submit" value="webGL PREVIEW" style="height: 50px; width: 250px;" />
+            </form>
+            <div class="twelve columns">
+                <h3><span>UPLOAD NEW DATA</span></h3>
+                <p>For file structure and VRNetz composition refer to files in VRNetzer_Backend/static/networks</p>
+            </div>
+
+            <!--++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                    Project + Namespace Dropdown
+      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+            <form id="upload_form" method=post enctype=multipart/form-data>
+
+                <div class="twelve columns">
+
+                    <div class="six columns">
+                        <div class="frameBox">
+                            <div class="two columns">
+                                <input type="radio" name="namespace" id="radio_new_namespace" value="New">
+                            </div>
+                            <h6>CREATE NEW PROJECT</h6>
+                            <br>
+
+                            <input type="text" id="new_namespace_name" name="new_name" class="swagBox">
+                            <p id="submit_warnings" style="display:inline"></p>
+
+                            <!-- The Popup window warning :
+            <script>
+              function popupWarning() {
+                var popup = document.getElementById("myPopup");
+                popup.classList.toggle("show");
+              }
+            </script>
+            <div class="popup" onclick="popupWarning()">
+              <input type="text" id="new_namespace_name" name="new_name" class="swagBox">
+              <span class="popuptext" id="submit_warnings"></span>
+            </div>
+            -->
+
+                        </div>
+                    </div>
+
+                    <div class="six columns">
+                        <div class="frameBox">
+                            <div class="two columns">
+                                <input type="radio" name="namespace" value="existing" checked><br>
+                            </div>
+                            <h6> ADD TO PROJECT</h6>
+
+                            <!--<h3 class="lineglowslow"><span>PROJECT</span></h3>-->
+                            <br>
+                            <div class="cornerBox">
+                                <select name="namespaces" id="namespaces">
+                                    {% for namespace in namespaces %}
+                                    print(namespace);
+                                    <option value="{{namespace}}">{{namespace}}</option>
+                                    {% endfor %}
+                                </select>
+                                <br>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+
+
+                <!-- original position before radio buttons <form id="upload_form" method=post enctype=multipart/form-data> -->
+
+                <div class="frameBox">
+                    <div class="twelve columns">
+                        <h4 class="nine columns">VRNetz</h4>
+                        <input type=file name=vrnetz multiple value="placeholder">
+                    </div>
+                </div>
+
+                <!--
+            <label>N O D E S</label><br>
+            <input type=file name=nodes multiple><br><br>
+            -->
+                <div class="twelve columns">
+                    <div class="six columns">
+                        <div class="frameBox">
+                            <h4> LAYOUT<br>&ensp;ALGORITHM</h4>
+                            <br>
+                            <div class="cornerBox">
+                                <select name="algo" id="algo">
+                                    {% for algo in algorithms %}
+                                    <option value="{{algo}}">{{algo}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="six columns">
+                        <div class="frameBox">
+                            <div class="two columns">
+                                <input type="string_checkbox" name="stringify" value="stringify" checked>
+                            </div>
+                            <label for="stringify">
+                                <h6>STRING NETWORK</h6>
+                            </label><br>
+                            <div class="two columns">
+                                <input type="string_checkbox" name="write" value="write" checked>
+                            </div>
+                            <label for="write">
+                                <h6>SAVE NETWORK WITH COORDS</h6>
+                            </label><br>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+
+                <!--
+            <label>A T T R I B U T E S (optional) </label><br>
+            <input type=file name=attributes multiple><br><br>
+          
+            <label>L A B E L S (optional) </label><br>
+            <input type=file name=labels multiple><br><br>
+            -->
+
+                <div class="frameBox">
+                    <div class="twelve columns">
+                        <div class="two columns"><input type=submit value=Upload id=upload_button
+                                class="swagSubmit"></button>
+                        </div>
+                        <div class="nine columns" id="upload_message"></div>
+                        <br>
+
+
+                    </div>
+                </div>
+                <!--<div class="twelve columns"> 
+          <div  class="lineglow" style="background-position: center;"><br></br></div>
+        </div>-->
+
+        </div>
+
+        </form>
+
+
+    </div>
+</body>
+
+</html>
