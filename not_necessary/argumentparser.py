@@ -1,3 +1,4 @@
+"""Used in the cmd line interface to call the different workflows."""
 import sys
 from ast import literal_eval
 

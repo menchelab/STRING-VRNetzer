@@ -1,3 +1,4 @@
+"""Old util to load a network from a json file."""
 import json
 
 from SVRNetzer.util.settings import VRNetzElements as VRNE

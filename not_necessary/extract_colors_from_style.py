@@ -1,5 +1,4 @@
-from re import M
-
+"""Old utility to extract the colors of the nodes from a styles.xml file."""
 import bs4
 from bs4 import BeautifulSoup as BS
 from PIL import ImageColor

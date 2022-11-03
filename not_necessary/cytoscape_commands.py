@@ -1,3 +1,4 @@
+"""Abstract class for Cytoscape commands which can be executed using the cytoscape parser."""
 from abc import ABC
 
 

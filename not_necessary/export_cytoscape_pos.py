@@ -1,3 +1,4 @@
+"""Old Utility to export the positions of the nodes in a Cytoscape session."""
 import json
 import sys
 

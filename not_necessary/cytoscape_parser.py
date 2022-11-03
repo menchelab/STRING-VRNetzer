@@ -1,3 +1,4 @@
+"""Parser to execute commands in Cytoscape using the cyREST API."""
 # exec(
 #     requests.get(
 #         "https://raw.githubusercontent.com/cytoscape/jupyter-bridge/master/client/p4c_init.py"

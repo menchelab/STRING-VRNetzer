@@ -1,7 +1,5 @@
-import os
-import sys
-
-from main import main
+"""Tested converter workflows."""
+from not_necessary.main import main
 
 
 def convert_csv_vrnetz(node_files: str, link_files: str):

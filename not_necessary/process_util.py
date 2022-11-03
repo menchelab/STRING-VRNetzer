@@ -1,3 +1,4 @@
+"""Used to check if Cytoscape is running."""
 import time
 
 import psutil

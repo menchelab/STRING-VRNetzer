@@ -1,5 +1,5 @@
 #! python3
-
+"""Guides through the cmd line interface."""
 import sys
 
 from StringEx.src import argumentparser as ap

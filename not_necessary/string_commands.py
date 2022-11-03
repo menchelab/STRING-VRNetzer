@@ -1,3 +1,4 @@
+"""Classes to execute commands of the StringApp in Cytoscape """
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Union

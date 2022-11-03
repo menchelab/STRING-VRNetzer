@@ -1,7 +1,6 @@
-import os
-import sys
+"""Uploader test."""
 
-from main import main
+from not_necessary.main import main
 
 
 def upload_100_alz():

@@ -1,3 +1,4 @@
+"""Old GraphML Parser for GraphML files exported from Cytoscape."""
 import xml.etree.ElementTree as ET
 
 _GRAPHML_URL = "{http://graphml.graphdrawing.org/xmlns}"

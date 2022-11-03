@@ -1,3 +1,4 @@
+"""Classes to exectute commands of the VRNetzerApp in Cytoscape."""
 from dataclasses import dataclass
 from typing import Union
 
