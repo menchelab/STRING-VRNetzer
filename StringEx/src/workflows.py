@@ -1,12 +1,15 @@
 import json
 import logging
 import os
+import time
 
 from .converter import VRNetzConverter
+
 # from .cytoscape_parser import CytoscapeParser
 from .layouter import Layouter
 from .map_small_on_large import map_source_to_target
-from .settings import _NETWORKS_PATH, _PROJECTS_PATH, UNIPROT_MAP, Organisms
+from .settings import _NETWORKS_PATH, _PROJECTS_PATH, UNIPROT_MAP, Organisms, logger
+
 # from .settings import VRNetzElements as VRNE
 # from .string_commands import (StringCompoundQuery, StringDiseaseQuery,
 #                               StringProteinQuery, StringPubMedQuery)
@@ -18,16 +21,15 @@ from .uploader import Uploader
 # from extract_colors_from_style import get_node_mapping
 
 
-logger = logging.getLogger("VRNetzer Cytoscape App")
-logger.setLevel(logging.DEBUG)
-
 def VRNetzer_upload_workflow(request):
     """Used from the StringEX/uploadfiles route"""
-    print("Starting upload of VRNetz...")
-    stringify, write_VRNetz,gen_layout,algo = False, False, False, None
+    logger.info("Starting upload of VRNetz...")
+    stringify, write_VRNetz, gen_layout, algo = False, False, False, None
     form = request.form.to_dict()
     network = request.files.getlist("vrnetz")[0].read().decode("utf-8")
     network = json.loads(network)
+    start = time.time()
+    logger.debug(f"Network loaded in {time.time()-start} seconds.")
 
     project_name = ""
 
@@ -36,73 +38,88 @@ def VRNetzer_upload_workflow(request):
 
     else:
         project_name = form["existing_namespace"]
+
     if not project_name:
         return "namespace fail"
-    # print(form.keys())
+
     if algo in form:
         algo = form["algo"]
 
-    tags = {"stringify":stringify,
-     "write":write_VRNetz,"calc_lay":gen_layout}
-    for key,_ in tags.items():
+    tags = {"stringify": stringify, "write": write_VRNetz, "calc_lay": gen_layout}
+    for key, _ in tags.items():
         if key in form:
             tags[key] = True
-    stringify, write_VRNetz,gen_layout = tags["stringify"], tags["write"], tags["calc_lay"]        
+    stringify, write_VRNetz, gen_layout = (
+        tags["stringify"],
+        tags["write"],
+        tags["calc_lay"],
+    )
     # create layout
-    layouter = apply_layout_workflow(network, layout_algo=algo, stringify=stringify,gen_layout=gen_layout)
+    s1 = time.time()
+    layouter = apply_layout_workflow(
+        network, layout_algo=algo, stringify=stringify, gen_layout=gen_layout
+    )
+    logger.debug(f"Applying layout algorithm in {time.time()-s1} seconds.")
     network = layouter.network
 
     # upload network
     uploader = Uploader(network, p_name=project_name, stringify=stringify)
+    s1 = time.time()
     state = uploader.upload_files(network)
+    logger.debug(f"Uploading process took {time.time()-s1} seconds.")
     if write_VRNetz:
         outfile = f"{_NETWORKS_PATH}/{project_name}_processed.VRNetz"
-        print(f"processed network saved at:{outfile}")
         with open(outfile, "w") as f:
             json.dump(network, f)
-        logging.info(f"Saved network as {outfile}")
+        logger.info(f"Saved network as {outfile}")
     if stringify:
         uploader.stringify_project()
-        print("stringified")
-        logging.info(f"Layouts stringified: {project_name}")
+        logger.debug("Layouts of project has been stringified.")
+    logger.debug(f"Total process took {time.time()-s1} seconds.")
+    logger.info("Project has been uploaded!")
     return state
+
 
 def VRNetzer_map_workflow(request):
     """Used from the StringEX/mapfiles route"""
 
-    print("Starting mapping of VRNetz...")
+    logger.info("Starting mapping of VRNetz...")
 
     form = request.form.to_dict()
     f_src_network = request.files.getlist("vrnetz")[0]
     src_network = f_src_network.read().decode("utf-8")
     src_network = json.loads(src_network)
-    
+
     organ = form.get("organism")
     f_organ = Organisms.get_file_name(organ)
     f_organ = os.path.join(_PROJECTS_PATH, f_organ)
-    trg_network = json.loads(organ)
+    nodes_files = os.path.join(f_organ, "nodes.json")
+    trg_network = json.loads(nodes_files)
 
     project_name = form.get("project_name")
     if project_name is None or project_name == "":
         src_name = os.path.split(f_src_network.filename)[1].split(".")[0]
-        trg_name = organ.replace(".","_")
+        trg_name = organ.replace(".", "_")
         project_name = f"{src_name}_on_{trg_name}"
 
     destination = os.path.join(_PROJECTS_PATH, project_name)
     try:
         map_source_to_target(src_network, trg_network, destination)
-        html = (f'<a style="color:green;">SUCCESS: network {f_src_network.filename} mapped on {organ} saved as project {project_name} </a>'
-        f"<br>"+
-        f'<input type="submit" value="Preview" id="upload_preview" style="height: 50px; width: 150px;">'+
-        "<script>"+
-        "$('#reload').on('click', function() {"+
-        f"var url = window.location.href.split('&')[0] + '&project={project_name}'"+
-        f"window.location.href = url;"+
-        "});"
-        f"</script>'")
+        html = (
+            f'<a style="color:green;">SUCCESS: network {f_src_network.filename} mapped on {organ} saved as project {project_name} </a>'
+            f"<br>"
+            + f'<input type="submit" value="Preview" id="upload_preview" style="height: 50px; width: 150px;">'
+            + "<script>"
+            + "$('#reload').on('click', function() {"
+            + f"var url = window.location.href.split('&')[0] + '&project={project_name}'"
+            + f"window.location.href = url;"
+            + "});"
+            f"</script>'"
+        )
     except Exception as e:
         html = f'<a style="color:red;">ERROR: {e}</a>'
     return html
+
 
 def apply_layout_workflow(
     network: str,
@@ -132,9 +149,10 @@ def apply_layout_workflow(
         layouter.correct_cytoscape_pos()
         logger.info(f"2D layout created!")
     if stringify:
+        logger.info("Will Stringify.")
         layouter.gen_evidence_layouts()
+        logger.info(f"Layouts stringified!")
     return layouter
-
 
 
 def create_project_workflow(
@@ -154,11 +172,11 @@ def create_project_workflow(
         print(f"OUTFILE:{outfile}")
         with open(outfile, "w") as f:
             json.dump(network, f)
-        logging.info(f"Saved network as {outfile}")
+        logger.info(f"Saved network as {outfile}")
     if stringifiy and cy_layout:
         uploader.stringify_project()
-        logging.info(f"Layouts stringified: {project_name}")
-    logging.info(f"Project created: {project_name}")
+        logger.info(f"Layouts stringified: {project_name}")
+    logger.info(f"Project created: {project_name}")
     return state
 
 
@@ -179,6 +197,7 @@ def convert_workflow(
     converter = VRNetzConverter(node_list, edge_list, uniprot_mapping, project)
     converter.convert()
     return output
+
 
 # def apply_style_workflow(graph: nx.Graph, style: str) -> nx.Graph:
 #     color_mapping = get_node_mapping(style)

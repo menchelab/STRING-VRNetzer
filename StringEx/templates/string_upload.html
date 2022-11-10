@@ -52,6 +52,11 @@
                         src="{{ url_for('static', filename='img/upload.png') }}" /></a>
             </li>
         </ul>
+        <script>
+                $(function() {
+                    $("#tabsUL").tabs();
+                });
+        </script>
 
         <div id="fragment-1">
             <div class="twelve columns">
@@ -114,7 +119,7 @@
                             <div class="two columns">
                                 <input type="radio" name="namespace" value="existing" checked><br>
                             </div>
-                            <h6> ADD TO PROJECT</h6>
+                            <h6> Update PROJECT</h6>
 
                             <!--<h3 class="lineglowslow"><span>PROJECT</span></h3>-->
                             <br>
@@ -175,7 +180,7 @@
                                 <h6>STRING NETWORK</h6>
                             </label><br>
                             <div class="two columns">
-                                <input type="checkbox" name="write" value="write" checked>
+                                <input type="checkbox" name="write" value="write" unchecked>
                             </div>
                             <label for="write">
                                 <h6>SAVE NETWORK WITH COORDS</h6>

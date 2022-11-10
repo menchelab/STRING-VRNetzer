@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -46,6 +47,21 @@ HELP_TEXT = (
     + "possible algorithms:\n"
     + "spring, kamada_kawai, cg_local_tsne, cg_local_umap, cg_global_tsne, cg_global_umap, cg_importance_tsne, cg_importance_umap"
 )
+logger = logging.getLogger("StringEx")
+logger.setLevel(logging.DEBUG)
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(ch)
+
 # Tags
 class LayoutTags:
     position = "p"
@@ -66,12 +82,19 @@ class NodeTags:
     name = "n"
     suid = "SUID"
     description = "description"
-    stringdb_canoncial_name = "stringdb_canonical name"
-    stringdb_sequence = "stringdb_sequence"
+    sequence = "sequence"
+    species = "species"
     ppi_id = "ppi_id"
     id = "id"
     attr_lst = "attrlist"
     uniprot = "uniprot"
+
+
+class StringTags:
+    stringdb_canoncial_name = "stringdb_canonical name"
+    stringdb_sequence = "stringdb_sequence"
+    stringdb_description = "stringdb_description"
+    stringdb_species = "stringdb_species"
 
 
 class ProjectTag:
@@ -188,18 +211,34 @@ class Organisms:
         }
         return tax_ids.get(organism)
 
+    @staticmethod
+    def get_scientific_name(organism):
+        """Return the tax id for the organism."""
+        tax_ids = {
+            Organisms.human: "Homo sapiens",
+            Organisms.mouse: "Mus musculus",
+            Organisms.rat: "Rattus norvegicus",
+            Organisms.zebrafish: "Danio rerio",
+            Organisms.fly: "Drosophila melanogaster",
+            Organisms.worm: "Caenorhabditis elegans",
+            Organisms.yeast: "Saccharomyces cerevisiae",
+            Organisms.ecoli: "Escherichia coli 536",
+            Organisms.arabidopsis: "Arabidopsis thaliana",
+        }
+        return tax_ids.get(organism)
+
     # TODO: REMOVE BIOGRID IF NOT USED
     @staticmethod
     def get_file_name(organism: str) -> str:
         file_names = {
-            Organisms.human: "biogrid_homo_sapiens_4.4.124",
-            Organisms.mouse: "biogrid_mus_musculus_4.4.124",
-            Organisms.yeast: "biogrid_saccharomyces_cerevisiae_4.4.124",
-            Organisms.worm: "biogrid_caenorhabditis_elegans_4.4.124",
-            Organisms.fly: "biogrid_drosophila_melanogaster_4.4.124",
-            Organisms.arabidopsis: "biogrid_arabidopsis_thaliana_4.4.124",
-            Organisms.zebrafish: "biogrid_danio_rerio_4.4.124",
-            Organisms.rat: "biogrid_rattus_norvegicus_4.4.124",
-            Organisms.ecoli: "biogrid_escherichia_coli_4.4.124",
+            Organisms.human: "new_ppi",
+            Organisms.mouse: "string_mouse_ppi",
+            Organisms.yeast: "string_yeast_ppi",
+            Organisms.worm: "string_worm_ppi",
+            Organisms.fly: "string_fly_ppi",
+            Organisms.arabidopsis: "string_arabidopsis_ppi",
+            Organisms.zebrafish: "string_zebrafish_ppi",
+            Organisms.rat: "string_rat_ppi",
+            Organisms.ecoli: "string_ecoli_ppi",
         }
         return file_names.get(organism)

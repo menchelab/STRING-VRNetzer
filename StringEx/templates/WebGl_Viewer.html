@@ -1,0 +1,104 @@
+{% include "threeJS_VIEWER.html" %}
+
+<!-- StringEx style -->
+<link rel="stylesheet" href="{{ url_for('StringEx.static', filename='css/StringStyle.css') }}">
+
+<!-- StringEx scripts -->
+<script src="{{ url_for('StringEx.static', filename='js/stringUI_Elements.js') }}"></script>
+
+<div id="mySidenav" class="sidenav">
+
+    <!-- <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> -->
+    <h5>STRING<br>&ensp; Evidences</h5>
+    <div class="frameBox" style="display:inline-block;">
+        <button class="stringEvidenceButton" style="background-color:#c8c8c8;
+            color:black;" type="WebGL" id="evidence-all">
+            All</button>
+        <script>
+            selectEvidenceWebGL("evidence-all", "anyRGB");
+        </script>
+    </div>
+    <div class="frameBox" style="display:inline-block;">
+        <h6 style="margin-left: 10px;"> Known<br>interactions</h6>
+
+
+        <button class="stringEvidenceButton" style="background-color:#ff00ff;" id="evidence-experiments"
+            type="WebGL">
+            Experiments</button>
+        <script>
+            selectEvidenceWebGL("evidence-experiments", "stringdb_experimentsRGB");
+        </script>
+
+        <button class="stringEvidenceButton" style="background-color:#00ffff;color:black;" id="evidence-database"
+            type="WebGL"> Database</button>
+        <script>
+            selectEvidenceWebGL("evidence-database", "stringdb_databasesRGB");
+        </script>
+
+    </div>
+    <div class="frameBox" style="display:inline-block;">
+        <h6 style="margin-left: 10px;"> Predicted interactions</h6>
+
+
+        <button class="stringEvidenceButton" style="background-color:#00ff00;
+            color:black;" id="evidence-neighborhood" type="WebGL">
+            Neighborhood</button>
+        <script>
+            selectEvidenceWebGL("evidence-neighborhood", "stringdb_neighborhoodRGB");
+        </script>
+
+        <button class="stringEvidenceButton" style="background-color:#ff0000;" id="evidence-fusion" type="WebGL">
+            Fusion</button>
+        <script>
+            selectEvidenceWebGL("evidence-fusion", "stringdb_fusionRGB");
+        </script>
+
+        <button class="stringEvidenceButton" style="background-color:#0000ff;" id="evidence-cooccurrence"
+            type="WebGL">
+            Cooccurrence</button>
+        <script>
+            selectEvidenceWebGL("evidence-cooccurrence", "stringdb_cooccurrenceRGB");
+        </script>
+    </div>
+    <div class="frameBox" style="display:inline-block;">
+        <h6 style="margin-left: 10px;"> Other Evidences</h6>
+
+
+        <button class="stringEvidenceButton" style="background-color:#c6ea46;color:black;" id="evidence-textmining"
+            type="WebGL">
+            Textmining</button>
+        <script>
+            selectEvidenceWebGL("evidence-textmining", "stringdb_textminingRGB");
+        </script>
+
+
+        <button class="stringEvidenceButton" style="background-color:#323232;" id="evidence-coexpression"
+            type="WebGL">
+            Coexpression</button>
+        <script>
+            selectEvidenceWebGL("evidence-coexpression", "stringdb_coexpressionRGB");
+        </script>
+
+
+        <button class="stringEvidenceButton" style="background-color:#9d9df8;
+        color:black;" id="evidence-homology" type="WebGL">
+            Homology</button>
+        <script>
+            selectEvidenceWebGL("evidence-homology", "stringdb_similarityRGB");
+        </script>
+    </div>
+
+</div>
+<script>
+    if (!(pdata["network"]=="string")){
+        document.getElementById("mySidenav").remove();
+    }
+</script>
+<script>
+    var forms = document.getElementsByTagName("form")
+    for(var i=0;i<forms.length; i++){
+        if(forms[i].action =="http://127.0.0.1:5000/preview"){
+            forms[i].action = "http://127.0.0.1:5000/StringEx/preview";
+        };
+    };
+</script>

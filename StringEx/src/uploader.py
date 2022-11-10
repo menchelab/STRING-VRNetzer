@@ -18,7 +18,9 @@ from .settings import LayoutTags as LT
 from .settings import LinkTags as LiT
 from .settings import NodeTags as NT
 from .settings import ProjectTag as PT
+from .settings import StringTags as ST
 from .settings import VRNetzElements as VRNE
+from .settings import logger
 from .util import clean_filename
 
 
@@ -79,8 +81,9 @@ class Uploader:
 
         with open(self.names_file, "w") as outfile:
             json.dump(self.attr_list, outfile)
-
-        print(f"Successfully created directories in {path} ")
+        rel_path = path.find("static")
+        rel_path = path[rel_path:]
+        logger.debug(f"Successfully created directories in {rel_path}")
 
     def loadProjectInfo(self) -> dict or str:
         self.folder = os_join(self.p_path)
@@ -228,7 +231,20 @@ class Uploader:
                 ]
             )
 
+        universal_attributes = [NT.description, NT.sequence, NT.species]
+        string_attributes = [
+            ST.stringdb_description,
+            ST.stringdb_sequence,
+            ST.stringdb_species,
+        ]
+
         for _, elem in enumerate(nodes):
+            # rename stringdb attributes to universal attributes to present them in nodepanel
+            for u_att, s_attr in zip(universal_attributes, string_attributes):
+                if s_attr in elem:
+                    elem[u_att] = elem[s_attr]
+                    del elem[s_attr]
+
             self.nodes[VRNE.nodes].append(
                 {k: v for k, v in elem.items() if k not in skip_attr}
             )
@@ -368,26 +384,32 @@ class Uploader:
         return nodes_data, edges_data
 
     def stringify_project(self):
-        """Changes the order of layouts in the pfile to start with a Cytoscape 2D network on the floor with all edges, than a new calculated 2D layout, and than the 3D layout with all edges after one another."""
+        """Only adds the evidences to pfile layouts."""
         ev = EV.get_default_scheme().keys()
         ev_xyz = [f"{ev}XYZ" for ev in ev]
         ev_rgb = [f"{ev}RGB" for ev in ev]
-        self.pfile[PT.links] = [ev_xyz[0], ev_xyz[0]] + ev_xyz
-        self.pfile[PT.links_rgb] = [ev_rgb[0], ev_rgb[0]] + ev_rgb
-        if f"{LT.cy_layout}XYZ" in self.pfile[PT.layouts]:
-            self.pfile[PT.layouts] = [
-                f"{LT.cy_layout}XYZ",
-                f"{LT.string_3d_no_z}XYZ",
-                f"{LT.string_3d}XYZ",
-            ]
-        else:
+        self.pfile[PT.links] = ev_xyz  # [ev_xyz[0], ev_xyz[0]] + ev_xyz
+        self.pfile[PT.links_rgb] = ev_rgb  # [ev_rgb[0], ev_rgb[0]] + ev_rgb
+        if LT.cy_layout not in self.pfile[PT.layouts]:
+            self.pfile[PT.layouts] = [f"{LT.string_3d_no_z}XYZ", f"{LT.string_3d}XYZ"]
             self.pfile[PT.layouts_rgb] = [
                 f"{LT.string_3d_no_z}RGB",
                 f"{LT.string_3d}RGB",
             ]
-        for _ in ev:
-            self.pfile[PT.layouts].append(self.pfile[PT.layouts][-1])
-            self.pfile[PT.layouts_rgb].append(self.pfile[PT.layouts_rgb][-1])
+        # if f"{LT.cy_layout}XYZ" in self.pfile[PT.layouts]:
+        #     self.pfile[PT.layouts] = [
+        #         f"{LT.cy_layout}XYZ",
+        #         f"{LT.string_3d_no_z}XYZ",
+        #         f"{LT.string_3d}XYZ",
+        #     ]
+        # else:
+        #     self.pfile[PT.layouts_rgb] = [
+        #         f"{LT.string_3d_no_z}RGB",
+        #         f"{LT.string_3d}RGB",
+        #     ]
+        # for _ in ev:
+        #     self.pfile[PT.layouts].append(self.pfile[PT.layouts][-1])
+        #     self.pfile[PT.layouts_rgb].append(self.pfile[PT.layouts_rgb][-1])
 
         with open(self.pfile_file, "w") as json_file:
             json.dump(self.pfile, json_file)
@@ -407,7 +429,7 @@ class Uploader:
             self.makeProjectFolders()
         else:
             if project in prolist:
-                print("project exists")
+                logger.debug(f"Project: {project} already exists.")
             else:
                 # Make Folders
                 self.makeProjectFolders()
@@ -443,28 +465,28 @@ def extract_attributes(attr_list, elem, skip_attr):
     #     attr_list["names"] = []
     # name = ["NA"]
 
-    # if NT.stringdb_canoncial_name in elem.keys():
-    #     uniprod = elem[NT.stringdb_canoncial_name]
+    # if ST.stringdb_canoncial_name in elem.keys():
+    #     uniprot = elem[ST.stringdb_canoncial_name]
     #     name = [
-    #         uniprod,  # identifier
+    #         uniprot,  # identifier
     #         "None",  # Attribute
-    #         uniprod,  # Annotation
+    #         uniprot,  # Annotation
     #         50,  # Additional
     #     ]
-    #     if NT.stringdb_sequence in elem.keys():
-    #         name[-1] = elem[NT.stringdb_sequence]
+    #     if ST.stringdb_sequence in elem.keys():
+    #         name[-1] = elem[ST.stringdb_sequence]
     # elif NT.name in elem.keys():
     #     gene_name = elem[NT.name]
     #     name = [f"GENENAME={gene_name}"]
-    uniprod = elem.get(NT.stringdb_canoncial_name)
-    if uniprod is None:
-        uniprod = elem.get(NT.uniprot)
-        if uniprod:
-            uniprod = uniprod[0]
+    uniprot = elem.get(ST.stringdb_canoncial_name)
+    if uniprot is None:
+        uniprot = elem.get(NT.uniprot)
+        if uniprot:
+            uniprot = uniprot[0]
         else:
             elem.get(NT.name)
-    if uniprod:
-        name = [uniprod]
+    if uniprot:
+        name = [uniprot]
         if "names" not in attr_list:
             attr_list["names"] = []
         attr_list["names"].append(name)

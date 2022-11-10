@@ -11,10 +11,6 @@ import uploader
 from . import settings as st
 from . import workflows as wf
 
-GD.sessionData["layoutAlgos"] = st.LayoutAlgroithms.all_algos
-GD.sessionData["actAlgo"] = st.LayoutAlgroithms.spring
-GD.sessionData["organisms"] = st.Organisms.all_organisms
-
 url_prefix = "/StringEx"
 
 blueprint = flask.Blueprint(
@@ -37,11 +33,9 @@ def string_main():
         print(username)
     project = flask.request.args.get("project")
 
-    if project is None:
-        project = "none"
-    else:
-        print(project)
-
+    if project is None or project == "none":
+        project = uploader.listProjects()[0]
+    print(project)
     if flask.request.method == "GET":
 
         room = 1
@@ -49,21 +43,18 @@ def string_main():
         flask.session["username"] = username
         flask.session["room"] = room
         # prolist = listProjects()
-        if project != "none":
-            folder = "static/projects/" + project + "/"
-            with open(folder + "pfile.json", "r") as json_file:
-                GD.pfile = json.load(json_file)
-                # print(pfile)
-            json_file.close()
+        folder = "static/projects/" + project + "/"
 
-            with open(folder + "names.json", "r") as json_file:
-                global names
-                names = json.load(json_file)
-                # print(names)
-            json_file.close()
+        with open(folder + "pfile.json", "r") as json_file:
+            GD.pfile = json.load(json_file)
+
+        with open(folder + "names.json", "r") as json_file:
+            GD.names = json.load(json_file)
+
         return flask.render_template(
-            "string_main.html",
-            session=flask.session,
+            # "/mainpanel/string_main.html",
+            "/string_main.html",
+            session=json.dumps(dict(flask.session)),
             sessionData=json.dumps(GD.sessionData),
             pfile=json.dumps(GD.pfile),
         )
@@ -74,11 +65,12 @@ def string_main():
 @blueprint.route("/preview", methods=["GET"])
 def string_preview():
     """Route to STRING WEBGL Preview."""
+    global sesssionData
     data = {}
     layoutindex = 0
     layoutRGBIndex = 0
     linkRGBIndex = 0
-    html_preview = "threeJS_VIEWER_string.html"
+    html_preview = "WebGl_Viewer.html"
     html_menu = "threeJS_VIEWER_Menu.html"
     if flask.request.args.get("project") is None:
         print("project Argument not provided - redirecting to menu page")
@@ -205,6 +197,9 @@ def string_preview():
 
 @blueprint.route("/upload", methods=["GET"])
 def upload_string():
+    GD.sessionData["layoutAlgos"] = st.LayoutAlgroithms.all_algos
+    GD.sessionData["actAlgo"] = st.LayoutAlgroithms.spring
+    GD.sessionData["organisms"] = st.Organisms.all_organisms
     """Route to STRING upload."""
     prolist = uploader.listProjects()
     html_page = "string_upload.html"
@@ -238,42 +233,51 @@ def prepare_session_data():
     flask.session["username"] = username
 
 
-@blueprint.route("/nodepanel", methods=["GET", "POST"])
-def nodepanel():
-    # try:
-    #    id = int(request.args.get("id"))
-    # except:
-    #    print('C_DEBUG: in except at start')
-    #    if id is None:
-    #        id=0
-    nodes = {"nodes": []}
-    project = flask.request.args.get("project")
-    if project is None:
-        project = "Uploader_test"
-        folder = os.path.join("static", "projects", project)
-        with open(os.path.join(folder, "pfile.json"), "r") as json_file:
-            GD.pfile = json.load(json_file)
+# @blueprint.route("/nodepanel", methods=["GET", "POST"])
+# def nodepanel():
+#     # try:
+#     #    id = int(request.args.get("id"))
+#     # except:
+#     #    print('C_DEBUG: in except at start')
+#     #    if id is None:
+#     #        id=0
+#     nodes = {"nodes": []}
+#     project = flask.request.args.get("project")
+#     if project is None:
+#         GD.sessionData.get("actPro")
+#         print(GD.sessionData)
+#         project = "Ecoli"
 
-    if project:
-        folder = os.path.join("static", "projects", project)
-        with open(os.path.join(folder, "nodes.json"), "r") as json_file:
-            nodes = json.load(json_file)
-    add_key = "NA"  # Additional key to show under Structural Information
-    # nodes = {node["id"]: node for node in nodes}
-    try:
-        id = int(flask.request.args.get("id"))
-    except:
-        id = 0
-    uniprots = nodes["nodes"][id].get("uniprot")
-    if uniprots:
-        GD.sessionData["actStruc"] = uniprots[0]
-    # data = names["names"][id]
-    return flask.render_template(
-        "string_nodepanel.html",
-        sessionData=json.dumps(GD.sessionData),
-        session=flask.session,
-        pfile=json.dumps(GD.pfile),
-        id=id,
-        add_key=add_key,
-        nodes=json.dumps(nodes),
-    )
+#     folder = os.path.join("static", "projects", project)
+
+#     with open(os.path.join(folder, "pfile.json"), "r") as json_file:
+#         pfile = json.load(json_file)
+
+#     with open(os.path.join(folder, "nodes.json"), "r") as json_file:
+#         nodes = json.load(json_file)
+#     add_key = "NA"  # Additional key to show under Structural Information
+#     # nodes = {node["id"]: node for node in nodes}
+#     try:
+#         id = int(flask.request.args.get("id"))
+#     except Exception as e:
+#         id = 0
+#         print(e)
+#     uniprots = nodes["nodes"][id].get("uniprot")
+#     if uniprots:
+#         GD.sessionData["actStruc"] = uniprots[0]
+#     # data = GD.names["names"][id]
+
+#     network_type = GD.pfile.get("network")
+#     print(network_type)
+#     if network_type == "string":
+#         return flask.render_template(
+#             "/nodepanel/string_nodepanel.html",
+#             sessionData=json.dumps(GD.sessionData),
+#             session=flask.session,
+#             pfile=GD.pfile,
+#             id=id,
+#             add_key=add_key,
+#             nodes=json.dumps(nodes),
+#         )
+#     else:
+#         return flask.redirect("/nodepanel")

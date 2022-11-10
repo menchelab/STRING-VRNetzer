@@ -5,6 +5,7 @@ from .settings import _NETWORKS_PATH
 from .settings import Evidences as EV
 from .settings import LayoutTags as LT
 from .settings import NodeTags as NT
+from .settings import StringTags as ST
 from .settings import VRNetzElements as VRNE
 
 # def process_edge(source, sink, target_edge, source_edges):
@@ -40,8 +41,8 @@ def gen_name_suid_map(source_net: dict) -> tuple[dict, dict]:
     all_canoncial_names = {}
     for s_node in source_net[VRNE.nodes]:
         all_dis_names[s_node[NT.name]] = s_node
-        if NT.stringdb_canoncial_name in s_node:
-            all_canoncial_names[s_node[NT.stringdb_canoncial_name]] = s_node
+        if ST.stringdb_canoncial_name in s_node:
+            all_canoncial_names[s_node[ST.stringdb_canoncial_name]] = s_node
     return all_dis_names, all_canoncial_names
 
 

@@ -15,9 +15,6 @@ $(document).ready(function () {
   $(function () {
     $("#organism").selectmenu();
   });
-  $(function () {
-    $("#tabsUL").tabs();
-  });
 
   $("#namespaces").on("selectmenuselect", function () {
     var name = $("#namespaces").find(":selected").text();

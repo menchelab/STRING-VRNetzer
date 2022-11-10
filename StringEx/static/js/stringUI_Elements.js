@@ -14,9 +14,12 @@ function selectEvidenceWebGL(id, opt) {
         }
     });
 }
-function selectEvidenceVRNetzer(id, opt) {
+function selectEvidenceVRNetzer(id, layout) {
     $('#' + id).on("click", function() {
-        socket.emit('ex', { id: "linkcolors", opt: opt, fn: "sel" });
+        var color = layout + "RGB";
+        var cord = layout + "XYZ";
+        socket.emit('ex', { id: "linkcolors", opt: color, fn: "sel" });
+        socket.emit('ex', { id: "links", opt: cord, fn: "sel" });
     });
 }
 function stringForwardButton(id,data) {
@@ -42,9 +45,52 @@ function layoutDropdown (id, data, active){
     });
   
   }
-  
-function setHref(id, uniprot,link) {
-    var href = link.replace("<toChange>", uniprot)
-    console.log(href)
-    $('#' + id).attr('href', href);
+
+/**
+ * Will turn off the change of Link layouts if network is a string network
+ */
+function deactiveLinkLayouts() {
+    var code =`
+    <div class="twelve columns" hidden="true">
+        <div class="slideTwo">
+            <input type="checkbox" value="false" id="chbLrgb" name="check" unchecked></checkbox>
+            <script>
+                initCheckbox("chbLrgb");
+            </script>
+        </div>
+    </div>
+
+    <div class="twelve columns" hidden="true">
+        <div class="slideTwo">
+            <input type="checkbox" value="false" id="chbLxyz" name="check" unchecked></checkbox>
+            <script>
+                initCheckbox("chbLxyz");
+            </script>
+        </div>
+    </div>`;
+    document.write(code)
+}
+/**
+ * Will turn on the change of Link layouts if network isn't a string network
+ */
+function activateLinkLayouts() {
+    var code =`
+    <div class="twelve columns" hidden="true">
+        <div class="slideTwo">
+            <input type="checkbox" value="false" id="chbLrgb" name="check" checked></checkbox>
+            <script>
+                initCheckbox("chbLrgb");
+            </script>
+        </div>
+    </div>
+
+    <div class="twelve columns" hidden="true">
+        <div class="slideTwo">
+            <input type="checkbox" value="false" id="chbLxyz" name="check" checked></checkbox>
+            <script>
+                initCheckbox("chbLxyz");
+            </script>
+        </div>
+    </div>`;
+    document.write(code)
 }

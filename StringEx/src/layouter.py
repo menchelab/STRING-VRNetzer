@@ -11,6 +11,7 @@ from .settings import LayoutTags as LT
 from .settings import LinkTags as LiT
 from .settings import NodeTags as NT
 from .settings import VRNetzElements as VRNE
+from .settings import logger
 
 
 class Layouter:
@@ -19,9 +20,9 @@ class Layouter:
     graph: nx.Graph = nx.Graph()
 
     def gen_graph(self, nodes, links):
-        for node_data in nodes:
-            self.graph.add_node(node_data[NT.id], data=node_data)
-            # self.node_map[node_data["id"]] = node_data
+        # for node_data in nodes:
+        #     self.graph.add_node(node_data[NT.id], data=node_data)
+        #     # self.node_map[node_data["id"]] = node_data
         for link in links:
             self.graph.add_edge(link[LiT.start], link[LiT.end], data=link)
             # self.edge_map[(str(edge["s"]), str(edge["e"]))] = edge
@@ -104,7 +105,12 @@ class Layouter:
         idx = 0
         for node, pos in layout.items():
             node = self.network[VRNE.nodes][idx]
-            color = [random.randint(0,255),random.randint(0,255),random.randint(0,255),255]
+            color = [
+                random.randint(0, 255),
+                random.randint(0, 255),
+                random.randint(0, 255),
+                255,
+            ]
             size = 1
 
             # find the correct layout
@@ -156,7 +162,7 @@ class Layouter:
 
                 # Get positions of only these
                 points.append(cy_layout[LT.position])
-                
+
         if len(points) == 0:
             return None
         # normalize positions between in [0,1]
@@ -196,31 +202,31 @@ class Layouter:
         # Set up the colors for each evidence type
         if evidences is None:
             evidences = Evidences.get_default_scheme()
-
+        logger.debug(f"Evidence colors: {evidences}")
         links = self.network[VRNE.links]
+        print(type(links))
+        logger.debug(f"links loaded.")
         if VRNE.link_layouts not in self.network:
             self.network[VRNE.link_layouts] = []
         for ev in evidences:
+            logger.debug(f"Handling evidence: {ev}.")
             self.network[VRNE.link_layouts].append(ev)
-            cur_links = links
+            cur_links = {idx: link for idx, link in enumerate(links)}
             if not ev == Evidences.any:
-                cur_links = [link for link in links if ev in link]
+                cur_links = {idx: link for idx, link in enumerate(links) if ev in link}
             # Skip This evidence if there are not edges for this evidence
             if len(cur_links) == 0:
                 continue
 
             # Color each link with the color of the evidence
-            for idx, link in enumerate(links):
-                if link in cur_links:
-                    if ev == Evidences.any:
-                        color = evidences[ev]
-                        # TODO extract the alpha value with the highest score.
-                    else:
-                        color = evidences[ev][:3] + (
-                            int(link[ev] * 255),
-                        )  # Alpha scales with score
+            for idx, link in cur_links.items():
+                if ev == Evidences.any:
+                    color = evidences[ev]
+                    # TODO extract the alpha value with the highest score.
                 else:
-                    color = (0, 0, 0, 0)  # No evidence
+                    color = evidences[ev][:3] + (
+                        int(link[ev] * 255),
+                    )  # Alpha scales with score
                 if LiT.layouts not in self.network[VRNE.links][idx]:
                     self.network[VRNE.links][idx][LiT.layouts] = []
                 self.network[VRNE.links][idx][LiT.layouts].append(
