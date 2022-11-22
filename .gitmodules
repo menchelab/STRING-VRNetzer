@@ -1,0 +1,3 @@
+[submodule "StringEx"]
+	path = StringEx
+	url = https://github.com/menchelab/StringEx
