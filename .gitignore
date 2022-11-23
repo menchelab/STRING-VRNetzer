@@ -7,7 +7,6 @@ __pycache__/
 *.graphml
 *.json
 *.bmp
-*.png
 */*/.DS_Store
 /static/networks
 /static/projects
