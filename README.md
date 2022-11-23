@@ -2,12 +2,20 @@
 
 This repository includes everything thats needed to bring protein-protein association networks from STRING DB on the VRNetzer platform:
 
-1. A [CytoscapeApp](https://github.com/menchelab/STRING-VRNetzer/blob/main/cytoscapeApp/VRNetzerApp/target/VRNetzerApp-1.0.0.jar) which enables the export of VRNetzer designated data format
+1. A CytoscapeApp –[VRNetzerApp](https://github.com/menchelab/STRING-VRNetzer/blob/main/cytoscapeApp/VRNetzerApp/target/VRNetzerApp-1.0.0.jar) – which enables the export of VRNetzer designated data format
 2. An VRNetzer extension – [StringEx](https://github.com/menchelab/StringEx) – which enables the visualization of STRING specific features like multiple association evidences
 
-### **Miro Board**
+---
 
-https://miro.com/app/board/uXjVOtKWqXI=/?share_link_id=552918253097
+### **Resources**
+
+[Miro board](https://miro.com/app/board/uXjVOtKWqXI=/?share_link_id=552918253097)
+
+[VRNetzerApp](https://github.com/menchelab/STRING-VRNetzer/blob/main/cytoscapeApp/VRNetzerApp/target/VRNetzerApp-1.0.0.jar)
+
+[StringEx](https://github.com/menchelab/StringEx)
+
+---
 
 ## **Content**
 
@@ -20,11 +28,15 @@ https://miro.com/app/board/uXjVOtKWqXI=/?share_link_id=552918253097
 7. [**Dependencies**](#Dependencies)<br>
 8. [**License**](#License)<br>
 
+---
+
 <details>
   <summary><h3 id="App_install"><b>1. Installation of the VRNetzerApp</b></h3></summary>
 To install it, you can use the App Manger in Cytoscape:<br>
 Apps -> App Manger -> Install from File... -> select the "VRNetzerApp-x.x.x.jar" file.
 </details>
+
+---
 
 <details>
   <summary><h3 id="App_usage"><b> 2. Usage of the VRNetzerApp </b></h3></summary>
@@ -39,6 +51,8 @@ Apps -> App Manger -> Install from File... -> select the "VRNetzerApp-x.x.x.jar"
 You network is now exported as an VRNetz which can be used in the [VRNetzer](https://github.com/menchelab/VRNetzer) to present your network as a 3D network.
 
 </details>
+
+---
 
 <details>
 <summary><h3 id="Ex_install"><b> 3. Installation of StringEx </b></h3></summary>
@@ -72,6 +86,8 @@ python -m pip install -r requirements.txt
 
 </details>
 
+---
+
 <details>
 <summary><h3 id="upload_string"><b> 4. Upload a STRING network </b></h3></summary>
 
@@ -89,6 +105,8 @@ python -m pip install -r requirements.txt
 
 </details>
 
+---
+
 <details>
 <summary><h3 id="upload_network"><b>5. Upload an arbitrary VRNetz</b></h3></summary>
 
@@ -101,6 +119,8 @@ Do the first six steps as mentioned [above](#upload_string).
 8. Click on the "Upload" button to upload the network to the VRNetzer platform.
 9. If the upload was successful, you'll be prompted with a success message and a link to preview the project in the designated WebGL previewer.
 </details>
+
+---
 
 <details>
 <summary><h3 id="map_network"><b>6. Map an exported network on a preprocessed PPI</b></h3></summary>
@@ -117,16 +137,25 @@ Do the first three steps as mentioned [above](#upload_string).
 
 </details>
 
+---
+
 ## **Dependencies**
 
 [Cytoscape - StringApp](https://apps.cytoscape.org/apps/stringapp)
+
 [Cytoscape - VRNetzerApp](https://apps.cytoscape.org/apps/stringapp)
+
 [VRNetzer - StringEx](https://apps.cytoscape.org/apps/stringapp)
+
+---
 
 ## **Software**
 
-[VRNetzer](https://github.com/menchelab/VRNetzer_Backend)<br>
-[Cytoscape v3.8. ++](https://cytoscape.org/)<br>
+[VRNetzer](https://github.com/menchelab/VRNetzer_Backend)
+
+[Cytoscape v3.8. ++](https://cytoscape.org/)
+
+---
 
 ## **License**
 
