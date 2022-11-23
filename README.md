@@ -94,9 +94,12 @@ python -m pip install -r requirements.txt
 
 Do the first six steps as mentioned [above](#upload_string).
 
-1. Uncheck the checkbox `STRING NETWORK`
-2. Click on the "Upload" button to upload the network to the VRNetzer platform.
-3. If the upload was successful, you'll be prompted with a success message and a link to preview the project in the designated WebGL previewer.
+7. Uncheck the checkbox `STRING NETWORK`
+
+   ![Picture that visualizes the where the checkbox can be found](pictures/non_string.png)
+
+8. Click on the "Upload" button to upload the network to the VRNetzer platform.
+9. If the upload was successful, you'll be prompted with a success message and a link to preview the project in the designated WebGL previewer.
 </details>
 
 <details>
