@@ -2,14 +2,15 @@ package univie.menchelab.VRNetzerApp.internal.main;
 
 import org.cytoscape.task.AbstractNetworkTaskFactory;
 import org.cytoscape.work.TaskIterator;
+
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 
-public class ExportVRNetzerFactory extends AbstractNetworkTaskFactory {
+public class ExportVRNetzFactory extends AbstractNetworkTaskFactory {
 
 	private CyServiceRegistrar registrar;
 	
-	public ExportVRNetzerFactory(
+	public ExportVRNetzFactory(
 			CyServiceRegistrar registrar
 			){
 		this.registrar = registrar;
@@ -17,7 +18,7 @@ public class ExportVRNetzerFactory extends AbstractNetworkTaskFactory {
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetwork network) {
-		return new TaskIterator(new ExportVRNetzerTask(registrar,network));
+		return new TaskIterator(new ExportVRNetz(network,registrar));
 	}
 	
 }
