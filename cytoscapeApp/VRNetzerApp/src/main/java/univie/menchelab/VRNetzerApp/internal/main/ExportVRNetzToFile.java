@@ -45,7 +45,11 @@ public class ExportVRNetzToFile extends AbstractNetworkTask implements CyWriter 
 			monitor.setStatusMessage("Writing network in .VRNetz format...");
 			monitor.setProgress(-1.0);
 		}
+<<<<<<< HEAD
 		VRNetzExporter exporter = new VRNetzExporter()
+=======
+		VRNetzerExporter exporter = new VRNetzerExporter()
+>>>>>>> 0c34d75351d6d63144405f1706787a31c8d80de6
 		
 		if (monitor != null) {
 			monitor.setStatusMessage("Success.");
