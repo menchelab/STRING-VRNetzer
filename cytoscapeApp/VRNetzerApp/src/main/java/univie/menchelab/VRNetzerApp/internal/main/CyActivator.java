@@ -42,7 +42,9 @@ public class CyActivator extends AbstractCyActivator {
 		VisualMappingManager visualMappingManager = getService(bc,VisualMappingManager.class);
 		VisualStyleFactory visualStyleFactory = getService(bc,VisualStyleFactory.class);
 		StreamUtil streamUtil = getService(bc, StreamUtil.class);
-		ExportVRNetzerFactory exportNetwork = new ExportVRNetzerFactory(registrar);
+		final BasicCyFileFilter fileFilter = new BasicCyFileFilter(new String[] { "VRNetz" },
+				new String[] { "application/json" }, "JSON for VRNetzer", DataCategory.NETWORK, streamUtil);
+		ExportVRNetzToFileFactory exportNetworkAsFile = new ExportVRNetzToFileFactory(registrar,fileFilter);
 //		ExportVRNetzerFactory exportNetworkAPP = new ExportVRNetzerFactory(registrar);
 //		final BasicCyFileFilter cytoscapejsFilter = new BasicCyFileFilter(new String[] { "VRNetz" },
 //				new String[] { "application/VRNetz" }, "Cytoscape.VRNetz", DataCategory.NETWORK, streamUtil);
@@ -55,14 +57,17 @@ public class CyActivator extends AbstractCyActivator {
 		// Create button on File -> Export -> Export network as VRNetz
 //		props.setProperty(COMMAND_SUPPORTS_JSON, "true");
 //    	props.setProperty(COMMAND_EXAMPLE_JSON, JSON_EXAMPLE);
-    	
-		props.setProperty(PREFERRED_MENU,"File.Export");
-		props.setProperty(TITLE,"Network as VRNetz...");
-		props.setProperty(MENU_GRAVITY,"4.0");
+
+//		
+//		props.setProperty(PREFERRED_MENU,"File.Export");
+//		props.setProperty(TITLE,"Network as VRNetz...");
+//		props.setProperty(MENU_GRAVITY,"4.0");
+		props.setProperty(ID,"exportVRNetzerFactory");
 		
-		registerService(bc, exportNetwork, NetworkTaskFactory.class, props);
+		registerAllServices(bc, exportNetworkAsFile, props);
 		
 		// Create button on Apps -> VRNetzer -> Export as VRNetz
+		ExportVRNetzFactory exportNetwork = new ExportVRNetzFactory(registrar);
 		props.setProperty(PREFERRED_MENU,"Apps.VRNetzer");
 		props.setProperty(TITLE,"Export Network as VRNetz...");
 		props.setProperty(MENU_GRAVITY,"1.0");
@@ -74,6 +79,7 @@ public class CyActivator extends AbstractCyActivator {
 		props.setProperty(COMMAND_LONG_DESCRIPTION,
 				"<html>The currently selected network gets exported <br />"
 				+ "as an VRNetz.<br /></html>");
+		props.setProperty(ID, "vrnetzerExportApp");
 		
 		registerService(bc, exportNetwork, NetworkTaskFactory.class, props);
 				
