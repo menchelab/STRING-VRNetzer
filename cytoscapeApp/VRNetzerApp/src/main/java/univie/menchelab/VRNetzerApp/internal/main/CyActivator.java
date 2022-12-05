@@ -89,3 +89,6 @@ public class CyActivator extends AbstractCyActivator {
 	
 }
 
+//https://github.com/keiono/cytoscape-d3/blob/master/src/main/java/org/cytoscape/d3/internal/writer/D3NetworkWriter.java
+//https://github.com/cytoscape/cx/tree/49e178adef988405f723403ed144554f2be7c3c8/src/main/java/org/cytoscape/io/internal/cx_writer
+
