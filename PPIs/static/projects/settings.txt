@@ -1,0 +1,12 @@
+[ecoli]
+Algorithm: cartographs global map
+n_neighbours: 5
+spread: 10
+min_dist: 0.9
+[human]
+
+[yeast]
+Algorithm: cartographs global map
+n_neighbours: 10
+spread: 0.9
+min_dist: 0.9
