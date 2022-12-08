@@ -14,44 +14,34 @@ public class Utility{
 		for(int j=0; j< columnsArray.length;j++) {
 			 String key = columnsArray[j].toString(); // Name of the Column
 			 Object value = row.getRaw(columnsArray[j].toString()); // Value of the Column
-			 if (value == null){
-				 continue;
-			 }
-			 if (key.equals( "display name")){
-				data.put("n",value);
-			 }
+			 if (value == null) continue;
+			 if (key.equals( "display name")) data.put("n",value);
+
 			 if(key.equals("stringdb::canonical name")) {
 				 List<String> uniprot = new ArrayList<String>();
 				 uniprot.add(value.toString());
 				 data.put("uniprot",uniprot);
-			 }
+			 };
 			 // ignore defined column
-			 if(skipColumns.contains(key)){
-				 continue;
-			 }
+			 if(skipColumns.contains(key)) continue;
 			 
 			 // ignore empty values
 			 if (value instanceof String) {
-				 if(value.equals("")) {
-					 continue;
-				 }
-				 
-			 }
+				 if(value.equals("")) continue;
+
+			 };
 			 // ignore stringdb_structures, if there is no structure listed
 			 if (key.equals("stringdb::structures")) {
 				 List<String> structures = (List<String>) value;
 				 System.out.println(structures.size());
 				 if(structures.size()==1) {
-					 if(structures.get(0).equals("")){
-						 continue;
-					 }
-
-				 }
-			 }
+					 if(structures.get(0).equals("")) continue;
+				 };
+			 };
 			 data.put(key.replace("::", "_"), value); // Remove weird :: characters from column names
-		}
+		};
 		return data;
-	}
+	};
 	
 	@SuppressWarnings("unchecked")
 	public void printMap(Map<String,Object> map) {
@@ -65,10 +55,8 @@ public class Utility{
 	    	k = dataPoint.getKey();
 	    	v = dataPoint.getValue().toString();
 		    System.out.printf("\t%s = %s\n", k, v);
-	    }
+	    };
 	    System.out.println("");
-	}
-	}
-
-
-}
+	};
+	};
+};

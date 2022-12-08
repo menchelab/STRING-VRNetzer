@@ -1,5 +1,6 @@
 package univie.menchelab.VRNetzerApp.internal.main;
 
+
 import org.cytoscape.task.NetworkTaskFactory;
 import org.osgi.framework.BundleContext;
 import org.cytoscape.service.util.AbstractCyActivator;
@@ -82,3 +83,4 @@ public class CyActivator extends AbstractCyActivator {
 	}
 	
 }
+

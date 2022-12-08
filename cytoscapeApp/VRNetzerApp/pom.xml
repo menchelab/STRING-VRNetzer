@@ -17,7 +17,7 @@
     <osgi.api.version>6.0.0</osgi.api.version>
   </properties>
 	
-	<groupId>edu.ucsf.rbvi</groupId>
+	<groupId>univie.menchelab</groupId>
 	<artifactId>VRNetzerApp</artifactId>
 	<packaging>bundle</packaging>
 	<name>${bundle.symbolicName}</name>
@@ -164,16 +164,16 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+	    <groupId>org.cytoscape</groupId>
+	    	<artifactId>viewmodel-api</artifactId>
+	    	<version>${cytoscape.api.version}</version>
+	    	<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.core</artifactId>
 			<version>${osgi.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.13</version>
-			<optional>true</optional>
 		</dependency>
 		<dependency>
 		    <groupId>com.googlecode.json-simple</groupId>

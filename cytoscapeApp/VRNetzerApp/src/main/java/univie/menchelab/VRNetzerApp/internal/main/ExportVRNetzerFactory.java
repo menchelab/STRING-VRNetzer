@@ -13,11 +13,11 @@ public class ExportVRNetzerFactory extends AbstractNetworkTaskFactory {
 			CyServiceRegistrar registrar
 			){
 		this.registrar = registrar;
-	}
+	};
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetwork network) {
 		return new TaskIterator(new ExportVRNetzerTask(registrar,network));
-	}
+	};
 	
-}
+};
