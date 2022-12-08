@@ -1,28 +1,21 @@
 package univie.menchelab.VRNetzerApp.internal.main;
-
-import java.io.OutputStreamWriter;
-import java.util.Collection;
-
-import org.cytoscape.model.CyNetwork;
-import org.cytoscape.service.util.CyServiceRegistrar;
-import org.cytoscape.view.model.CyNetworkView;
-import org.cytoscape.view.model.CyNetworkViewManager;
-import org.cytoscape.work.TaskMonitor;
-import org.json.simple.JSONObject;
-
-import univie.menchelab.VRNetzerApp.internal.util.ConstructJson;
-
-public final class VRNetzExporter {
+public final class NewMethod_VRNetzExporter extends AbstractNetworkTask implements CyWriter {
 	private CyNetwork network;
 	private CyNetworkView netView;
+	private final OutputStream outputStream;
+	private CyServiceRegistrar registrar;
+	private File fileName;
 	JSONObject networkJson = new JSONObject();
 	
-	public void VRNetzerExporter(CyNetwork network) {
-		this.network = network;
-		
-	}
-	public final void writeNetwork(TaskMonitor monitor, CyServiceRegistrar registrar) throws Exception {
-        Collection<CyNetworkView> views = registrar.getService(CyNetworkViewManager.class).getNetworkViews(network);
+	public NewMethod_VRNetzExporter(OutputStream outputStream,CyNetwork network,CyServiceRegistrar registrar,File fileName) {
+		super(network);
+		this.outputStream = outputStream;
+		this.registrar = registrar;
+		this.fileName = fileName;
+	};
+	@Override
+	public void run(TaskMonitor monitor) throws Exception {
+		Collection<CyNetworkView> views = registrar.getService(CyNetworkViewManager.class).getNetworkViews(network);
         if (views.isEmpty()){
         	monitor.setTitle("Error: No network view!");
     	   monitor.showMessage(TaskMonitor.Level.ERROR,"You first have to create a network view!");
@@ -35,14 +28,15 @@ public final class VRNetzExporter {
                 break;
             }
         }; 
-		NetworkToVRNetz writer = new NetworkToVRNetz(registrar,network);
-		networkJson = writer.getVRNetz(monitor);
+		NewMethod_NetworkToVRNetz networkToJson = new NewMethod_NetworkToVRNetz(registrar,network);
+		networkJson = networkToJson.getVRNetz(monitor);
 		
 		// Write data to json
 		monitor.showMessage(TaskMonitor.Level.INFO, "Writing data of '"+network.toString()+"'");
         long startTime = System.currentTimeMillis();
         
-        OutputStreamWriter writer = new OutputStreamWriter(outputStream,EncodingUtil.getEncoder());
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream,Charset.forName("UTF-8").newEncoder());
+        
 		if (fileName == null) throw new RuntimeException("Output has no filename!");
 		// Set Names
 		String _fileName = fileName.getAbsolutePath();
@@ -60,5 +54,7 @@ public final class VRNetzExporter {
 		monitor.showMessage(TaskMonitor.Level.INFO, "Writing file took:"+String.valueOf(totalTimeInSeconds));
 		
 		monitor.setStatusMessage("Exported network to '"+_fileName+"'");
+		outputStream.close();
+		
 	}
 }

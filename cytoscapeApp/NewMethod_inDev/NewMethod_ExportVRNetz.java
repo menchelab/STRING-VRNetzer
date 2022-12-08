@@ -10,6 +10,9 @@ import org.cytoscape.task.AbstractNetworkTask;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 import org.json.simple.JSONObject;
+
+import univie.menchelab.VRNetzerApp.internal.util.ConstructJson;
+
 import org.cytoscape.io.CyFileFilter;
 
 
@@ -17,7 +20,7 @@ import org.cytoscape.io.CyFileFilter;
  * Writer for VRNetz format
  * 
  */
-public class ExportVRNetz extends AbstractNetworkTask implements CyWriter{
+public class NewMethod_ExportVRNetz extends AbstractNetworkTask implements CyWriter{
 
 	final CyServiceRegistrar registrar;
 	private CyNetwork network;
@@ -28,7 +31,7 @@ public class ExportVRNetz extends AbstractNetworkTask implements CyWriter{
 	public File fileName = null;
 
 
-	public ExportVRNetz(final CyNetwork network, CyServiceRegistrar registrar) {
+	public NewMethod_ExportVRNetz(final CyNetwork network, CyServiceRegistrar registrar) {
 		super(network);
 		this.registrar = registrar;
 	}
@@ -41,9 +44,8 @@ public class ExportVRNetz extends AbstractNetworkTask implements CyWriter{
 			monitor.setProgress(-1.0);
 		}
 		
-		NetworkToVRNetz writer = new NetworkToVRNetz(registrar,network);
-		networkJson = writer.getVRNetz(monitor, fileName);
-		
+		NewMethod_VRNetzExporter exporter = new NewMethod_VRNetzExporter(network);
+		exporter.writeNetwork(monitor, registrar, fileName);
 
 		
 		if (monitor != null) {

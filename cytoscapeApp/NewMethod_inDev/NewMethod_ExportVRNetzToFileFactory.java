@@ -12,13 +12,13 @@ import java.io.OutputStream;
 
 import org.cytoscape.io.CyFileFilter;
 
-public class ExportVRNetzToFileFactory implements CyNetworkViewWriterFactory{
+public class NewMethod_ExportVRNetzToFileFactory implements CyNetworkViewWriterFactory{
 
 	private CyServiceRegistrar registrar;
 	private CyFileFilter filter;
 	
 	
-	public ExportVRNetzToFileFactory(
+	public NewMethod_ExportVRNetzToFileFactory(
 			CyServiceRegistrar registrar,
 			CyFileFilter filter
 			){
@@ -27,12 +27,12 @@ public class ExportVRNetzToFileFactory implements CyNetworkViewWriterFactory{
 	}
 		@Override
 		public CyWriter createWriter(OutputStream outputStream, CyNetworkView view) {
-			return new ExportVRNetzToFile(outputStream, view.getModel(), registrar);
+			return new NewMethod_ExportVRNetzToFile(outputStream, view.getModel(), registrar);
 		}
 		
 		@Override
 		public CyWriter createWriter(OutputStream outputStream, CyNetwork network) {
-			return new ExportVRNetzToFile(outputStream, network, registrar);
+			return new NewMethod_ExportVRNetzToFile(outputStream, network, registrar);
 		}
 
 		@Override

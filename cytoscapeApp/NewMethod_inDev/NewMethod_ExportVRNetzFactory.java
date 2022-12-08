@@ -6,11 +6,11 @@ import org.cytoscape.work.TaskIterator;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.service.util.CyServiceRegistrar;
 
-public class ExportVRNetzFactory extends AbstractNetworkTaskFactory {
+public class NewMethod_ExportVRNetzFactory extends AbstractNetworkTaskFactory {
 
 	private CyServiceRegistrar registrar;
 	
-	public ExportVRNetzFactory(
+	public NewMethod_ExportVRNetzFactory(
 			CyServiceRegistrar registrar
 			){
 		this.registrar = registrar;
@@ -18,7 +18,7 @@ public class ExportVRNetzFactory extends AbstractNetworkTaskFactory {
 
 	@Override
 	public TaskIterator createTaskIterator(CyNetwork network) {
-		return new TaskIterator(new ExportVRNetz(network,registrar));
+		return new TaskIterator(new NewMethod_ExportVRNetz(network,registrar));
 	}
 	
 }

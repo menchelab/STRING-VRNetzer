@@ -37,7 +37,7 @@ import univie.menchelab.VRNetzerApp.internal.util.Utility;
 import univie.menchelab.VRNetzerApp.internal.util.ConstructJson;
 
 
-public class NetworkToVRNetz {
+public class NewMethod_NetworkToVRNetz {
 
 	final CyServiceRegistrar registrar;
 	private CyNetwork network;
@@ -49,7 +49,7 @@ public class NetworkToVRNetz {
 	private CyNetworkView netView;
 	private final List<String> skipColumns = Arrays.asList("stringdb::STRING style","selected","stringdb::namespace","stringdb::enhancedLabel Passthrough"); 
 
-	public NetworkToVRNetz(CyServiceRegistrar registrar, CyNetwork network) {
+	public NewMethod_NetworkToVRNetz(CyServiceRegistrar registrar, CyNetwork network) {
 		this.registrar = registrar;
 		this.network = network;
 	}

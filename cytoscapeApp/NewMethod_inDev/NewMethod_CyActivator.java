@@ -28,9 +28,9 @@ import static org.cytoscape.work.ServiceProperties.INSERT_SEPARATOR_BEFORE;
 import static org.cytoscape.work.ServiceProperties.ID;
 import java.util.Properties;
 
-public class CyActivator extends AbstractCyActivator {
+public class NewMethod_CyActivator extends AbstractCyActivator {
 	String JSON_EXAMPLE = "{\"SUID\":1234}";
-	public CyActivator() {
+	public NewMethod_CyActivator() {
 		super();
 	}
 
@@ -42,7 +42,9 @@ public class CyActivator extends AbstractCyActivator {
 		VisualMappingManager visualMappingManager = getService(bc,VisualMappingManager.class);
 		VisualStyleFactory visualStyleFactory = getService(bc,VisualStyleFactory.class);
 		StreamUtil streamUtil = getService(bc, StreamUtil.class);
-		ExportVRNetzerFactory exportNetwork = new ExportVRNetzerFactory(registrar);
+		final BasicCyFileFilter fileFilter = new BasicCyFileFilter(new String[] { "VRNetz" },
+				new String[] { "application/json" }, "JSON for VRNetzer", DataCategory.NETWORK, streamUtil);
+		NewMethod_ExportVRNetzToFileFactory exportNetworkAsFile = new NewMethod_ExportVRNetzToFileFactory(registrar,fileFilter);
 //		ExportVRNetzerFactory exportNetworkAPP = new ExportVRNetzerFactory(registrar);
 //		final BasicCyFileFilter cytoscapejsFilter = new BasicCyFileFilter(new String[] { "VRNetz" },
 //				new String[] { "application/VRNetz" }, "Cytoscape.VRNetz", DataCategory.NETWORK, streamUtil);
@@ -55,14 +57,17 @@ public class CyActivator extends AbstractCyActivator {
 		// Create button on File -> Export -> Export network as VRNetz
 //		props.setProperty(COMMAND_SUPPORTS_JSON, "true");
 //    	props.setProperty(COMMAND_EXAMPLE_JSON, JSON_EXAMPLE);
-    	
-		props.setProperty(PREFERRED_MENU,"File.Export");
-		props.setProperty(TITLE,"Network as VRNetz...");
-		props.setProperty(MENU_GRAVITY,"4.0");
+
+//		
+//		props.setProperty(PREFERRED_MENU,"File.Export");
+//		props.setProperty(TITLE,"Network as VRNetz...");
+//		props.setProperty(MENU_GRAVITY,"4.0");
+		props.setProperty(ID,"exportVRNetzerFactory");
 		
-		registerService(bc, exportNetwork, NetworkTaskFactory.class, props);
+		registerAllServices(bc, exportNetworkAsFile, props);
 		
 		// Create button on Apps -> VRNetzer -> Export as VRNetz
+		NewMethod_ExportVRNetzFactory exportNetwork = new NewMethod_ExportVRNetzFactory(registrar);
 		props.setProperty(PREFERRED_MENU,"Apps.VRNetzer");
 		props.setProperty(TITLE,"Export Network as VRNetz...");
 		props.setProperty(MENU_GRAVITY,"1.0");
@@ -74,6 +79,7 @@ public class CyActivator extends AbstractCyActivator {
 		props.setProperty(COMMAND_LONG_DESCRIPTION,
 				"<html>The currently selected network gets exported <br />"
 				+ "as an VRNetz.<br /></html>");
+		props.setProperty(ID, "vrnetzerExportApp");
 		
 		registerService(bc, exportNetwork, NetworkTaskFactory.class, props);
 				
@@ -82,3 +88,7 @@ public class CyActivator extends AbstractCyActivator {
 	}
 	
 }
+
+//https://github.com/keiono/cytoscape-d3/blob/master/src/main/java/org/cytoscape/d3/internal/writer/D3NetworkWriter.java
+//https://github.com/cytoscape/cx/tree/49e178adef988405f723403ed144554f2be7c3c8/src/main/java/org/cytoscape/io/internal/cx_writer
+

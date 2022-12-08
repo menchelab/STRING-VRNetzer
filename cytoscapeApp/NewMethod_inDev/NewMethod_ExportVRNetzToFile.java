@@ -12,7 +12,7 @@ import org.cytoscape.work.Tunable;
 import org.json.simple.JSONObject;
 
 import univie.menchelab.VRNetzerApp.internal.util.ConstructJson;
-import univie.menchelab.VRNetzerApp.internal.main.VRNetzExporter;
+import univie.menchelab.VRNetzerApp.internal.main.NewMethod_VRNetzExporter;
 import org.cytoscape.io.CyFileFilter;
 
 
@@ -20,7 +20,7 @@ import org.cytoscape.io.CyFileFilter;
  * Writer for VRNetz format
  * 
  */
-public class ExportVRNetzToFile extends AbstractNetworkTask implements CyWriter {
+public class NewMethod_ExportVRNetzToFile extends AbstractNetworkTask implements CyWriter {
 
 	private final OutputStream outputStream;
 	final CyServiceRegistrar registrar;
@@ -32,7 +32,7 @@ public class ExportVRNetzToFile extends AbstractNetworkTask implements CyWriter 
 	public File fileName = null;
 
 
-	public ExportVRNetzToFile(final OutputStream outputStream, final CyNetwork network, CyServiceRegistrar registrar) {
+	public NewMethod_ExportVRNetzToFile(final OutputStream outputStream, final CyNetwork network, CyServiceRegistrar registrar) {
 		super(network);
 		this.outputStream = outputStream;
 		this.registrar = registrar;
@@ -45,11 +45,7 @@ public class ExportVRNetzToFile extends AbstractNetworkTask implements CyWriter 
 			monitor.setStatusMessage("Writing network in .VRNetz format...");
 			monitor.setProgress(-1.0);
 		}
-<<<<<<< HEAD
-		VRNetzExporter exporter = new VRNetzExporter()
-=======
-		VRNetzerExporter exporter = new VRNetzerExporter()
->>>>>>> 0c34d75351d6d63144405f1706787a31c8d80de6
+		NewMethod_VRNetzExporter exporter = new NewMethod_VRNetzExporter();
 		
 		if (monitor != null) {
 			monitor.setStatusMessage("Success.");
