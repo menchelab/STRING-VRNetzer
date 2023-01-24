@@ -248,6 +248,9 @@ public class ExportVRNetzerTask extends AbstractTask implements CyWriter {
 			 
 			 // For nodes, extract the color from the style
 			 CyEdge edge =  network.getEdge(suid);
+			 if (edge == null) {
+				 continue;
+			 }
 			 data.put("id", i);
 			 Integer s_suid = edge.getSource().getSUID().intValue();
 			 Integer e_suid = edge.getTarget().getSUID().intValue();
