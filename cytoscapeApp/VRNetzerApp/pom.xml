@@ -35,7 +35,7 @@
 						<Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
 						<Bundle-Version>${project.version}</Bundle-Version>
 						<Export-Package>!${bundle.namespace}.*</Export-Package>
-						<Bundle-Activator>${bundle.namespace}.main.CyActivator</Bundle-Activator>
+						<Bundle-Activator>${bundle.namespace}.CyActivator</Bundle-Activator>
 						<Embed-Dependency>*;scope=!provided</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>*;resolution:=optional</Import-Package>
@@ -114,7 +114,6 @@
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-	
 		<dependency>
 			<groupId>org.cytoscape</groupId>
 			<artifactId>group-api</artifactId>
@@ -131,6 +130,12 @@
 			<groupId>org.cytoscape</groupId>
 			<artifactId>core-task-api</artifactId>
 			<version>${cytoscape.api.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.logging</groupId>
+			<artifactId>pax-logging-api</artifactId>
+			<version>1.5.2</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -162,12 +167,6 @@
 			<artifactId>service-api</artifactId>
 			<version>${cytoscape.api.version}</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-	    <groupId>org.cytoscape</groupId>
-	    	<artifactId>viewmodel-api</artifactId>
-	    	<version>${cytoscape.api.version}</version>
-	    	<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>

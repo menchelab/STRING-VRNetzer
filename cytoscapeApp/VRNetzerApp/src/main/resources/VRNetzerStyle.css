@@ -1,0 +1,231 @@
+@font-face {
+    font-family: Future;
+    src: url('fonts/Roboto-Light.ttf');
+}
+
+@font-face {
+    font-family: Square;
+    src: url('fonts/square_sans_serif_7.ttf');
+}
+
+@font-face {
+    font-family: Venus;
+    src: url('fonts/venus.ttf');
+}
+
+@font-face {
+    font-family: Modular;
+    src: url('fonts/Modular Amplitude.otf');
+}
+
+@font-face {
+    font-family: Bal-ligital;
+    src: url('fonts/BaiJamjuree-LightItalic.ttf');
+}
+
+@font-face {
+    font-family: Bal-lig;
+    src: url('fonts/BaiJamjuree-Light.ttf');
+}
+
+@font-face {
+    font-family: Bal-boldital;
+    src: url('fonts/BaiJamjuree-BoldItalic.ttf');
+}
+
+@font-face {
+    font-family: Bal-semi;
+    src: url('fonts/BaiJamjuree-Semibold.ttf');
+}
+
+@font-face {
+    font-family: Bal-med;
+    src: url('fonts/BaiJamjuree-Medium.ttf');
+}
+
+@font-face {
+    font-family: Michr;
+    src: url('fonts/Michroma-Regular.ttf');
+}
+
+@font-face {
+    font-family: Jura;
+    src: url('fonts/Jura-VariableFont.ttf');
+}
+
+@font-face {
+    font-family: Jura-lig;
+    src: url('fonts/Jura-Light.ttf');
+}
+
+@font-face {
+    font-family: Jura-med;
+    src: url('fonts/Jura-Medium.ttf');
+}
+
+@font-face {
+    font-family: Aldi;
+    src: url('fonts/Aldrich-Regular.ttf');
+}
+
+@font-face {
+    font-family: Oxan-lig;
+    src: url('fonts/Oxanium-Light.ttf');
+}
+
+
+/* ######################################################
+#########################################################
+                  F O N T S
+#########################################################
+#######################################################*/
+
+h1 {
+    /*font-family: 'Square', sans-serif;*/
+    font-family: 'Michr', sans-serif;
+    font-size: 50px;
+    padding: 0%;
+    line-height: 2rem;
+    color: rgb(42, 113, 148);
+}
+
+h2 {
+    /*font-family: 'Future', sans-serif;*/
+    font-family: 'Square', sans-serif;
+    font-size: 96px;
+    font-weight: lighter;
+    color: rgba(42, 113, 148, 0.2);
+}
+
+h3 {
+    /*font-family: 'Modular', sans-serif;*/
+    font-family: 'Michr';
+    /*'Akshar-reg', sans-serif;*/
+    font-size: 22px;
+    color: #ffffff;
+    /*202020;*/
+    font-weight: normal;
+}
+
+h3 span {
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+h3.border {
+    border: 0px;
+    margin-top: 45px;
+    margin-bottom: 15px;
+}
+
+h4 {
+    /*font-family: 'Venus', sans-serif;*/
+    font-family: 'Michr', sans-serif;
+    /*'Akshar-reg', sans-serif; */
+    font-size: 22px;
+    padding: 0%;
+    margin-bottom: 10px;
+    margin-top: 15px;
+    font-style: italic;
+    color: rgb(42, 113, 148);
+    font-weight: lighter;
+}
+
+h5 {
+    /* same as h4 but non italic and white*/
+    /*font-family: 'Venus', sans-serif;*/
+    font-family: 'Michr', sans-serif;
+    /*'Akshar-reg', sans-serif; */
+    font-size: 22px;
+    padding: 0%;
+    margin-bottom: 10px;
+    margin-top: 15px;
+    color: rgb(255, 255, 255);
+    font-weight: lighter;
+}
+
+h6 {
+    /*font-family: 'Venus', sans-serif;*/
+    font-family: 'Michr', sans-serif;
+    /*'Akshar-reg', sans-serif; */
+    font-size: 16px;
+    padding: 0%;
+    margin-bottom: 10px;
+    margin-top: 15px;
+    font-style: italic;
+    color: rgb(42, 113, 148);
+    font-weight: lighter;
+}
+
+div {
+    font-family: 'Bal-lig', sans-serif;
+    font-weight: 100;
+    font-size: 18px;
+    line-height: 1.6rem;
+    padding: 0%;
+    margin: 0%;
+    color: rgb(255, 255, 255);
+    overflow-y: scroll;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+p {
+    font-family: 'Bal-lig', sans-serif;
+    color: rgb(42, 113, 148);
+}
+
+
+/* ######################################################
+#########################################################
+              U I     E L E M E N T S 
+#########################################################
+#######################################################*/
+
+
+/*++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                  main body + columns 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
+
+
+/* for debugging i make the background of body and ui widget contents transparent */
+
+html,
+body {
+    background: #000000;
+    color: rgb(42, 113, 148);
+    margin: 20px;
+    width: 50vw;
+    height: 50vh;
+    overflow-y: scroll;
+}
+
+.container {
+    height: fit-content;
+    width: 100%;
+}
+
+
+a{
+color:  rgb(42, 113, 148);
+}
+a:link {
+color: #00d5ff;
+}
+
+/* visited link */
+a:visited {
+color: rgb(160, 78, 255);
+}
+
+/* mouse over link */
+a:hover {
+color: hotpink;
+}
+
+/* selected link */
+a:active {
+color: rgb(61, 61, 253);
+}
