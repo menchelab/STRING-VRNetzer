@@ -2,82 +2,43 @@ package univie.menchelab.VRNetzerApp.internal.util;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.cytoscape.model.CyColumn;
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyRow;
 import org.cytoscape.model.CyTable;
-import org.cytoscape.model.CyTableManager;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
-import org.cytoscape.work.TaskMonitor;
 import org.javatuples.Triplet;
 import org.json.simple.JSONObject;
 
 
 public class ConstructJson {
 	private CyServiceRegistrar registrar;
-	private TaskMonitor monitor;
 	private CyNetwork network;
 	private CyNetworkView netView;
-	private ArrayList<String> layouts = new ArrayList<String>();
-	private List<String> skipNodeColumns = new ArrayList<String>();
-	private List<String> skipEdgeColumns = new ArrayList<String>();
-	private Utility util = new Utility();
+	private ExportContext context = null;
 
-	public ConstructJson(CyServiceRegistrar registrar, TaskMonitor monitor, CyNetwork network,
-			CyNetworkView netView, List<String> skipNodeColumns, List<String> skipEdgeColumns) {
+	public ConstructJson(CyServiceRegistrar registrar, CyNetwork network, ExportContext context) {
 		this.registrar = registrar;
-		this.monitor = monitor;
 		this.network = network;
-		this.netView = netView;
-		this.skipNodeColumns = skipNodeColumns;
-		this.skipEdgeColumns = skipEdgeColumns;
-
+		this.context = context;
 	};
 
 	@SuppressWarnings("unchecked")
 	public JSONObject generateObject(String header, List<HashMap<String, Object>> data) {
 		JSONObject objectToWrite = new JSONObject();
 		objectToWrite.put(header, data);
-		// objectToWrite.put("data_type", header); //Not needed and causes trouble
-		// objectToWrite.put("amount", data.size()); //Not needed and causes trouble
 		return objectToWrite;
 	};
-
-	public void validate() {
-		Timer validationTimer = new Timer("Validating input.", monitor, TaskMonitor.Level.INFO);
-		validationTimer.start();
-		monitor.setTitle("Export network as VRNetz");
-		// Get current network
-
-		if (network == null) {
-			monitor.showMessage(TaskMonitor.Level.WARN, "No network to export");
-			throw new RuntimeException("No network to export!");
-		}
-
-		if (netView == null) {
-			Collection<CyNetworkView> views =
-					registrar.getService(CyNetworkViewManager.class).getNetworkViews(network);
-			if (views.isEmpty()) {
-				monitor.setTitle("Error: No network view!");
-				monitor.showMessage(TaskMonitor.Level.ERROR,
-						"You first have to create a network view!");
-				throw new RuntimeException("You first have to create a network view!");
-			}
-		}
-		validationTimer.stop();
-	}
 
 	@SuppressWarnings("unchecked")
 	public JSONObject constructOutput() {
@@ -91,24 +52,14 @@ public class ConstructJson {
 			}
 		}
 		JSONObject networkJson = new JSONObject();
-		CyTableManager tableManager = registrar.getService(CyTableManager.class);
-		Set<CyTable> tables = tableManager.getAllTables(true);
+
+		// CyNetworkTableManager networkTableManager =
+		// registrar.getService(CyNetworkTableManager.class);
+		if (context.networkType == "string") {
+			context.stringContext.extractEnrichmentTables(networkJson, registrar);
+		}
 		HashMap<Integer, Integer> suidOnId = new HashMap<Integer, Integer>();
-		CyTable edges = null;
-		// CyTableFactory tableFactory = registrar.getService(CyTableFactory.class);
-		// List<CyTable> enrichmentTable = new ArrayList<CyTable>();
-		String tableTitle = "";
-		for (CyTable table : tables) {
-			tableTitle = table.getTitle();
-			if (tableTitle.contains("STRING Enrichment") && !(tableTitle.contains("PMID"))) {
 
-				networkJson.put("enrichment", getEnrichmentData(table));
-
-			} else if (table.getTitle().contains("PMID")) {
-
-				networkJson.put("publications", getEnrichmentData(table));
-			}
-		} ;
 		HashMap<String, Object> networkData =
 				getNetworkData(network.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS));
 		networkJson.put("network", networkData);
@@ -121,6 +72,7 @@ public class ConstructJson {
 
 
 		// Write data to json
+		ArrayList<String> layouts = new ArrayList<String>();
 		layouts.add("cy");
 
 		networkJson.put("layouts", layouts);
@@ -168,25 +120,6 @@ public class ConstructJson {
 		return node_prop;
 	}
 
-	public List<HashMap<String, Object>> getEnrichmentData(CyTable table) {
-		List<HashMap<String, Object>> mapList = new ArrayList<HashMap<String, Object>>();
-		List<CyRow> rows = table.getAllRows();
-		Collection<CyColumn> columns = table.getColumns();
-		Object[] columnsArray = columns.toArray();
-
-		List<String> skip = Arrays.asList("nodes.SUID", "network.SUID");
-		// System.out.println(rows.size());
-		for (int i = 0; i < rows.size(); i++) {
-			HashMap<String, Object> data = new HashMap<>();
-			CyRow row = rows.get(i);
-			data = util.writeData(data, columnsArray, row, skip);
-			mapList.add(data);
-		}
-		return (List<HashMap<String, Object>>) mapList;
-
-	}
-
-	@SuppressWarnings("unchecked")
 	public List<HashMap<String, Object>> getEdgeData(CyTable table,
 			HashMap<Integer, Integer> suidOnId) {
 		// For edges, extract source and sink and add it to the map
@@ -224,7 +157,7 @@ public class ConstructJson {
 			data.put("s", s_id); // write start
 			data.put("e", e_id); // write end
 
-			data = util.writeData(data, columnsArray, row, skipEdgeColumns);
+			data = Utility.writeData(data, columnsArray, row, context.skipEdgeColumns);
 			mapList.add(data);
 		}
 		return (List<HashMap<String, Object>>) mapList;
@@ -243,7 +176,6 @@ public class ConstructJson {
 		return data;
 	};
 
-	@SuppressWarnings("unchecked")
 	public Object[] getNodeData(CyTable table) {
 		// public List<HashMap<String, Object>> getData(CyTable table, Class<? extends
 		// CyIdentifiable> type){
@@ -307,7 +239,7 @@ public class ConstructJson {
 			// data.putAll(getStyle(node));
 			// data.put("id", i);
 			// }
-			data = util.writeData(data, columnsArray, row, skipNodeColumns);
+			data = Utility.writeData(data, columnsArray, row, context.skipNodeColumns);
 			mapList.add(data);
 		}
 		Object[] output = new Object[] {(List<HashMap<String, Object>>) mapList, suidOnId};

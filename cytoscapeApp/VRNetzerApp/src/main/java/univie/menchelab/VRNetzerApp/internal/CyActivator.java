@@ -4,9 +4,6 @@ package univie.menchelab.VRNetzerApp.internal;
 import static org.cytoscape.work.ServiceProperties.COMMAND;
 import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_LONG_DESCRIPTION;
-// import static org.cytoscape.work.ServiceProperties.COMMAND_DESCRIPTION;
-// import static org.cytoscape.work.ServiceProperties.COMMAND_EXAMPLE_JSON;
-// import static org.cytoscape.work.ServiceProperties.COMMAND_LONG_DESCRIPTION;
 import static org.cytoscape.work.ServiceProperties.COMMAND_NAMESPACE;
 import static org.cytoscape.work.ServiceProperties.MENU_GRAVITY;
 import static org.cytoscape.work.ServiceProperties.PREFERRED_MENU;
@@ -37,28 +34,13 @@ public class CyActivator extends AbstractCyActivator {
 		String version = v.toString(); // The full version
 		CyServiceRegistrar registrar = getService(bc, CyServiceRegistrar.class);
 
-		// CyApplicationManager cyApplicationManager = getService(bc,CyApplicationManager.class);
-		// VisualMappingManager visualMappingManager = getService(bc,VisualMappingManager.class);
-		// VisualStyleFactory visualStyleFactory = getService(bc,VisualStyleFactory.class);
-		// StreamUtil streamUtil = getService(bc, StreamUtil.class);
 		ExportVRNetzerFactory exportNetwork = new ExportVRNetzerFactory(registrar);
 		SendNetworkFactory sendNetwork = new SendNetworkFactory(registrar);
 		TestSendFactory testSendFactory = new TestSendFactory(registrar);
-		// ExportVRNetzerFactory exportNetworkAPP = new ExportVRNetzerFactory(registrar);
-		// final BasicCyFileFilter cytoscapejsFilter = new BasicCyFileFilter(new String[] { "VRNetz"
-		// },
-		// new String[] { "application/VRNetz" }, "Cytoscape.VRNetz", DataCategory.NETWORK,
-		// streamUtil);
-		// final Properties exportProp = new Properties();
-		// exportProp.put(ID, "cytoscapejsNetworkWriterFactory");
-		// registerService(bc, exportNetwork, NetworkTaskFactory.class, exportProp);
 
 		Properties props = new Properties();
 
 		// // Create button on File -> Export -> Export network as VRNetz
-		// props.setProperty(COMMAND_SUPPORTS_JSON, "true");
-		// props.setProperty(COMMAND_EXAMPLE_JSON, JSON_EXAMPLE);
-
 		props.setProperty(PREFERRED_MENU, "File.Export");
 		props.setProperty(TITLE, "Network as VRNetz...");
 		props.setProperty(MENU_GRAVITY, "4.0");

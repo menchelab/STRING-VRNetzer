@@ -4,103 +4,105 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
-import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyTableManager;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ContainsTunables;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.TaskMonitor.Level;
 import org.cytoscape.work.Tunable;
-import org.cytoscape.work.util.ListMultipleSelection;
 import org.cytoscape.work.util.ListSingleSelection;
 import org.json.simple.JSONObject;
+import univie.menchelab.VRNetzerApp.internal.util.AlgorithmContext;
 import univie.menchelab.VRNetzerApp.internal.util.ConstructJson;
+import univie.menchelab.VRNetzerApp.internal.util.ExportContext;
+import univie.menchelab.VRNetzerApp.internal.util.LayoutParamsContext;
 import univie.menchelab.VRNetzerApp.internal.util.MessagePromptAction;
-import univie.menchelab.VRNetzerApp.internal.util.NetworkUtil;
+import univie.menchelab.VRNetzerApp.internal.util.SpringContext;
+import univie.menchelab.VRNetzerApp.internal.util.TSNEContext;
+import univie.menchelab.VRNetzerApp.internal.util.UMAPContext;
+import univie.menchelab.VRNetzerApp.internal.util.Utility;
 import univie.menchelab.VRNetzerApp.internal.util.http.ConnectionException;
 import univie.menchelab.VRNetzerApp.internal.util.http.HttpUtil;
 
 public class SendNetworkTask extends AbstractTask implements ObservableTask {
 
 	final CyServiceRegistrar registrar;
-	private CyNetwork network;
-	private List<String> skipNodeColumns =
-			new ArrayList<String>(Arrays.asList("stringdb::STRING style", "selected",
-					"stringdb::namespace", "stringdb::enhancedLabel Passthrough", "@id"));
-	private List<String> HideNodeColumns = new ArrayList<>(skipNodeColumns);
-	private List<String> HideEdgeColumns = new ArrayList<String>(Arrays.asList("selected", "SUID"));
-	private List<String> skipEdgeColumns = new ArrayList<String>(Arrays.asList("selected"));
-	// TODO Change that the default name of the file is "untitled"
+	public CyNetwork network;
+
+	@ContainsTunables
+	public ExportContext exportContext = null;
+
+	final String PROJECT_DESC =
+			"Name which will be used to create a new project on the VRNetzer. If the project already exists, depending whether overwrite or update is selected, the files in the project will be overwritten or updated.Spaces will be replaced by underscores.";
 	@Tunable(description = "Project name:", required = true, exampleStringValue = "new project",
-			groups = {"VRNetzer variables", "Project"})
+			groups = {"VRNetzer variables", "Project"}, tooltip = PROJECT_DESC,
+			longDescription = PROJECT_DESC, gravity = 1)
 	public String projectName = "new project";
 
-	@Tunable(description = "Update or Overwrite:", groups = {"VRNetzer variables", "Project"})
-	public ListSingleSelection updateProject = new ListSingleSelection<String>();
+	final String UO_DESC =
+			"Update will add any new layout to the project and will overwrite existing layouts with the same name.\nOverwrite will overwrite the whole project and will delete all layouts in the project.";
+	@Tunable(description = "Update or Overwrite:", groups = {"VRNetzer variables", "Project"},
+			gravity = 2, longDescription = UO_DESC, tooltip = UO_DESC)
+	public ListSingleSelection<String> updateProject = new ListSingleSelection<String>(
+			new ArrayList<String>(Arrays.asList("Update", "Overwrite")));
 
-	@Tunable(description = "Load project:",
-			longDescription = "If this is turned on, the project will be loaded up on running VRNetzer session.",
-			groups = {"VRNetzer variables"},
-			tooltip = "If this is turned on, the project will be loaded up on running VRNetzer session.")
+	final String LOAD_DESC =
+			"If this is turned on, the project will be loaded up on running VRNetzer session.";
+	@Tunable(description = "Load project:", longDescription = LOAD_DESC,
+			groups = {"VRNetzer variables", "Project"}, tooltip = LOAD_DESC, gravity = 3)
 	public Boolean load = false;
 
-	@Tunable(description = "Layout algorithm:", required = true, exampleStringValue = "new project",
-			groups = {"VRNetzer variables", "Project"})
-	public ListSingleSelection<String> algorithm = new ListSingleSelection<String>();
-
-	@Tunable(description = "Layout name", required = true, exampleStringValue = "spring_layout",
-			groups = {"VRNetzer variables", "Project"})
-	public String layoutName = null;
-
-	@Tunable(description = "IP of the VRNetzer:", required = true, groups = {"VRNetzer variables"})
+	final String IP_DESC = "IP of the VRNetzer, e.g. localhost";
+	@Tunable(description = "IP of the VRNetzer:", required = true,
+			groups = {"VRNetzer variables", "Connection config"}, tooltip = IP_DESC, gravity = 4,
+			params = "displayState=expanded", longDescription = IP_DESC)
 	public String ip = "localhost";
 
-	@Tunable(description = "Port of the VRNetzer:", required = true,
-			groups = {"VRNetzer variables"})
+	final String PORT_DESC =
+			"Port of the VRNetzer, default for Windows and Linux is 5000, for Mac its 3000";
+	@Tunable(description = "Port of the VRNetzer:", required = true, tooltip = PORT_DESC,
+			longDescription = PORT_DESC, groups = {"VRNetzer variables", "Connection config"},
+			gravity = 5, params = "displayState=expanded")
 	public Integer port = 5000;
 
-	@Tunable(description = "Node attributes for export.",
-			longDescription = "Select the node table columns to be exported.",
-			groups = ("Table values"))
-	public ListMultipleSelection<String> nodeAttributeList = null;
+	@ContainsTunables
+	public AlgorithmContext algorithmContext = null;
 
-	@Tunable(description = "Edge attributes for export.",
-			longDescription = "Select the edge table columns.", groups = ("Table values"))
-	public ListMultipleSelection<String> edgeAttributeList = null;
+	@ContainsTunables
+	public SpringContext springContext = null;
 
-	// @Tunable(description = "Select namespace to export.", params = "input=false",gravity = 2.0)
-	// public String namespace = null; // Not so sure about that one.
+	@ContainsTunables
+	public UMAPContext umapContext = null;
+
+	@ContainsTunables
+	public TSNEContext tsneContext = null;
+
+	@ContainsTunables
+	public LayoutParamsContext layoutParamsContext = null;
 
 	private CyNetworkView netView;
 
 
-	public SendNetworkTask(CyServiceRegistrar registrar, CyNetwork network, CyNetworkView netView) {
-
-		HideNodeColumns.addAll(Arrays.asList("SUID", "display name"));
+	public SendNetworkTask(CyServiceRegistrar registrar, CyNetwork network) {
 		this.registrar = registrar;
-		if (network != null) {
-			this.network = network;
-			nodeAttributeList = NetworkUtil.updateNodeEdgeAttributeList(network, nodeAttributeList,
-					CyNode.class, HideNodeColumns);
-			edgeAttributeList = NetworkUtil.updateNodeEdgeAttributeList(network, edgeAttributeList,
-					CyEdge.class, HideEdgeColumns);
-			algorithm.setPossibleValues(new ArrayList<String>(
-					Arrays.asList("spring", "kamada_kawai", "cg_local_tsne", "cg_global_tsne",
-							"cg_global_umap", "cg_importance_umap", "cg_importance_umap")));
-			algorithm.setSelectedValue("spring");
-			updateProject
-					.setPossibleValues(new ArrayList<String>(Arrays.asList("Update", "Overwrite")));
-			updateProject.setSelectedValue("Update");
-		}
-		this.netView = netView;
+		this.network = network;
+		this.exportContext = new ExportContext();
+		this.algorithmContext = new AlgorithmContext();
+		this.springContext = new SpringContext();
+		this.umapContext = new UMAPContext();
+		this.tsneContext = new TSNEContext();
+		this.layoutParamsContext = new LayoutParamsContext(springContext, umapContext, tsneContext);
+
+		Utility.validate(network, netView, registrar);
+		exportContext.setup(network, registrar);
+
 	}
 
 	// JSONObject nodesJson = exportFile.generateObject("nodes", nodesData);
@@ -111,48 +113,50 @@ public class SendNetworkTask extends AbstractTask implements ObservableTask {
 
 	// @SuppressWarnings("unchecked")
 	@Override
-	public void run(TaskMonitor monitor) throws Exception {
+	public void run(TaskMonitor monitor) {
+		projectName = projectName.replaceAll(" ", "_");
 		monitor.setTitle("Send Network to VRNetzer");
 		monitor.setProgress(0);
-		List<String> selectedNodeAttributes = nodeAttributeList.getSelectedValues();
-		List<String> selectedEdgeAtrributes = edgeAttributeList.getSelectedValues();
 
-		for (String attr : nodeAttributeList.getPossibleValues()) {
-			if (!selectedNodeAttributes.contains(attr)) {
-				skipNodeColumns.add(attr);
-			}
-		}
-
-		for (String attr : edgeAttributeList.getPossibleValues()) {
-			if (!selectedEdgeAtrributes.contains(attr)) {
-				skipEdgeColumns.add(attr);
-			}
-		}
 
 		monitor.setProgress(0.3);
-		ConstructJson constructJson = new ConstructJson(registrar, monitor, network, netView,
-				skipNodeColumns, skipEdgeColumns);
-		JSONObject networkJson = constructJson.constructOutput();
-		HashMap<String, Object> formValues = new HashMap<String, Object>();
-		HashMap<String, String> algorithm_var = new HashMap<String, String>();
+		System.out.println("Test");
+		ConstructJson constructJson = new ConstructJson(registrar, network, exportContext);
 
-		algorithm_var.put("n", algorithm.getSelectedValue());
+		JSONObject networkJson = constructJson.constructOutput();
+		System.out.println("Test");
+		HashMap<String, Object> formValues = new HashMap<String, Object>();
+		HashMap<String, Object> algorithm_var = new HashMap<String, Object>();
+
+		algorithm_var.put("n", algorithmContext.selectedLayout());
+		algorithm_var.put("string_cg_prplxty", tsneContext.prplxty.getValue());
+		algorithm_var.put("string_cg_density", tsneContext.density.getValue());
+		algorithm_var.put("string_cg_l_rate", tsneContext.lRate.getValue());
+		algorithm_var.put("string_cg_steps", tsneContext.steps.getValue());
+
+		algorithm_var.put("string_cg_n_neighbors", umapContext.neighbors.getValue());
+		algorithm_var.put("string_cg_spread", umapContext.spread.getValue());
+		algorithm_var.put("string_cg_min_dist", umapContext.minDist.getValue());
+
+		algorithm_var.put("string_spring_opt_dist", springContext.optDist.getValue());
+		algorithm_var.put("string_spring_iterations", springContext.iter.getValue());
+		algorithm_var.put("string_spring_threshold", springContext.iter.getValue());
+
 
 		formValues.put("project", projectName);
 		formValues.put("algorithm", algorithm_var);
 		formValues.put("update", updateProject.getSelectedValue());
-		formValues.put("layout", layoutName);
+		formValues.put("layout", algorithmContext.getLayoutName());
 		formValues.put("load", load);
-
 		networkJson.put("form", formValues);
 
 		monitor.setProgress(0.8);
 
 		String baseURL = "http://" + ip + ":" + port.toString();
 
-		JSONObject results;
+		JSONObject results = new JSONObject();
+		// JSONObject results;
 		try {
-			// results = HttpUtils.postJSON(getExampleJsonNetwork(), registrar);
 			String URL = baseURL + "/StringEx/receiveNetwork";
 			results = HttpUtil.postJSON(networkJson, registrar, URL);
 			String href = baseURL + "/StringEx/preview?project=" + projectName;

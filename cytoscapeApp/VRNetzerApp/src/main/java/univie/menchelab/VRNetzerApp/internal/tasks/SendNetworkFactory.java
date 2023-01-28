@@ -14,7 +14,7 @@ public class SendNetworkFactory extends AbstractNetworkTaskFactory {
 	}
 
 	public TaskIterator createTaskIterator(CyNetwork net) {
-		return new TaskIterator(new SendNetworkTask(registrar, net, null));
+		return new TaskIterator(new SendNetworkTask(registrar, net));
 	}
 
 

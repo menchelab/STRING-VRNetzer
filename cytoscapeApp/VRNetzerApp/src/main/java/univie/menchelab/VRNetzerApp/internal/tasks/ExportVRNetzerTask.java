@@ -4,121 +4,73 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
-import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
-import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTable;
 import org.cytoscape.model.CyTableManager;
 import org.cytoscape.service.util.CyServiceRegistrar;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.AbstractTask;
+import org.cytoscape.work.ContainsTunables;
 import org.cytoscape.work.ObservableTask;
 import org.cytoscape.work.ProvidesTitle;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
-import org.cytoscape.work.util.ListMultipleSelection;
 import org.json.simple.JSONObject;
 import univie.menchelab.VRNetzerApp.internal.util.ConstructJson;
-import univie.menchelab.VRNetzerApp.internal.util.NetworkUtil;
+import univie.menchelab.VRNetzerApp.internal.util.ExportContext;
 import univie.menchelab.VRNetzerApp.internal.util.Timer;
+import univie.menchelab.VRNetzerApp.internal.util.Utility;
 
 public class ExportVRNetzerTask extends AbstractTask implements ObservableTask {
 
 	final CyServiceRegistrar registrar;
 	private CyNetwork network;
-	private List<String> skipNodeColumns =
-			new ArrayList<String>(Arrays.asList("stringdb::STRING style", "selected",
-					"stringdb::namespace", "stringdb::enhancedLabel Passthrough", "@id"));
-	private List<String> HideNodeColumns = new ArrayList<>(skipNodeColumns);
-	private List<String> HideEdgeColumns = new ArrayList<String>(Arrays.asList("selected", "SUID"));
-	private List<String> skipEdgeColumns = new ArrayList<String>(Arrays.asList("selected"));
-	// TODO Change that the default name of the file is "untitled"
-	@Tunable(description = "Save network as <fileName>.VRNetz",
-			params = "input=false;fileCategory=network",
+	public TaskMonitor monitor = null;
+	public String networkType = null;
+
+	@ContainsTunables
+	public ExportContext context = null;
+
+	@Tunable(description = "Save network as ...", params = "input=false;fileCategory=network",
 			tooltip = "<html>Note: for convenience spaces are replaced by underscores.</html>",
-			required = true, exampleStringValue = "network.VRNetz", groups = ("File property"))
+			required = true, exampleStringValue = "network.VRNetz", groups = ("File property"),
+			gravity = 1.0)
+	public File fileName = new File("untitled.VRNetz");
 
-	public File fileName = null;
+	public String _fileName = null;
 
-	@Tunable(description = "Node attributes for export.",
-			longDescription = "Select the node table columns to be exported.",
-			groups = ("Table values"))
-	public ListMultipleSelection<String> nodeAttributeList = null;
 
-	@Tunable(description = "Edge attributes for export.",
-			longDescription = "Select the edge table columns.", groups = ("Table values"))
-	public ListMultipleSelection<String> edgeAttributeList = null;
-
-	// @Tunable(description = "Select namespace to export.", params =
-	// "input=false",gravity = 2.0)
-	// public String namespace = null; // Not so sure about that one.
 
 	private CyNetworkView netView;
 
-	public ExportVRNetzerTask(CyServiceRegistrar registrar, CyNetwork network,
-			CyNetworkView netView) {
-		try {
-			fileName = new File(System.getProperty("user.home") + "/Desktop" + "/untitled.VRNetz");
-		} catch (Exception e) {
-			fileName = new File("utitled.VRNetz");
-		}
-
-		HideNodeColumns.addAll(Arrays.asList("SUID", "display name"));
+	public ExportVRNetzerTask(CyServiceRegistrar registrar, CyNetwork network) {
+		// Check if network is not null
+		Utility.validate(network, netView, registrar);
+		validatedFileName();
 		this.registrar = registrar;
-		if (network != null) {
-			this.network = network;
-			nodeAttributeList = NetworkUtil.updateNodeEdgeAttributeList(network, nodeAttributeList,
-					CyNode.class, HideNodeColumns);
-			edgeAttributeList = NetworkUtil.updateNodeEdgeAttributeList(network, edgeAttributeList,
-					CyEdge.class, HideEdgeColumns);
-		}
-		this.netView = netView;
+		this.network = network;
+		this.context = new ExportContext();
+		context.setup(network, registrar);
+
 	}
 
-	// JSONObject nodesJson = exportFile.generateObject("nodes", nodesData);
-	// JSONObject edgesJson = exportFile.generateObject("edges", edgesData);
-	ArrayList<String> layouts = new ArrayList<String>();
 	CyTableManager tableManager = null;
 	Set<CyTable> tables = null;
 
 	// @SuppressWarnings("unchecked")
 	@Override
 	public void run(TaskMonitor monitor) throws Exception {
+		this.monitor = monitor;
 		monitor.setTitle("Export Network as VRNetz");
 		monitor.setProgress(0);
-		List<String> selectedNodeAttributes = nodeAttributeList.getSelectedValues();
-		List<String> selectedEdgeAtrributes = edgeAttributeList.getSelectedValues();
+		context.filterAttributes();
 
-		for (String attr : nodeAttributeList.getPossibleValues()) {
-			if (!selectedNodeAttributes.contains(attr)) {
-				skipNodeColumns.add(attr);
-			}
-		}
 
-		for (String attr : edgeAttributeList.getPossibleValues()) {
-			if (!selectedEdgeAtrributes.contains(attr)) {
-				skipEdgeColumns.add(attr);
-			}
-		}
 		monitor.setProgress(0.2);
-		if (fileName == null) {
-			monitor.showMessage(TaskMonitor.Level.WARN,
-					"No file destination provided to export the network to.");
-			throw new RuntimeException("No file name provided!");
-		}
-		// Set Names
-		String _fileName = fileName.getAbsolutePath();
-		System.out.println(_fileName);
-		_fileName = _fileName.replace(' ', '_');
-		if (!_fileName.endsWith(".VRNetz"))
-			_fileName += ".VRNetz";
+
 		monitor.setProgress(0.3);
-		ConstructJson exportFile = new ConstructJson(registrar, monitor, network, netView,
-				skipNodeColumns, skipEdgeColumns);
+		ConstructJson exportFile = new ConstructJson(registrar, network, context);
 		JSONObject networkJson = exportFile.constructOutput();
 		monitor.setProgress(0.8);
 
@@ -128,9 +80,7 @@ public class ExportVRNetzerTask extends AbstractTask implements ObservableTask {
 						monitor, TaskMonitor.Level.INFO);
 		exportTimer.start();
 
-		writeObject(networkJson, _fileName); // TODO Improve the writing performance, if we need
-												// more nodes to be
-												// exported!
+		writeObject(networkJson, _fileName);
 		exportTimer.stop();
 
 		monitor.showMessage(TaskMonitor.Level.INFO, "Exported file to " + _fileName + ".");
@@ -150,5 +100,23 @@ public class ExportVRNetzerTask extends AbstractTask implements ObservableTask {
 	@Override
 	public <R> R getResults(Class<? extends R> type) {
 		return null;
+	}
+
+	public void validatedFileName() {
+		try {
+			fileName = new File(System.getProperty("user.home") + "/Desktop" + "/untitled.VRNetz");
+		} catch (Exception e) {
+			System.out.println("Reset file name to default.");
+			fileName = new File("untitled.VRNetz");
+		}
+		if (fileName == null) {
+			throw new RuntimeException("No file name provided!");
+		}
+		// Set Names
+		_fileName = fileName.getAbsolutePath();
+		System.out.println(_fileName);
+		_fileName = _fileName.replace(' ', '_');
+		if (!_fileName.endsWith(".VRNetz"))
+			_fileName += ".VRNetz";
 	}
 }
