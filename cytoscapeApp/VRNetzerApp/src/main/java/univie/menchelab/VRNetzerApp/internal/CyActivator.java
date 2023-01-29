@@ -90,6 +90,7 @@ public class CyActivator extends AbstractCyActivator {
 		registerService(bc, testSendFactory, NetworkTaskFactory.class, props);
 
 
+
 		logger.info("VRNetzer " + version + " initialized.");
 		System.out.println("VRNetzer " + version + " initialized.");
 

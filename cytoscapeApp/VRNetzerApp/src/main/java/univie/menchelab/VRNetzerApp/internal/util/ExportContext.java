@@ -33,7 +33,7 @@ public class ExportContext {
 	@ContainsTunables
 	public StringNetworkContext stringContext = null;
 
-	List<String> selectedNodeAttributes, selectedEdgeAtrributes = null;
+	List<String> selectedNodeAttributes, selectedEdgeAttributes = null;
 
 
 	public List<String> skipNodeColumns =
@@ -41,24 +41,20 @@ public class ExportContext {
 					"stringdb::namespace", "stringdb::enhancedLabel Passthrough", "@id"));
 
 	public List<String> skipEdgeColumns = new ArrayList<String>(Arrays.asList("selected"));
+	public List<String> skipNetworkColumns =
+			new ArrayList<String>(Arrays.asList("selected", "analyzedNodes.SUID"));
 
 	public List<String> HideNodeColumns = new ArrayList<>(skipNodeColumns);
 	public List<String> HideEdgeColumns = new ArrayList<String>(Arrays.asList("selected", "SUID"));
-
-	public ExportContext() {
-
-	}
 
 	public void setup(CyNetwork network, CyServiceRegistrar registrar) {
 		this.network = network;
 		this.registrar = registrar;
 		updateAttributes();
 		CyTable networkInfo = network.getTable(CyNetwork.class, CyNetwork.LOCAL_ATTRS);
-		String networkType = networkInfo.getRow(network.getSUID()).get("database", String.class);
-		System.out.println("Network type: " + networkType);
+		this.networkType = networkInfo.getRow(network.getSUID()).get("database", String.class);
 
 		if (networkType != null && networkType.equals("string")) {
-			networkType = "string";
 			stringContext = new StringNetworkContext();
 			stringContext.setup(network, registrar);
 		}
@@ -74,11 +70,11 @@ public class ExportContext {
 	}
 
 	public void filterAttributes() {
-		selectedNodeAttributes = this.nodeAttributeList.getSelectedValues();
-		selectedEdgeAtrributes = this.edgeAttributeList.getSelectedValues();
+		selectedNodeAttributes = nodeAttributeList.getSelectedValues();
+		selectedEdgeAttributes = edgeAttributeList.getSelectedValues();
 
-		skipNodeColumns = Utility.getFilteredList(nodeAttributeList, selectedNodeAttributes);
-		skipEdgeColumns = Utility.getFilteredList(edgeAttributeList, selectedEdgeAtrributes);
+		skipNodeColumns.addAll(Utility.getFilteredList(nodeAttributeList, selectedNodeAttributes));
+		skipEdgeColumns.addAll(Utility.getFilteredList(edgeAttributeList, selectedEdgeAttributes));
 
 	}
 

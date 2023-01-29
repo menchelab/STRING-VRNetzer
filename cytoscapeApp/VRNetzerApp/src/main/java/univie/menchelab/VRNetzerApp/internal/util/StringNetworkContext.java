@@ -56,22 +56,41 @@ public class StringNetworkContext {
         for (CyTable table : tables) {
             tableTitle = table.getTitle();
 
-            if (tableTitle.contains("STRING Enrichment") && !(tableTitle.contains("PMID"))) {
+            if (tableTitle.equals("STRING Enrichment: All")) {
+                if (table.getColumn("network.SUID") != null) {
+                    if (table.getAllRows().size() > 0) {
 
-                enrichmentTable = table;
+                        CyRow tempRow = table.getAllRows().get(0);
 
-            } else if (table.getTitle().contains("PMID")) {
+                        if (tempRow.get("network.SUID", Long.class) != null) {
 
-                publicationTable = table;
+                            if (tempRow.get("network.SUID", Long.class).equals(network.getSUID())) {
+
+                                enrichmentTable = table;
+                            }
+
+                        }
+                    }
+                }
+            } else if (tableTitle.contains("PMID")) {
+                if (table.getColumn("network.SUID") != null) {
+                    if (table.getAllRows().size() > 0) {
+                        CyRow tempRow = table.getAllRows().get(0);
+                        if (tempRow.get("network.SUID", Long.class) != null && tempRow
+                                .get("network.SUID", Long.class).equals(network.getSUID())) {
+                            publicationTable = table;
+                        }
+                    }
+                }
             }
         }
         if (enrichmentTable != null) {
             enrichmentAtrributeList = NetworkUtil.updateEnrichments(network,
                     enrichmentAtrributeList, "STRING Enrichment", HideEnrichmentColumns, registrar);
             if (enrichmentAtrributeList != null) {
-                slectedEnrichmentAttributes = this.enrichmentAtrributeList.getSelectedValues();
-                this.skipEnrichmentColumns = Utility.getFilteredList(this.enrichmentAtrributeList,
-                        slectedEnrichmentAttributes);
+                slectedEnrichmentAttributes = enrichmentAtrributeList.getSelectedValues();
+                skipEnrichmentColumns.addAll(Utility.getFilteredList(enrichmentAtrributeList,
+                        slectedEnrichmentAttributes));
             }
         }
         if (publicationTable != null) {
@@ -79,23 +98,29 @@ public class StringNetworkContext {
             publicationAtrrributeList = NetworkUtil.updateEnrichments(network,
                     enrichmentAtrributeList, "PMID", HidePublicationColumns, registrar);
 
-            if (this.publicationAtrrributeList != null) {
+            if (publicationAtrrributeList != null) {
                 selectedPublciationAtrributes = publicationAtrrributeList.getSelectedValues();
-                this.skipPublicationColumns = Utility.getFilteredList(
-                        this.publicationAtrrributeList, selectedPublciationAtrributes);
+                skipPublicationColumns.addAll(Utility.getFilteredList(
+                        this.publicationAtrrributeList, selectedPublciationAtrributes));
             }
         }
 
     }
 
     @SuppressWarnings("unchecked")
-    void extractEnrichmentTables(JSONObject networkJson, CyServiceRegistrar registrar) {
-        networkJson.put("enrichment", getEnrichmentData(enrichmentTable, skipEnrichmentColumns));
-        networkJson.put("publications",
-                getEnrichmentData(publicationTable, skipPublicationColumns));
+    public JSONObject extractEnrichmentTables(JSONObject networkJson,
+            CyServiceRegistrar registrar) {
+        if (enrichmentTable != null)
+            networkJson.put("enrichment",
+                    getEnrichmentData(enrichmentTable, skipEnrichmentColumns));
+        if (publicationTable != null)
+            networkJson.put("publications",
+                    getEnrichmentData(publicationTable, skipPublicationColumns));
+        return networkJson;
     }
 
     public List<HashMap<String, Object>> getEnrichmentData(CyTable table, List<String> skip) {
+        System.out.println("Table name: " + table.getTitle());
         List<HashMap<String, Object>> mapList = new ArrayList<HashMap<String, Object>>();
         List<CyRow> rows = table.getAllRows();
         Collection<CyColumn> columns = table.getColumns();

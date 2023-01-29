@@ -55,8 +55,8 @@ public class ConstructJson {
 
 		// CyNetworkTableManager networkTableManager =
 		// registrar.getService(CyNetworkTableManager.class);
-		if (context.networkType == "string") {
-			context.stringContext.extractEnrichmentTables(networkJson, registrar);
+		if (context.networkType != null && context.networkType.equals("string")) {
+			networkJson = context.stringContext.extractEnrichmentTables(networkJson, registrar);
 		}
 		HashMap<Integer, Integer> suidOnId = new HashMap<Integer, Integer>();
 
@@ -164,12 +164,11 @@ public class ConstructJson {
 	}
 
 	public HashMap<String, Object> getNetworkData(CyTable table) {
-		Collection<CyColumn> cols = table.getColumns();
 		HashMap<String, Object> data = new HashMap<>();
 		CyRow row = table.getAllRows().get(0);
 		for (CyColumn col : table.getColumns()) {
 			String colName = col.getName();
-			if (colName.equals("analyzedNodes.SUID"))
+			if (context.skipNetworkColumns.contains(colName))
 				continue;
 			data.put(col.getName(), row.getRaw(col.getName()));
 		} ;
@@ -191,9 +190,6 @@ public class ConstructJson {
 		 * @return A HashMap containing the SUID as key and the node/edge data as another HashMap
 		 */
 
-		// Define the type of the Elements in the given List.
-		// if (!(type == CyNode.class) & !(type == CyEdge.class))
-		// return new ArrayList<HashMap<String, Object>>();
 
 		// get all Columns in the corresponding table
 		Collection<CyColumn> columns = table.getColumns();

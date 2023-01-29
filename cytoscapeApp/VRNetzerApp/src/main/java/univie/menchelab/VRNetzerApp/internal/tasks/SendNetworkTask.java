@@ -1,5 +1,7 @@
 package univie.menchelab.VRNetzerApp.internal.tasks;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +26,7 @@ import univie.menchelab.VRNetzerApp.internal.util.ConstructJson;
 import univie.menchelab.VRNetzerApp.internal.util.ExportContext;
 import univie.menchelab.VRNetzerApp.internal.util.LayoutParamsContext;
 import univie.menchelab.VRNetzerApp.internal.util.MessagePromptAction;
+import univie.menchelab.VRNetzerApp.internal.util.OpenExternalBrowser;
 import univie.menchelab.VRNetzerApp.internal.util.SpringContext;
 import univie.menchelab.VRNetzerApp.internal.util.TSNEContext;
 import univie.menchelab.VRNetzerApp.internal.util.UMAPContext;
@@ -120,11 +123,9 @@ public class SendNetworkTask extends AbstractTask implements ObservableTask {
 
 
 		monitor.setProgress(0.3);
-		System.out.println("Test");
 		ConstructJson constructJson = new ConstructJson(registrar, network, exportContext);
 
 		JSONObject networkJson = constructJson.constructOutput();
-		System.out.println("Test");
 		HashMap<String, Object> formValues = new HashMap<String, Object>();
 		HashMap<String, Object> algorithm_var = new HashMap<String, Object>();
 
@@ -159,13 +160,14 @@ public class SendNetworkTask extends AbstractTask implements ObservableTask {
 		try {
 			String URL = baseURL + "/StringEx/receiveNetwork";
 			results = HttpUtil.postJSON(networkJson, registrar, URL);
-			String href = baseURL + "/StringEx/preview?project=" + projectName;
-			String message = "Network sent to VRNetzer.<br><h4><a style='color:green;'href=" + href
-					+ ">Preview project: '" + projectName + "' on VRNetzer platform -></a></h4>";
-			message += "<br>" + results.get("html").toString();
-			presentResults(monitor, baseURL, message);
+			Object url = results.get("url");
+			if (url != null) {
+				URL = baseURL + url.toString();
+				System.out.println("URL: " + URL);
+				OpenExternalBrowser.browse(URL);
+			}
 			monitor.setProgress(1.0);
-		} catch (ConnectionException e) {
+		} catch (ConnectionException | IOException | URISyntaxException e) {
 			String message = "Could not connect to VRNetzer platform.<br>Project '" + projectName
 					+ "' has not been uploaded.<br>Please check you ip and port: <a href=" + baseURL
 					+ ">" + baseURL + "</a>";

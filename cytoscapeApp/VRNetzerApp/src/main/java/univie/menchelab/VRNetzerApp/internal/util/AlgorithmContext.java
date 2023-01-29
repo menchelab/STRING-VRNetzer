@@ -33,7 +33,7 @@ public class AlgorithmContext {
                 if (algo.contains(layoutName) || layoutName == "") {
                         return getMap().get(algorithm.getSelectedValue());
                 } else {
-                        return layoutName;
+                        return layoutName.replace(" ", "_");
                 }
         }
 
