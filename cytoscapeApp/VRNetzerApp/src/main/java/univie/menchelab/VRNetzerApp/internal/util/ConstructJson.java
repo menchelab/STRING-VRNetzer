@@ -106,16 +106,10 @@ public class ConstructJson {
 
 		node_prop.put("n", node_label); // set node name
 
+		node_prop.put("cy_pos", xyz); // set node Cytoscape position
+		node_prop.put("cy_col", rgb); // set node color
+		node_prop.put("size", node_size); // set node size
 
-		HashMap<String, Object> cytoscape_layout = new HashMap<String, Object>();
-		cytoscape_layout.put("p", xyz); // set node Cytoscape position
-		cytoscape_layout.put("c", rgb); // set node color
-		cytoscape_layout.put("s", node_size); // set node size
-		cytoscape_layout.put("n", "cy"); // set node size
-
-		List<HashMap<String, Object>> layouts = new ArrayList<HashMap<String, Object>>();
-		layouts.add(cytoscape_layout);
-		node_prop.put("layouts", layouts);
 
 		return node_prop;
 	}

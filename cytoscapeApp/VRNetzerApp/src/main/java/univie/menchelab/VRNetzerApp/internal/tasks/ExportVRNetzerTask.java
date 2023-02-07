@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Set;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyTable;
@@ -31,15 +32,33 @@ public class ExportVRNetzerTask extends AbstractTask implements ObservableTask {
 
 	@ContainsTunables
 	public ExportContext context = null;
+	public File outFile = null;
 
 	@Tunable(description = "Save network as ...", params = "input=false;fileCategory=network",
 			tooltip = "<html>Note: for convenience spaces are replaced by underscores.</html>",
 			required = true, exampleStringValue = "network.VRNetz", groups = ("File property"),
 			gravity = 1.0)
-	public File fileName = new File("untitled.VRNetz");
+	public File getFileName() {
+		if (Objects.isNull(outFile)) {
+			File tmp = new File("");
+			try {
+				tmp = new File(System.getProperty("user.home") + "/Desktop" + "/untitled.VRNetz");
+			} catch (Exception e) {
+				System.out.println("Reset file name to default.");
+				tmp = new File("untitled.VRNetz");
+			}
+			return tmp;
+		} else {
+			System.out.println("New File Name: " + outFile.getAbsolutePath() + "");
+			return outFile;
+		}
+	}
+
+	public void setFileName(File outFile) {
+		this.outFile = outFile;
+	}
 
 	public String _fileName = null;
-
 
 
 	private CyNetworkView netView;
@@ -47,7 +66,6 @@ public class ExportVRNetzerTask extends AbstractTask implements ObservableTask {
 	public ExportVRNetzerTask(CyServiceRegistrar registrar, CyNetwork network) {
 		// Check if network is not null
 		Utility.validate(network, netView, registrar);
-		validatedFileName();
 		this.registrar = registrar;
 		this.network = network;
 		this.context = new ExportContext();
@@ -61,6 +79,7 @@ public class ExportVRNetzerTask extends AbstractTask implements ObservableTask {
 	// @SuppressWarnings("unchecked")
 	@Override
 	public void run(TaskMonitor monitor) throws Exception {
+		validatedFileName();
 		this.monitor = monitor;
 		monitor.setTitle("Export Network as VRNetz");
 		monitor.setProgress(0);
@@ -103,17 +122,12 @@ public class ExportVRNetzerTask extends AbstractTask implements ObservableTask {
 	}
 
 	public void validatedFileName() {
-		try {
-			fileName = new File(System.getProperty("user.home") + "/Desktop" + "/untitled.VRNetz");
-		} catch (Exception e) {
-			System.out.println("Reset file name to default.");
-			fileName = new File("untitled.VRNetz");
-		}
-		if (fileName == null) {
+
+		if (outFile == null) {
 			throw new RuntimeException("No file name provided!");
 		}
 		// Set Names
-		_fileName = fileName.getAbsolutePath();
+		_fileName = getFileName().getAbsolutePath();
 		System.out.println(_fileName);
 		_fileName = _fileName.replace(' ', '_');
 		if (!_fileName.endsWith(".VRNetz"))
