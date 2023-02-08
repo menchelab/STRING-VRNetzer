@@ -41,14 +41,36 @@ Apps -> App Manger -> Install from File... -> select the "VRNetzerApp-x.x.x.jar"
 <details>
   <summary><h3 id="App_usage"><b> 2. Usage of the VRNetzerApp </b></h3></summary>
 
+<h4> Export a network as VRNetz </h4>
 1. Select a network you would like to export.
 2. Export the selected network as an "VRNetz" via:<br>
    a) Apps -> VRNetzer -> Export network as VRNetz<br>
    or <br>
    b) File -> Export -> Export network as VRNetz
-3. Select the location where to save the network, as well as a name in the propted window.
+3. Select the location where to save the network, as well as a name in the prompted window.
+(4. When needed you can select only the link and node column you want to export. By default all link and node columns are exported.)
+5. Click "Ok" and the network is exported.
+
+![Picture that visualizes the location of the StringEx uploader tab.](pictures/VRNetzerApp_export.png)
 
 You network is now exported as an VRNetz which can be used in the [VRNetzer](https://github.com/menchelab/VRNetzer) to present your network as a 3D network.
+
+<h4> Send a network to the VRNetzer </h4>
+1. Select a network you would like to send.
+2. Send the selected network to the VRNetzer via:<br>
+   - Apps -> VRNetzer -> Send network to VRNetzer<br>
+3. Select a layout algorithm the prompted window.
+   a) You can define the variables of the layout algorithm if you like.
+   b) You can define a name for the layout to allow multiple layouts for the same project.
+4. Select a project name.
+5. Select whether you want to update an existing project, or create a new one.
+   a) Update an existing project: All layouts with the same name are overwritten. Pick this option if you want to update an existing project with new layouts or node colors.
+   b) Create a new project: A new project is created. Pick this option if you want to create a new project, be aware that the project name has to be unique. If a project with this name already exists, the whole project will be overwritten.
+(5. If the VRNetzer is not running on your local machine or on a different port than 5000, you can change the IP and port.)
+(6. When needed you can select only the link and node column you want to send. By default all link and node columns are sent.) 
+1. Click "Ok" and the network is sent to the VRNetzer.
+
+![Picture that visualizes the location of the StringEx uploader tab.](pictures/VRNetzerApp_send.png)
 
 </details>
 
