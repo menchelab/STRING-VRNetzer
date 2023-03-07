@@ -16,3 +16,4 @@ PPIs/.venv/**
 PPIs/STRING/**
 cytoscapeApp/VRNetzerApp/target/maven-status/*
 cytoscapeApp/VRNetzerApp/.settings/*
+.vscode/*
