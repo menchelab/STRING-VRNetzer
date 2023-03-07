@@ -14,6 +14,8 @@ __pycache__/
 .venv
 PPIs/.venv/**
 PPIs/STRING/**
-cytoscapeApp/VRNetzerApp/target/maven-status/*
-cytoscapeApp/VRNetzerApp/.settings/*
 .vscode/*
+VRNetzerApp/target/classes/**
+VRNetzerApp/target/maven-status/**
+VRNetzerApp/target/dependencies.txt
+cytoscapeApp/VRNetzerApp/bin/.project
