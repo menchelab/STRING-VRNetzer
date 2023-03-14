@@ -4,3 +4,6 @@
 [submodule "VRNetzer_Backend_THESIS"]
 	path = VRNetzer_Backend_THESIS
 	url = https://github.com/ObT1337/VRNetzer_Backend_THESIS.git
+[submodule "ProteinStructureFetch"]
+	path = ProteinStructureFetch
+	url = https://github.com/menchelab/ProteinStructureFetch
